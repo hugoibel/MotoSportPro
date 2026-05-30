@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0e14" />
+  <title>MotoSportPro</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>Moto<span>Sport</span>Pro</h1>
+    <span id="gps-status" class="gps-badge" title="Estado del GPS">GPS ·</span>
+  </header>
+
+  <main>
+    <!-- Vista: Grabar ruta -->
+    <section id="view-grabar" class="view active">
+      <div id="map"></div>
+
+      <div class="telemetry">
+        <div class="stat big">
+          <span class="value" id="t-velocidad">0</span>
+          <span class="unit">km/h</span>
+        </div>
+        <div class="stats-grid">
+          <div class="stat">
+            <span class="value" id="t-distancia">0.00</span>
+            <span class="label">km</span>
+          </div>
+          <div class="stat">
+            <span class="value" id="t-tiempo">00:00</span>
+            <span class="label">tiempo</span>
+          </div>
+          <div class="stat">
+            <span class="value" id="t-maxima">0</span>
+            <span class="label">máx km/h</span>
+          </div>
+          <div class="stat">
+            <span class="value" id="t-media">0</span>
+            <span class="label">media km/h</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="btn-start" class="btn primary">▶ Iniciar</button>
+        <button id="btn-stop" class="btn danger" disabled>■ Parar y guardar</button>
+      </div>
+    </section>
+
+    <!-- Vista: Mis rutas -->
+    <section id="view-rutas" class="view">
+      <h2>Mis rutas</h2>
+      <ul id="lista-rutas" class="route-list"></ul>
+      <p id="rutas-vacio" class="empty">Aún no has grabado ninguna ruta.</p>
+    </section>
+  </main>
+
+  <nav class="tabbar">
+    <button class="tab active" data-view="grabar">🏍️ Grabar</button>
+    <button class="tab" data-view="rutas">🗺️ Rutas</button>
+  </nav>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
