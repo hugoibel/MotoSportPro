@@ -1,78 +1,52 @@
 // ===== MotoSportPro — lógica principal =====
 
-// --- Estado de la sesión de grabación ---
 let grabando = false;
 let watchId = null;
-let puntos = [];          // [[lat, lng], ...]
-let distancia = 0;        // metros acumulados
+let distancia = 0;        // metros
 let velMax = 0;           // m/s
 let tiempoInicio = 0;
 let cronometro = null;
 let ultimaPos = null;
-
-// --- Mapa ---
-let map, traza, marcador;
-
-function initMapa() {
-  map = L.map('map', { zoomControl: false, attributionControl: false })
-    .setView([40.4168, -3.7038], 13); // Madrid por defecto
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19
-  }).addTo(map);
-  traza = L.polyline([], { color: '#ff5c2a', weight: 5 }).addTo(map);
-}
+let nPuntos = 0;
 
 // --- Utilidades ---
 function distanciaMetros(a, b) {
-  // Haversine
   const R = 6371000;
   const dLat = (b[0] - a[0]) * Math.PI / 180;
   const dLng = (b[1] - a[1]) * Math.PI / 180;
-  const lat1 = a[0] * Math.PI / 180;
-  const lat2 = b[0] * Math.PI / 180;
-  const h = Math.sin(dLat / 2) ** 2 +
-            Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+  const lat1 = a[0] * Math.PI / 180, lat2 = b[0] * Math.PI / 180;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
   return 2 * R * Math.asin(Math.sqrt(h));
 }
-
 function fmtTiempo(seg) {
-  const m = Math.floor(seg / 60);
-  const s = Math.floor(seg % 60);
-  const h = Math.floor(m / 60);
-  const mm = (m % 60).toString().padStart(2, '0');
-  const ss = s.toString().padStart(2, '0');
+  const m = Math.floor(seg / 60), s = Math.floor(seg % 60), h = Math.floor(m / 60);
+  const mm = (m % 60).toString().padStart(2, '0'), ss = s.toString().padStart(2, '0');
   return h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
 }
-
+const $ = id => document.getElementById(id);
 const setGps = (txt, cls) => {
-  const el = document.getElementById('gps-status');
+  const el = $('gps-status');
   el.textContent = 'GPS ' + txt;
   el.className = 'gps-badge' + (cls ? ' ' + cls : '');
 };
 
+// guardamos los puntos de la sesión para almacenarlos al parar
+let puntosSesion = [];
+
 // --- Grabación ---
 function iniciarGrabacion() {
-  if (!('geolocation' in navigator)) {
-    alert('Este dispositivo no tiene GPS / geolocalización disponible.');
-    return;
-  }
+  if (!('geolocation' in navigator)) { alert(i18n.t('sin_gps')); return; }
   grabando = true;
-  puntos = [];
-  distancia = 0;
-  velMax = 0;
-  ultimaPos = null;
+  distancia = 0; velMax = 0; ultimaPos = null; nPuntos = 0; puntosSesion = [];
   tiempoInicio = Date.now();
-  traza.setLatLngs([]);
+  Mapa.reset();
 
-  document.getElementById('btn-start').disabled = true;
-  document.getElementById('btn-stop').disabled = false;
-
+  $('btn-start').disabled = true;
+  $('btn-stop').disabled = false;
   cronometro = setInterval(actualizarTiempo, 1000);
 
   watchId = navigator.geolocation.watchPosition(onPosicion, onErrorGps, {
-    enableHighAccuracy: true,
-    maximumAge: 1000,
-    timeout: 10000
+    enableHighAccuracy: true, maximumAge: 1000, timeout: 10000
   });
 }
 
@@ -80,47 +54,32 @@ function onPosicion(pos) {
   setGps('●', 'ok');
   const { latitude, longitude, speed } = pos.coords;
   const punto = [latitude, longitude];
-
-  if (ultimaPos) {
-    distancia += distanciaMetros(ultimaPos, punto);
-  }
+  if (ultimaPos) distancia += distanciaMetros(ultimaPos, punto);
   ultimaPos = punto;
-  puntos.push(punto);
+  puntosSesion.push(punto);
+  nPuntos++;
 
-  // Velocidad: usa la del GPS si existe (m/s), si no se infiere por tiempo/distancia
   let velMs = (speed != null && speed >= 0) ? speed : 0;
   if (velMs > velMax) velMax = velMs;
 
-  // Pintar en el mapa
-  traza.addLatLng(punto);
-  if (!marcador) {
-    marcador = L.circleMarker(punto, { radius: 7, color: '#fff', fillColor: '#ff5c2a', fillOpacity: 1 }).addTo(map);
-  } else {
-    marcador.setLatLng(punto);
-  }
-  map.setView(punto, Math.max(map.getZoom(), 15));
+  Mapa.addPoint(latitude, longitude);
 
-  // Refrescar telemetría
-  document.getElementById('t-velocidad').textContent = Math.round(velMs * 3.6);
-  document.getElementById('t-distancia').textContent = (distancia / 1000).toFixed(2);
-  document.getElementById('t-maxima').textContent = Math.round(velMax * 3.6);
+  $('t-velocidad').textContent = Math.round(velMs * 3.6);
+  $('t-distancia').textContent = (distancia / 1000).toFixed(2);
+  $('t-maxima').textContent = Math.round(velMax * 3.6);
 }
 
 function actualizarTiempo() {
   const seg = (Date.now() - tiempoInicio) / 1000;
-  document.getElementById('t-tiempo').textContent = fmtTiempo(seg);
-  const km = distancia / 1000;
+  $('t-tiempo').textContent = fmtTiempo(seg);
   const horas = seg / 3600;
-  const media = horas > 0 ? km / horas : 0;
-  document.getElementById('t-media').textContent = Math.round(media);
+  const media = horas > 0 ? (distancia / 1000) / horas : 0;
+  $('t-media').textContent = Math.round(media);
 }
 
 function onErrorGps(err) {
-  console.warn('Error GPS:', err);
   setGps('✕', 'err');
-  if (err.code === 1) {
-    alert('Permiso de ubicación denegado. Actívalo para grabar la ruta.');
-  }
+  if (err.code === 1) alert(i18n.t('permiso_gps'));
 }
 
 function pararGrabacion() {
@@ -128,19 +87,14 @@ function pararGrabacion() {
   if (watchId != null) navigator.geolocation.clearWatch(watchId);
   clearInterval(cronometro);
   setGps('·', '');
-
-  document.getElementById('btn-start').disabled = false;
-  document.getElementById('btn-stop').disabled = true;
+  $('btn-start').disabled = false;
+  $('btn-stop').disabled = true;
 
   const duracionSeg = (Date.now() - tiempoInicio) / 1000;
   const km = distancia / 1000;
   const media = duracionSeg > 0 ? km / (duracionSeg / 3600) : 0;
 
-  if (puntos.length < 2) {
-    alert('Ruta demasiado corta para guardar (no se registró movimiento).');
-    resetTelemetria();
-    return;
-  }
+  if (nPuntos < 2) { alert(i18n.t('corta')); resetTelemetria(); return; }
 
   Storage.guardarRuta({
     id: Date.now().toString(),
@@ -149,54 +103,47 @@ function pararGrabacion() {
     duracionSeg: Math.round(duracionSeg),
     velMax: Math.round(velMax * 3.6),
     velMedia: Math.round(media),
-    puntos
+    puntos: puntosSesion
   });
-
-  alert(`Ruta guardada: ${km.toFixed(2)} km en ${fmtTiempo(duracionSeg)}`);
+  alert(`${i18n.t('guardada')}: ${km.toFixed(2)} km · ${fmtTiempo(duracionSeg)}`);
   resetTelemetria();
 }
 
 function resetTelemetria() {
-  if (marcador) { map.removeLayer(marcador); marcador = null; }
-  document.getElementById('t-velocidad').textContent = '0';
-  document.getElementById('t-distancia').textContent = '0.00';
-  document.getElementById('t-tiempo').textContent = '00:00';
-  document.getElementById('t-maxima').textContent = '0';
-  document.getElementById('t-media').textContent = '0';
+  Mapa.reset();
+  $('t-velocidad').textContent = '0';
+  $('t-distancia').textContent = '0.00';
+  $('t-tiempo').textContent = '00:00';
+  $('t-maxima').textContent = '0';
+  $('t-media').textContent = '0';
 }
 
 // --- Lista de rutas ---
 function renderRutas() {
-  const lista = document.getElementById('lista-rutas');
-  const vacio = document.getElementById('rutas-vacio');
+  const lista = $('lista-rutas'), vacio = $('rutas-vacio');
   const rutas = Storage.listarRutas();
   lista.innerHTML = '';
   vacio.style.display = rutas.length ? 'none' : 'block';
-
   rutas.forEach(r => {
-    const fecha = new Date(r.fecha).toLocaleString('es-ES', {
+    const fecha = new Date(r.fecha).toLocaleString(i18n.lang, {
       day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
     });
     const li = document.createElement('li');
     li.className = 'route-card';
     li.innerHTML = `
-      <button class="r-del" data-id="${r.id}" title="Borrar">🗑️</button>
+      <button class="r-del" data-id="${r.id}" title="x">🗑️</button>
       <div class="r-fecha">${fecha}</div>
       <div class="r-stats">
         <span><b>${r.distanciaKm}</b> km</span>
         <span><b>${fmtTiempo(r.duracionSeg)}</b></span>
-        <span><b>${r.velMax}</b> máx km/h</span>
-        <span><b>${r.velMedia}</b> media km/h</span>
+        <span><b>${r.velMax}</b> ${i18n.t('max')}</span>
+        <span><b>${r.velMedia}</b> ${i18n.t('media')}</span>
       </div>`;
     lista.appendChild(li);
   });
-
   lista.querySelectorAll('.r-del').forEach(btn => {
     btn.addEventListener('click', () => {
-      if (confirm('¿Borrar esta ruta?')) {
-        Storage.borrarRuta(btn.dataset.id);
-        renderRutas();
-      }
+      if (confirm(i18n.t('borrar_ruta'))) { Storage.borrarRuta(btn.dataset.id); renderRutas(); }
     });
   });
 }
@@ -205,32 +152,51 @@ function renderRutas() {
 function cambiarVista(nombre) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('view-' + nombre).classList.add('active');
+  $('view-' + nombre).classList.add('active');
   document.querySelector(`.tab[data-view="${nombre}"]`).classList.add('active');
   if (nombre === 'rutas') renderRutas();
-  if (nombre === 'grabar') setTimeout(() => map.invalidateSize(), 100);
+  if (nombre === 'tienda') Store.render();
+  if (nombre === 'premium') Premium.render();
+  if (nombre === 'grabar') Mapa.invalidate();
 }
 
 // --- Arranque ---
-window.addEventListener('DOMContentLoaded', () => {
-  initMapa();
+window.addEventListener('DOMContentLoaded', async () => {
+  i18n.init();
+  i18n.aplicar();
 
-  document.getElementById('btn-start').addEventListener('click', iniciarGrabacion);
-  document.getElementById('btn-stop').addEventListener('click', pararGrabacion);
-  document.querySelectorAll('.tab').forEach(t => {
-    t.addEventListener('click', () => cambiarVista(t.dataset.view));
+  await Mapa.init('map');
+
+  $('btn-start').addEventListener('click', iniciarGrabacion);
+  $('btn-stop').addEventListener('click', pararGrabacion);
+  $('btn-premium').addEventListener('click', () => Premium.comprar());
+  document.querySelectorAll('.tab').forEach(t =>
+    t.addEventListener('click', () => cambiarVista(t.dataset.view)));
+
+  // Selector de idioma
+  const sel = $('selector-idioma');
+  CONFIG.IDIOMAS.forEach(l => {
+    const o = document.createElement('option');
+    o.value = l; o.textContent = NOMBRES_IDIOMA[l] || l;
+    if (l === i18n.lang) o.selected = true;
+    sel.appendChild(o);
+  });
+  sel.addEventListener('change', e => {
+    i18n.set(e.target.value);
+    renderRutas(); Store.render(); Premium.render();
   });
 
-  // Centrar el mapa en la posición actual al abrir (sin grabar todavía)
+  Premium.render();
+
+  // Centrar en posición actual al abrir
   if ('geolocation' in navigator) {
     navigator.geolocation.getCurrentPosition(
-      pos => map.setView([pos.coords.latitude, pos.coords.longitude], 15),
+      pos => Mapa.center(pos.coords.latitude, pos.coords.longitude, 15),
       () => setGps('·', ''),
       { enableHighAccuracy: true, timeout: 8000 }
     );
   }
 
-  // Registrar service worker (PWA)
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW:', e));
   }

@@ -13,60 +13,84 @@
 <body>
   <header class="topbar">
     <h1>Moto<span>Sport</span>Pro</h1>
-    <span id="gps-status" class="gps-badge" title="Estado del GPS">GPS ·</span>
+    <div class="topbar-right">
+      <select id="selector-idioma" class="lang-select" aria-label="Idioma"></select>
+      <span id="gps-status" class="gps-badge" title="GPS">GPS ·</span>
+    </div>
   </header>
 
   <main>
-    <!-- Vista: Grabar ruta -->
+    <!-- ===== CONDUCIR ===== -->
     <section id="view-grabar" class="view active">
       <div id="map"></div>
-
       <div class="telemetry">
         <div class="stat big">
           <span class="value" id="t-velocidad">0</span>
-          <span class="unit">km/h</span>
+          <span class="unit" data-i18n="vel">km/h</span>
         </div>
         <div class="stats-grid">
-          <div class="stat">
-            <span class="value" id="t-distancia">0.00</span>
-            <span class="label">km</span>
-          </div>
-          <div class="stat">
-            <span class="value" id="t-tiempo">00:00</span>
-            <span class="label">tiempo</span>
-          </div>
-          <div class="stat">
-            <span class="value" id="t-maxima">0</span>
-            <span class="label">máx km/h</span>
-          </div>
-          <div class="stat">
-            <span class="value" id="t-media">0</span>
-            <span class="label">media km/h</span>
-          </div>
+          <div class="stat"><span class="value" id="t-distancia">0.00</span><span class="label" data-i18n="dist">km</span></div>
+          <div class="stat"><span class="value" id="t-tiempo">00:00</span><span class="label" data-i18n="tiempo">tiempo</span></div>
+          <div class="stat"><span class="value" id="t-maxima">0</span><span class="label" data-i18n="max">máx km/h</span></div>
+          <div class="stat"><span class="value" id="t-media">0</span><span class="label" data-i18n="media">media km/h</span></div>
         </div>
       </div>
-
       <div class="controls">
-        <button id="btn-start" class="btn primary">▶ Iniciar</button>
-        <button id="btn-stop" class="btn danger" disabled>■ Parar y guardar</button>
+        <button id="btn-start" class="btn primary" data-i18n="iniciar">▶ Iniciar</button>
+        <button id="btn-stop" class="btn danger" disabled data-i18n="parar">■ Parar y guardar</button>
       </div>
     </section>
 
-    <!-- Vista: Mis rutas -->
+    <!-- ===== RUTAS ===== -->
     <section id="view-rutas" class="view">
-      <h2>Mis rutas</h2>
+      <h2 data-i18n="mis_rutas">Mis rutas</h2>
       <ul id="lista-rutas" class="route-list"></ul>
-      <p id="rutas-vacio" class="empty">Aún no has grabado ninguna ruta.</p>
+      <p id="rutas-vacio" class="empty" data-i18n="rutas_vacio">Aún no has grabado ninguna ruta.</p>
+    </section>
+
+    <!-- ===== TIENDA ===== -->
+    <section id="view-tienda" class="view">
+      <h2 data-i18n="tienda_titulo">Tienda de piezas y equipo</h2>
+      <p class="muted" data-i18n="tienda_sub">Las mejores piezas para tu moto.</p>
+      <div id="store-grid" class="shop-grid"></div>
+    </section>
+
+    <!-- ===== PREMIUM ===== -->
+    <section id="view-premium" class="view">
+      <div class="premium-hero">
+        <div class="premium-crown">👑</div>
+        <h2 data-i18n="premium_titulo">MotoSportPro Premium</h2>
+        <div class="premium-precio">
+          <span id="premium-precio-num">$2.99</span>
+          <small data-i18n="premium_precio">al mes</small>
+        </div>
+      </div>
+      <ul class="premium-feats">
+        <li data-i18n="premium_f1">Rutas curvas inteligentes</li>
+        <li data-i18n="premium_f2">Mapas sin conexión</li>
+        <li data-i18n="premium_f3">Detección de caídas y SOS</li>
+        <li data-i18n="premium_f4">Estadísticas avanzadas</li>
+        <li data-i18n="premium_f5">Sin anuncios y rutas ilimitadas</li>
+      </ul>
+      <button id="btn-premium" class="btn premium-cta" data-i18n="premium_cta">Hazte Premium</button>
+      <p id="premium-activo" class="premium-ok" style="display:none" data-i18n="premium_activo">✅ Eres Premium.</p>
     </section>
   </main>
 
   <nav class="tabbar">
-    <button class="tab active" data-view="grabar">🏍️ Grabar</button>
-    <button class="tab" data-view="rutas">🗺️ Rutas</button>
+    <button class="tab active" data-view="grabar" data-i18n="tab_grabar">🏍️ Conducir</button>
+    <button class="tab" data-view="rutas" data-i18n="tab_rutas">🗺️ Rutas</button>
+    <button class="tab" data-view="tienda" data-i18n="tab_tienda">🛒 Tienda</button>
+    <button class="tab" data-view="premium" data-i18n="tab_premium">👑 Premium</button>
   </nav>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/i18n.js"></script>
   <script src="js/storage.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/premium.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
