@@ -133,6 +133,7 @@ function pararGrabacion() {
   document.body.classList.remove('recording');
   document.body.classList.remove('driving');
   salirPantallaCompleta();
+  if (typeof Nav !== 'undefined') Nav.cancelar();
   Mapa.invalidate();
   if (watchId != null) navigator.geolocation.clearWatch(watchId);
   clearInterval(cronometro);
@@ -234,6 +235,10 @@ window.addEventListener('DOMContentLoaded', async () => {
   $('btn-start').addEventListener('click', iniciarGrabacion);
   $('btn-stop').addEventListener('click', pararGrabacion);
   $('btn-premium').addEventListener('click', () => Premium.comprar());
+
+  // Navegación: buscador de destino + "Comenzar navegación" (arranca la grabación)
+  Nav.init();
+  $('nav-start').addEventListener('click', () => iniciarGrabacion());
 
   // Copia de seguridad de fotos (exportar / importar)
   $('btn-export').addEventListener('click', () => Backup.exportar());

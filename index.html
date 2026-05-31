@@ -30,6 +30,21 @@
     <!-- ===== CONDUCIR ===== -->
     <section id="view-grabar" class="view active">
       <div class="rec-pill"><span class="rec-dot"></span><span data-i18n="grabando">Grabando</span></div>
+
+      <!-- Buscador de destino + navegación -->
+      <div class="nav-search">
+        <input id="nav-input" type="text" inputmode="search" autocomplete="off" />
+        <button id="nav-go" class="nav-go" aria-label="Buscar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+        </button>
+      </div>
+      <div id="nav-results" class="nav-results" style="display:none"></div>
+      <div id="nav-info" class="nav-info" style="display:none">
+        <div class="nav-info-data"><b id="nav-dist"></b><span id="nav-time"></span></div>
+        <button id="nav-start" class="nav-start" data-i18n="nav_comenzar">Comenzar navegación</button>
+        <button id="nav-cancel" class="nav-cancel" aria-label="Cancelar">✕</button>
+      </div>
+
       <button class="rutas-fab" data-view="rutas">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
           <path d="M9 3 3.5 5.5v15L9 18l6 3 5.5-2.5v-15L15 6 9 3z"/><path d="M9 3v15M15 6v15"/>
@@ -156,6 +171,7 @@
   <script src="js/i18n.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/map.js"></script>
+  <script src="js/nav.js"></script>
   <script src="js/store.js"></script>
   <script src="js/backup.js"></script>
   <script src="js/premium.js"></script>

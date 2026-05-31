@@ -21,6 +21,8 @@ const I18N = {
     premium_f5: 'Sin anuncios y rutas ilimitadas',
     ajustes: 'Ajustes', idioma: 'Idioma',
     guardada: 'Ruta guardada', corta: 'Ruta demasiado corta para guardar.', grabando: 'Grabando',
+    nav_buscar: '¿A dónde quieres ir?', nav_comenzar: 'Comenzar navegación', nav_buscando: 'Buscando…',
+    nav_sin_resultados: 'Sin resultados', nav_error: 'No se pudo calcular la ruta', nav_min: 'min',
     sin_gps: 'Este dispositivo no tiene GPS disponible.',
     permiso_gps: 'Permiso de ubicación denegado. Actívalo para grabar.',
     borrar_ruta: '¿Borrar esta ruta?'
@@ -43,6 +45,8 @@ const I18N = {
     premium_f5: 'No ads and unlimited routes',
     ajustes: 'Settings', idioma: 'Language',
     guardada: 'Route saved', corta: 'Route too short to save.', grabando: 'Recording',
+    nav_buscar: 'Where do you want to go?', nav_comenzar: 'Start navigation', nav_buscando: 'Searching…',
+    nav_sin_resultados: 'No results', nav_error: 'Could not get the route', nav_min: 'min',
     sin_gps: 'This device has no GPS available.',
     permiso_gps: 'Location permission denied. Enable it to record.',
     borrar_ruta: 'Delete this route?'
@@ -65,6 +69,8 @@ const I18N = {
     premium_f5: 'Keine Werbung und unbegrenzte Routen',
     ajustes: 'Einstellungen', idioma: 'Sprache',
     guardada: 'Route gespeichert', corta: 'Route zu kurz zum Speichern.', grabando: 'Aufnahme',
+    nav_buscar: 'Wohin möchtest du?', nav_comenzar: 'Navigation starten', nav_buscando: 'Suche…',
+    nav_sin_resultados: 'Keine Ergebnisse', nav_error: 'Route konnte nicht berechnet werden', nav_min: 'Min',
     sin_gps: 'Dieses Gerät hat kein GPS.',
     permiso_gps: 'Standortzugriff verweigert. Bitte aktivieren.',
     borrar_ruta: 'Diese Route löschen?'
@@ -87,6 +93,8 @@ const I18N = {
     premium_f5: 'Sans publicité et trajets illimités',
     ajustes: 'Réglages', idioma: 'Langue',
     guardada: 'Trajet enregistré', corta: 'Trajet trop court pour être enregistré.', grabando: 'Enregistrement',
+    nav_buscar: 'Où veux-tu aller ?', nav_comenzar: 'Démarrer la navigation', nav_buscando: 'Recherche…',
+    nav_sin_resultados: 'Aucun résultat', nav_error: 'Impossible de calculer l\'itinéraire', nav_min: 'min',
     sin_gps: 'Cet appareil n\'a pas de GPS.',
     permiso_gps: 'Autorisation de localisation refusée. Activez-la.',
     borrar_ruta: 'Supprimer ce trajet ?'
@@ -109,6 +117,8 @@ const I18N = {
     premium_f5: 'Senza pubblicità e percorsi illimitati',
     ajustes: 'Impostazioni', idioma: 'Lingua',
     guardada: 'Percorso salvato', corta: 'Percorso troppo corto per salvarlo.', grabando: 'Registrazione',
+    nav_buscar: 'Dove vuoi andare?', nav_comenzar: 'Avvia navigazione', nav_buscando: 'Ricerca…',
+    nav_sin_resultados: 'Nessun risultato', nav_error: 'Impossibile calcolare il percorso', nav_min: 'min',
     sin_gps: 'Questo dispositivo non ha il GPS.',
     permiso_gps: 'Permesso di posizione negato. Attivalo.',
     borrar_ruta: 'Eliminare questo percorso?'
