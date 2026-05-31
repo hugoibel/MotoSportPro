@@ -1,0 +1,33 @@
+<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff7a18"/>
+      <stop offset="0.5" stop-color="#ff2d75"/>
+      <stop offset="1" stop-color="#8a2be2"/>
+    </linearGradient>
+    <linearGradient id="visor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7ef9ff"/>
+      <stop offset="0.35" stop-color="#1b2740"/>
+      <stop offset="1" stop-color="#0b0e14"/>
+    </linearGradient>
+  </defs>
+  <rect width="120" height="120" rx="26" fill="url(#bg)"/>
+  <!-- sombra -->
+  <ellipse cx="60" cy="104" rx="34" ry="6" fill="rgba(0,0,0,0.18)"/>
+  <!-- calota del casco integral -->
+  <path d="M60 24 C39 24 27 40 27 62 L27 79 C27 92 39 100 60 100
+           C81 100 93 92 93 79 L93 62 C93 40 81 24 60 24 Z" fill="#ffffff"/>
+  <!-- mentonera (banda inferior) -->
+  <path d="M30 80 C40 96 80 96 90 80 L90 84 C82 99 38 99 30 84 Z" fill="#e7ebf2"/>
+  <!-- visor -->
+  <path d="M37 52 C48 45 72 45 83 52 L83 67 C72 73 48 73 37 67 Z" fill="url(#visor)"/>
+  <!-- reflejo del visor -->
+  <path d="M44 51 C52 48 60 48 66 50 L60 56 C54 55 49 55 45 57 Z" fill="rgba(255,255,255,0.35)"/>
+  <!-- ventilacion superior -->
+  <path d="M52 27 C56 25 64 25 68 27 L66 33 L54 33 Z" fill="#1b2740"/>
+  <!-- franja deportiva central -->
+  <path d="M55 24 L65 24 L63 50 L57 50 Z" fill="#ff2d75"/>
+  <path d="M58 24 L62 24 L61 50 L59 50 Z" fill="#ffd200"/>
+  <!-- entrada de aire mentonera -->
+  <rect x="52" y="82" width="16" height="6" rx="3" fill="#1b2740"/>
+</svg>

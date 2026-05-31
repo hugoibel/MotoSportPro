@@ -1,6 +1,6 @@
 // Service Worker — cachea la app para que funcione sin conexión.
 // (Los mapas de OpenStreetMap sí necesitan internet para descargar nuevas zonas.)
-const CACHE = 'motosportpro-v5';
+const CACHE = 'motosportpro-v6';
 const ASSETS = [
   './',
   './index.html',
@@ -19,6 +19,14 @@ const ASSETS = [
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',
+  './img/casco.svg',
+  './img/chaqueta.svg',
+  './img/guantes.svg',
+  './img/botas.svg',
+  './img/aceite.svg',
+  './img/cadena.svg',
+  './img/soporte.svg',
+  './img/camara.svg',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
 ];

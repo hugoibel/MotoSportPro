@@ -1,0 +1,23 @@
+<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#11998e"/>
+      <stop offset="1" stop-color="#38ef7d"/>
+    </linearGradient>
+  </defs>
+  <rect width="120" height="120" rx="26" fill="url(#bg)"/>
+  <ellipse cx="62" cy="100" rx="34" ry="5" fill="rgba(0,0,0,0.15)"/>
+  <!-- caña de la bota -->
+  <path d="M46 26 L66 26 L66 74 L42 74 Z" fill="#ffffff"/>
+  <!-- empeine y puntera -->
+  <path d="M42 74 L66 74 L88 84 C92 86 92 92 86 92 L40 92 C36 92 34 86 38 80 Z" fill="#ffffff"/>
+  <!-- suela -->
+  <path d="M38 92 L88 92 L88 97 C88 99 86 99 84 99 L40 99 C37 99 36 95 38 92 Z" fill="#1b2740"/>
+  <!-- proteccion tibia -->
+  <rect x="50" y="30" width="14" height="40" rx="5" fill="#1b2740"/>
+  <!-- hebillas -->
+  <rect x="48" y="40" width="20" height="5" rx="2" fill="#ff5c2a"/>
+  <rect x="48" y="52" width="20" height="5" rx="2" fill="#ff5c2a"/>
+  <!-- slider talon -->
+  <circle cx="70" cy="84" r="4" fill="#ff5c2a"/>
+</svg>

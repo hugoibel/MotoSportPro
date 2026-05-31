@@ -1,0 +1,26 @@
+<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2b6cff"/>
+      <stop offset="1" stop-color="#00d4ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="120" height="120" rx="26" fill="url(#bg)"/>
+  <ellipse cx="60" cy="104" rx="32" ry="5" fill="rgba(0,0,0,0.15)"/>
+  <!-- cuerpo de la chaqueta -->
+  <path d="M48 30 L60 26 L72 30 L86 44 L78 54 L72 49 L72 96 L48 96 L48 49 L42 54 L34 44 Z"
+        fill="#ffffff"/>
+  <!-- cuello -->
+  <path d="M52 30 L60 40 L68 30 L60 27 Z" fill="#0b1733"/>
+  <!-- cremallera -->
+  <line x1="60" y1="40" x2="60" y2="94" stroke="#0b1733" stroke-width="3"/>
+  <!-- hombreras (protecciones) -->
+  <circle cx="44" cy="46" r="5" fill="#ff5c2a"/>
+  <circle cx="76" cy="46" r="5" fill="#ff5c2a"/>
+  <!-- codera -->
+  <circle cx="37" cy="50" r="3.5" fill="#ff5c2a"/>
+  <circle cx="83" cy="50" r="3.5" fill="#ff5c2a"/>
+  <!-- bolsillos -->
+  <line x1="53" y1="74" x2="53" y2="84" stroke="#cfd6e4" stroke-width="2.5"/>
+  <line x1="67" y1="74" x2="67" y2="84" stroke="#cfd6e4" stroke-width="2.5"/>
+</svg>

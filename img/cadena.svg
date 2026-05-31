@@ -1,0 +1,29 @@
+<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#485563"/>
+      <stop offset="1" stop-color="#29323c"/>
+    </linearGradient>
+  </defs>
+  <rect width="120" height="120" rx="26" fill="url(#bg)"/>
+  <ellipse cx="60" cy="103" rx="28" ry="5" fill="rgba(0,0,0,0.18)"/>
+  <!-- dientes del piñón -->
+  <g fill="#ff5c2a">
+    <circle cx="60" cy="28" r="5"/><circle cx="79" cy="33" r="5"/>
+    <circle cx="90" cy="49" r="5"/><circle cx="92" cy="68" r="5"/>
+    <circle cx="83" cy="84" r="5"/><circle cx="68" cy="92" r="5"/>
+    <circle cx="49" cy="91" r="5"/><circle cx="34" cy="81" r="5"/>
+    <circle cx="28" cy="65" r="5"/><circle cx="31" cy="46" r="5"/>
+    <circle cx="43" cy="32" r="5"/>
+  </g>
+  <!-- cuerpo del piñón -->
+  <circle cx="60" cy="60" r="30" fill="#ffffff"/>
+  <circle cx="60" cy="60" r="20" fill="#1b2740"/>
+  <!-- centro -->
+  <circle cx="60" cy="60" r="8" fill="#ff5c2a"/>
+  <!-- agujeros aligeramiento -->
+  <g fill="#1b2740">
+    <circle cx="60" cy="42" r="3"/><circle cx="76" cy="60" r="3"/>
+    <circle cx="60" cy="78" r="3"/><circle cx="44" cy="60" r="3"/>
+  </g>
+</svg>

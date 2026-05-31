@@ -4,23 +4,24 @@
 // ============================================================
 
 // Catálogo inicial de ejemplo. Editable: añade tus propios productos.
+// 'img' = ilustración propia (sin marca). 'emoji' = respaldo si la imagen no carga.
 // 'amazonId' = ASIN del producto en Amazon. 'revzillaUrl' = enlace al producto.
 const PRODUCTOS = [
-  { emoji: '🪖', nombre: 'Casco integral', cat: 'Protección',
+  { img: 'img/casco.svg', emoji: '🪖', nombre: 'Casco integral', cat: 'Protección',
     amazonId: '', revzillaUrl: 'https://www.revzilla.com/motorcycle-helmets' },
-  { emoji: '🧥', nombre: 'Chaqueta con protecciones', cat: 'Protección',
+  { img: 'img/chaqueta.svg', emoji: '🧥', nombre: 'Chaqueta con protecciones', cat: 'Protección',
     amazonId: '', revzillaUrl: 'https://www.revzilla.com/motorcycle-jackets' },
-  { emoji: '🧤', nombre: 'Guantes de cuero', cat: 'Protección',
+  { img: 'img/guantes.svg', emoji: '🧤', nombre: 'Guantes de cuero', cat: 'Protección',
     amazonId: '', revzillaUrl: 'https://www.revzilla.com/motorcycle-gloves' },
-  { emoji: '👢', nombre: 'Botas de moto', cat: 'Protección',
+  { img: 'img/botas.svg', emoji: '👢', nombre: 'Botas de moto', cat: 'Protección',
     amazonId: '', revzillaUrl: 'https://www.revzilla.com/motorcycle-boots' },
-  { emoji: '🛢️', nombre: 'Aceite y filtro', cat: 'Mantenimiento',
+  { img: 'img/aceite.svg', emoji: '🛢️', nombre: 'Aceite y filtro', cat: 'Mantenimiento',
     amazonId: '', revzillaUrl: 'https://www.revzilla.com/motorcycle-oil' },
-  { emoji: '🔗', nombre: 'Kit de cadena', cat: 'Mantenimiento',
+  { img: 'img/cadena.svg', emoji: '🔗', nombre: 'Kit de cadena', cat: 'Mantenimiento',
     amazonId: '', revzillaUrl: 'https://www.revzilla.com/motorcycle-chains' },
-  { emoji: '📱', nombre: 'Soporte de móvil', cat: 'Accesorios',
+  { img: 'img/soporte.svg', emoji: '📱', nombre: 'Soporte de móvil', cat: 'Accesorios',
     amazonId: '', revzillaUrl: 'https://www.revzilla.com/motorcycle-phone-mounts' },
-  { emoji: '🎥', nombre: 'Cámara de acción', cat: 'Accesorios',
+  { img: 'img/camara.svg', emoji: '🎥', nombre: 'Cámara de acción', cat: 'Accesorios',
     amazonId: '', revzillaUrl: 'https://www.revzilla.com/motorcycle-cameras' }
 ];
 
@@ -50,7 +51,8 @@ const Store = {
       const card = document.createElement('div');
       card.className = 'shop-card';
       card.innerHTML = `
-        <div class="shop-emoji">${p.emoji}</div>
+        <img class="shop-img" src="${p.img}" alt="${p.nombre}" loading="lazy"
+             onerror="this.outerHTML='<div class=\\'shop-emoji\\'>${p.emoji}</div>'">
         <div class="shop-cat">${p.cat}</div>
         <div class="shop-name">${p.nombre}</div>
         <div class="shop-btns">
