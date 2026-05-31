@@ -1,6 +1,6 @@
 // Service Worker — cachea la app para que funcione sin conexión.
 // (Los mapas de OpenStreetMap sí necesitan internet para descargar nuevas zonas.)
-const CACHE = 'motosportpro-v6';
+const CACHE = 'motosportpro-v7';
 const ASSETS = [
   './',
   './index.html',
@@ -11,6 +11,7 @@ const ASSETS = [
   './js/storage.js',
   './js/map.js',
   './js/store.js',
+  './js/backup.js',
   './js/premium.js',
   './js/garage.js',
   './js/fuel.js',

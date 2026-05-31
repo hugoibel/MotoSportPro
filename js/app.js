@@ -196,6 +196,13 @@ window.addEventListener('DOMContentLoaded', async () => {
   $('btn-stop').addEventListener('click', pararGrabacion);
   $('btn-premium').addEventListener('click', () => Premium.comprar());
 
+  // Copia de seguridad de fotos (exportar / importar)
+  $('btn-export').addEventListener('click', () => Backup.exportar());
+  $('btn-import').addEventListener('click', () => $('import-file').click());
+  $('import-file').addEventListener('change', e => {
+    if (e.target.files[0]) Backup.importar(e.target.files[0]);
+  });
+
   // Conmutador de unidades MI / KM
   $('btn-unidades').addEventListener('click', () => {
     Units.toggle();

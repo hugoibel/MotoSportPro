@@ -296,6 +296,19 @@ body.recording .stat.big .value { animation: pulse 1.6s ease-in-out infinite; }
 .shop-btn.amazon { background: linear-gradient(135deg, #ffb400, #ff9900); }
 .shop-btn.revzilla { background: linear-gradient(135deg, #ffffff, #d7dbe3); }
 
+/* Copia de seguridad de fotos */
+.backup-box {
+  margin-top: 22px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius);
+}
+.backup-box h3 { font-family: var(--font-sport); font-size: 1.1rem; margin-bottom: 4px; }
+.backup-box .muted { margin-bottom: 12px; }
+.backup-btns { display: flex; gap: 10px; }
+.backup-btns .btn { padding: 13px; font-size: 0.85rem; }
+
 /* ===== Premium ===== */
 .premium-hero {
   text-align: center;

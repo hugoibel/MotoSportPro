@@ -135,7 +135,12 @@ Object.assign(I18N.es, {
   ev_fecha: 'Fecha', ev_hora: 'Hora', ev_notas: 'Notas', ev_crear: 'Crear evento',
   ev_vacio: 'No hay eventos. ¡Organiza una quedada!', ev_borrar: '¿Borrar este evento?',
   ev_falta: 'Pon al menos un nombre y una fecha.',
-  foto_cambiar: 'Poner mi foto', foto_quitar: 'Quitar foto'
+  foto_cambiar: 'Poner mi foto', foto_quitar: 'Quitar foto',
+  backup_titulo: 'Copia de seguridad de fotos',
+  backup_sub: 'Guarda en un archivo las fotos que subiste para no perderlas y poder publicarlas luego.',
+  backup_export: '⬇ Exportar mis fotos', backup_import: '⬆ Importar',
+  backup_ok: '✅ Fotos importadas correctamente.', backup_error: 'Archivo no válido.',
+  backup_vacio: 'Aún no has subido ninguna foto.'
 });
 Object.assign(I18N.en, {
   tab_gasolina: 'Fuel', tab_moto: 'My Bike', tab_eventos: 'Events', volver: '← Back',
@@ -156,7 +161,12 @@ Object.assign(I18N.en, {
   ev_fecha: 'Date', ev_hora: 'Time', ev_notas: 'Notes', ev_crear: 'Create event',
   ev_vacio: 'No events. Organize a meetup!', ev_borrar: 'Delete this event?',
   ev_falta: 'Add at least a name and a date.',
-  foto_cambiar: 'Set my photo', foto_quitar: 'Remove photo'
+  foto_cambiar: 'Set my photo', foto_quitar: 'Remove photo',
+  backup_titulo: 'Photo backup',
+  backup_sub: 'Save your uploaded photos to a file so you don\'t lose them and can publish them later.',
+  backup_export: '⬇ Export my photos', backup_import: '⬆ Import',
+  backup_ok: '✅ Photos imported successfully.', backup_error: 'Invalid file.',
+  backup_vacio: 'You haven\'t uploaded any photo yet.'
 });
 Object.assign(I18N.de, {
   tab_gasolina: 'Sprit', tab_moto: 'Mein Bike', tab_eventos: 'Events', volver: '← Zurück',
@@ -177,7 +187,12 @@ Object.assign(I18N.de, {
   ev_fecha: 'Datum', ev_hora: 'Uhrzeit', ev_notas: 'Notizen', ev_crear: 'Event erstellen',
   ev_vacio: 'Keine Events. Organisiere ein Treffen!', ev_borrar: 'Dieses Event löschen?',
   ev_falta: 'Bitte mindestens Name und Datum angeben.',
-  foto_cambiar: 'Mein Foto', foto_quitar: 'Foto entfernen'
+  foto_cambiar: 'Mein Foto', foto_quitar: 'Foto entfernen',
+  backup_titulo: 'Foto-Sicherung',
+  backup_sub: 'Speichere deine hochgeladenen Fotos in einer Datei, um sie nicht zu verlieren.',
+  backup_export: '⬇ Fotos exportieren', backup_import: '⬆ Importieren',
+  backup_ok: '✅ Fotos erfolgreich importiert.', backup_error: 'Ungültige Datei.',
+  backup_vacio: 'Du hast noch keine Fotos hochgeladen.'
 });
 Object.assign(I18N.fr, {
   tab_gasolina: 'Carburant', tab_moto: 'Ma Moto', tab_eventos: 'Événements', volver: '← Retour',
@@ -198,7 +213,12 @@ Object.assign(I18N.fr, {
   ev_fecha: 'Date', ev_hora: 'Heure', ev_notas: 'Notes', ev_crear: 'Créer l\'événement',
   ev_vacio: 'Aucun événement. Organise une sortie !', ev_borrar: 'Supprimer cet événement ?',
   ev_falta: 'Indique au moins un nom et une date.',
-  foto_cambiar: 'Ma photo', foto_quitar: 'Retirer la photo'
+  foto_cambiar: 'Ma photo', foto_quitar: 'Retirer la photo',
+  backup_titulo: 'Sauvegarde des photos',
+  backup_sub: 'Enregistre tes photos dans un fichier pour ne pas les perdre et les publier plus tard.',
+  backup_export: '⬇ Exporter mes photos', backup_import: '⬆ Importer',
+  backup_ok: '✅ Photos importées avec succès.', backup_error: 'Fichier non valide.',
+  backup_vacio: 'Tu n\'as encore importé aucune photo.'
 });
 Object.assign(I18N.it, {
   tab_gasolina: 'Carburante', tab_moto: 'La mia Moto', tab_eventos: 'Eventi', volver: '← Indietro',
@@ -219,7 +239,12 @@ Object.assign(I18N.it, {
   ev_fecha: 'Data', ev_hora: 'Ora', ev_notas: 'Note', ev_crear: 'Crea evento',
   ev_vacio: 'Nessun evento. Organizza un raduno!', ev_borrar: 'Eliminare questo evento?',
   ev_falta: 'Inserisci almeno un nome e una data.',
-  foto_cambiar: 'La mia foto', foto_quitar: 'Rimuovi foto'
+  foto_cambiar: 'La mia foto', foto_quitar: 'Rimuovi foto',
+  backup_titulo: 'Backup delle foto',
+  backup_sub: 'Salva in un file le foto caricate per non perderle e pubblicarle in seguito.',
+  backup_export: '⬇ Esporta le mie foto', backup_import: '⬆ Importa',
+  backup_ok: '✅ Foto importate correttamente.', backup_error: 'File non valido.',
+  backup_vacio: 'Non hai ancora caricato nessuna foto.'
 });
 
 const NOMBRES_IDIOMA = { es: 'Español', en: 'English', de: 'Deutsch', fr: 'Français', it: 'Italiano' };
