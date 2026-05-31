@@ -20,6 +20,7 @@
       <button id="btn-premium-top" class="crown-btn" title="Premium" data-view="premium">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 8l3.5 9h9L20 8l-5 3.5L12 5 9 11.5 4 8z"/></svg>
       </button>
+      <button id="btn-unidades" class="unit-btn" title="millas / km">MI</button>
       <select id="selector-idioma" class="lang-select" aria-label="Idioma"></select>
       <span id="gps-status" class="gps-badge" title="GPS">GPS ·</span>
     </div>
@@ -38,13 +39,13 @@
       <div class="telemetry">
         <div class="stat big">
           <span class="value" id="t-velocidad">0</span>
-          <span class="unit" data-i18n="vel">km/h</span>
+          <span class="unit" id="t-vel-unit">km/h</span>
         </div>
         <div class="stats-grid">
-          <div class="stat"><span class="value" id="t-distancia">0.00</span><span class="label" data-i18n="dist">km</span></div>
+          <div class="stat"><span class="value" id="t-distancia">0.00</span><span class="label" id="t-dist-label">km</span></div>
           <div class="stat"><span class="value" id="t-tiempo">00:00</span><span class="label" data-i18n="tiempo">tiempo</span></div>
-          <div class="stat"><span class="value" id="t-maxima">0</span><span class="label" data-i18n="max">máx km/h</span></div>
-          <div class="stat"><span class="value" id="t-media">0</span><span class="label" data-i18n="media">media km/h</span></div>
+          <div class="stat"><span class="value" id="t-maxima">0</span><span class="label" id="t-max-label">máx</span></div>
+          <div class="stat"><span class="value" id="t-media">0</span><span class="label" id="t-media-label">media</span></div>
         </div>
       </div>
       <div class="controls">
@@ -140,6 +141,7 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="js/config.js"></script>
+  <script src="js/units.js"></script>
   <script src="js/i18n.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/map.js"></script>

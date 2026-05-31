@@ -28,9 +28,12 @@ const CONFIG = {
   STRIPE_PAYMENT_LINK: '',
 
   // --- COMBUSTIBLE / GASOLINA ---
-  PAIS: 'ES',                          // para precio en vivo por país (ES = API oficial gratis)
-  PRECIO_COMBUSTIBLE: 1.65,            // precio por litro (editable; se usa si no hay precio en vivo)
+  PAIS: 'US',                          // para precio en vivo por país
+  PRECIO_COMBUSTIBLE: 1.65,            // precio por LITRO (sistema métrico); en imperial usa ~$/gal
   TIPO_COMBUSTIBLE: 'gasolina95',      // 'gasolina95' | 'gasolina98' | 'diesel'
+
+  // --- UNIDADES ---
+  SISTEMA_UNIDADES: 'imperial',        // 'imperial' (mi, mph, gal, MPG) | 'metric' (km, km/h, L)
 
   // --- GENERAL ---
   IDIOMA_POR_DEFECTO: 'es',            // se autodetecta del navegador si existe

@@ -331,6 +331,14 @@ body.recording .stat.big .value { animation: pulse 1.6s ease-in-out infinite; }
   box-shadow: 0 4px 12px rgba(255, 92, 42, 0.4);
 }
 .crown-btn svg { width: 20px; height: 20px; }
+.unit-btn {
+  background: var(--surface-2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text);
+  font-weight: 700; font-size: 0.74rem; letter-spacing: 0.5px;
+  width: 36px; height: 34px; border-radius: 9px; cursor: pointer;
+}
+.unit-btn:active { transform: scale(0.95); }
 .btn-back {
   background: none; border: none; color: var(--muted);
   font-weight: 600; font-size: 0.92rem; cursor: pointer;

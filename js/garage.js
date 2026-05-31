@@ -63,19 +63,23 @@ const Garage = {
     m.modelo = $('m-modelo').value.trim();
     m.anio = $('m-anio').value.trim();
     m.cc = $('m-cc').value.trim();
-    m.consumo = $('m-consumo').value.trim();
-    m.deposito = $('m-deposito').value.trim();
-    m.km = parseInt($('m-km').value) || 0;
+    // Consumo, depósito y km se introducen en la unidad elegida → se guardan en base
+    const cons = parseFloat($('m-consumo').value);
+    m.consumo = isNaN(cons) ? '' : Units.consToBase(cons);
+    const dep = parseFloat($('m-deposito').value);
+    m.deposito = isNaN(dep) ? '' : Units.volToBase(dep);
+    const km = parseFloat($('m-km').value);
+    m.km = isNaN(km) ? 0 : Math.round(Units.distToBase(km));
     this.save(m);
     this.render();
   },
 
   setUltimo(id) {
     const m = this.get();
-    const actual = m.mant[id] != null ? m.mant[id] : 0;
-    const v = prompt(`${i18n.t('moto_set_ultimo')} (km):`, actual);
+    const actualUser = Math.round(Units.distToUser(m.mant[id] != null ? m.mant[id] : 0));
+    const v = prompt(`${i18n.t('moto_set_ultimo')} (${Units.distLabel()}):`, actualUser);
     if (v === null) return;
-    m.mant[id] = parseInt(v) || 0;
+    m.mant[id] = Math.round(Units.distToBase(parseFloat(v) || 0));
     this.save(m);
     this.render();
   },
@@ -88,6 +92,11 @@ const Garage = {
       : `<div class="moto-foto vacia">📷<span data-i18n="moto_anadir_foto">${i18n.t('moto_anadir_foto')}</span></div>`;
 
     const titulo = (m.marca || m.modelo) ? `${m.marca} ${m.modelo}`.trim() : i18n.t('moto_sin');
+
+    // Valores mostrados en la unidad elegida
+    const consU = (m.consumo !== '' && m.consumo != null) ? Units.consToUser(parseFloat(m.consumo)).toFixed(1) : '';
+    const depU = (m.deposito !== '' && m.deposito != null) ? Units.volToUser(parseFloat(m.deposito)).toFixed(1) : '';
+    const kmU = m.km ? Math.round(Units.distToUser(m.km)) : 0;
 
     cont.innerHTML = `
       <h2 data-i18n="moto_titulo">${i18n.t('moto_titulo')}</h2>
@@ -102,9 +111,9 @@ const Garage = {
         <label>${i18n.t('moto_modelo')}<input id="m-modelo" value="${m.modelo || ''}"></label>
         <label>${i18n.t('moto_anio')}<input id="m-anio" type="number" value="${m.anio || ''}"></label>
         <label>${i18n.t('moto_cc')}<input id="m-cc" type="number" value="${m.cc || ''}"></label>
-        <label>${i18n.t('moto_consumo')}<input id="m-consumo" type="number" step="0.1" value="${m.consumo || ''}"></label>
-        <label>${i18n.t('moto_deposito')}<input id="m-deposito" type="number" step="0.1" value="${m.deposito || ''}"></label>
-        <label>${i18n.t('moto_km')}<input id="m-km" type="number" value="${m.km || 0}"></label>
+        <label>${i18n.t('moto_consumo')} (${Units.consLabel()})<input id="m-consumo" type="number" step="0.1" value="${consU}"></label>
+        <label>${i18n.t('moto_deposito')} (${Units.volLabel()})<input id="m-deposito" type="number" step="0.1" value="${depU}"></label>
+        <label>${i18n.t('moto_km')} (${Units.distLabel()})<input id="m-km" type="number" value="${kmU}"></label>
       </div>
       <button class="btn primary" id="m-guardar" data-i18n="moto_guardar">${i18n.t('moto_guardar')}</button>
 
@@ -128,9 +137,13 @@ const Garage = {
       const pct = Math.min(100, Math.round((recorrido / it.intervalo) * 100));
       const restante = it.intervalo - recorrido;
       const clase = pct >= 90 ? 'rojo' : pct >= 70 ? 'ambar' : 'verde';
+      const u = Units.distLabel();
+      const restU = Math.round(Units.distToUser(restante));
+      const recU = Math.round(Units.distToUser(recorrido));
+      const intU = Math.round(Units.distToUser(it.intervalo));
       const estado = restante <= 0
-        ? `<span class="mant-rev" data-i18n="moto_revisar">${i18n.t('moto_revisar')}</span>`
-        : `${restante.toLocaleString(i18n.lang)} km`;
+        ? `<span class="mant-rev">${i18n.t('moto_revisar')}</span>`
+        : `${restU.toLocaleString(i18n.lang)} ${u}`;
       return `
         <div class="mant-item ${clase}" data-id="${it.id}">
           <div class="mant-top">
@@ -138,7 +151,7 @@ const Garage = {
             <span class="mant-rest">${estado}</span>
           </div>
           <div class="mant-bar"><div class="mant-fill" style="width:${pct}%"></div></div>
-          <div class="mant-sub">${recorrido.toLocaleString(i18n.lang)} / ${it.intervalo.toLocaleString(i18n.lang)} km</div>
+          <div class="mant-sub">${recU.toLocaleString(i18n.lang)} / ${intU.toLocaleString(i18n.lang)} ${u}</div>
         </div>`;
     }).join('');
   }

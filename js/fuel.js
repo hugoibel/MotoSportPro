@@ -16,22 +16,27 @@ const Fuel = {
 
   render() {
     const cont = $('view-gasolina');
-    const consumo = (Garage.consumo() != null) ? Garage.consumo() : 5.0;
+    // Consumo base (L/100km) desde "Mi moto" → mostrado en la unidad elegida
+    const consBase = (Garage.consumo() != null) ? Garage.consumo() : 5.0;
+    const consU = Units.consToUser(consBase).toFixed(1);
+    const distU = Units.distToUser(this.distanciaDefecto()).toFixed(0);
+    const precioU = Units.precioDefecto().toFixed(2);
+
     cont.innerHTML = `
       <h2 data-i18n="gas_titulo">${i18n.t('gas_titulo')}</h2>
       <p class="muted" data-i18n="gas_sub">${i18n.t('gas_sub')}</p>
 
       <div class="fuel-form">
-        <label>${i18n.t('gas_distancia')} (km)
-          <input id="f-dist" type="number" step="1" value="${this.distanciaDefecto()}"></label>
-        <label>${i18n.t('gas_consumo')} (L/100km)
-          <input id="f-cons" type="number" step="0.1" value="${consumo}"></label>
-        <label>${i18n.t('gas_precio')} (${this.simbolo()}/L)
-          <input id="f-precio" type="number" step="0.01" value="${CONFIG.PRECIO_COMBUSTIBLE}"></label>
+        <label>${i18n.t('gas_distancia')} (${Units.distLabel()})
+          <input id="f-dist" type="number" step="1" value="${distU}"></label>
+        <label>${i18n.t('gas_consumo')} (${Units.consLabel()})
+          <input id="f-cons" type="number" step="0.1" value="${consU}"></label>
+        <label>${i18n.t('gas_precio')} (${this.simbolo()}${Units.priceLabel()})
+          <input id="f-precio" type="number" step="0.01" value="${precioU}"></label>
       </div>
 
       <div class="fuel-result">
-        <div class="fuel-big"><span id="f-litros">0</span><small> L</small></div>
+        <div class="fuel-big"><span id="f-litros">0</span><small> ${Units.volLabel()}</small></div>
         <div class="fuel-big accent"><span id="f-coste">0</span><small> ${this.simbolo()}</small></div>
       </div>
       <p class="muted" id="f-autonomia"></p>
@@ -51,19 +56,23 @@ const Fuel = {
   },
 
   calcular() {
-    const dist = parseFloat($('f-dist').value) || 0;
-    const cons = parseFloat($('f-cons').value) || 0;
-    const precio = parseFloat($('f-precio').value) || 0;
-    const litros = dist / 100 * cons;
-    const coste = litros * precio;
-    $('f-litros').textContent = litros.toFixed(2);
+    // Entradas en la unidad del usuario → se pasan a base (km, L/100km, $/L)
+    const distKm = Units.distToBase(parseFloat($('f-dist').value) || 0);
+    const consBase = Units.consToBase(parseFloat($('f-cons').value) || 0);
+    const precioUser = parseFloat($('f-precio').value) || 0;
+    const precioBaseL = Units.imperial ? precioUser / L_POR_GAL : precioUser;
+
+    const litros = distKm / 100 * consBase;          // litros base
+    const coste = litros * precioBaseL;
+    $('f-litros').textContent = Units.volToUser(litros).toFixed(2);
     $('f-coste').textContent = coste.toFixed(2);
 
-    const dep = parseFloat(Garage.get().deposito);
-    if (!isNaN(dep) && cons > 0) {
-      const autonomia = dep / cons * 100;
+    const dep = parseFloat(Garage.get().deposito);   // litros base
+    if (!isNaN(dep) && consBase > 0) {
+      const autonomiaKm = dep / consBase * 100;
       $('f-autonomia').textContent =
-        `${i18n.t('gas_autonomia')}: ~${Math.round(autonomia)} km (${dep} L)`;
+        `${i18n.t('gas_autonomia')}: ~${Math.round(Units.distToUser(autonomiaKm))} ${Units.distLabel()} ` +
+        `(${Units.volToUser(dep).toFixed(1)} ${Units.volLabel()})`;
     } else {
       $('f-autonomia').textContent = '';
     }
@@ -115,7 +124,7 @@ const Fuel = {
       <div class="gas-card">
         <div>
           <div class="gas-name">⛽ ${s.nombre}</div>
-          <div class="gas-dist">${s.d.toFixed(1)} km</div>
+          <div class="gas-dist">${Units.distToUser(s.d).toFixed(1)} ${Units.distLabel()}</div>
         </div>
         <a class="gas-go" target="_blank" rel="noopener"
            href="https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lon}"

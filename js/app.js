@@ -65,9 +65,9 @@ function onPosicion(pos) {
 
   Mapa.addPoint(latitude, longitude);
 
-  $('t-velocidad').textContent = Math.round(velMs * 3.6);
-  $('t-distancia').textContent = (distancia / 1000).toFixed(2);
-  $('t-maxima').textContent = Math.round(velMax * 3.6);
+  $('t-velocidad').textContent = Math.round(Units.speedToUser(velMs * 3.6));
+  $('t-distancia').textContent = Units.distToUser(distancia / 1000).toFixed(2);
+  $('t-maxima').textContent = Math.round(Units.speedToUser(velMax * 3.6));
 }
 
 function actualizarTiempo() {
@@ -75,7 +75,17 @@ function actualizarTiempo() {
   $('t-tiempo').textContent = fmtTiempo(seg);
   const horas = seg / 3600;
   const media = horas > 0 ? (distancia / 1000) / horas : 0;
-  $('t-media').textContent = Math.round(media);
+  $('t-media').textContent = Math.round(Units.speedToUser(media));
+}
+
+// Actualiza las etiquetas de unidad de la pantalla Conducir (km/h ↔ mph, km ↔ mi)
+function actualizarEtiquetas() {
+  $('t-vel-unit').textContent = Units.speedLabel();
+  $('t-dist-label').textContent = Units.distLabel();
+  $('t-max-label').textContent = `${i18n.t('max')} ${Units.speedLabel()}`;
+  $('t-media-label').textContent = `${i18n.t('media')} ${Units.speedLabel()}`;
+  const b = $('btn-unidades');
+  if (b) b.textContent = Units.botonTexto();
 }
 
 function onErrorGps(err) {
@@ -107,7 +117,7 @@ function pararGrabacion() {
     velMedia: Math.round(media),
     puntos: puntosSesion
   });
-  alert(`${i18n.t('guardada')}: ${km.toFixed(2)} km · ${fmtTiempo(duracionSeg)}`);
+  alert(`${i18n.t('guardada')}: ${Units.distToUser(km).toFixed(2)} ${Units.distLabel()} · ${fmtTiempo(duracionSeg)}`);
   resetTelemetria();
 }
 
@@ -136,10 +146,10 @@ function renderRutas() {
       <button class="r-del" data-id="${r.id}" title="x">🗑️</button>
       <div class="r-fecha">${fecha}</div>
       <div class="r-stats">
-        <span><b>${r.distanciaKm}</b> km</span>
+        <span><b>${Units.distToUser(r.distanciaKm).toFixed(1)}</b> ${Units.distLabel()}</span>
         <span><b>${fmtTiempo(r.duracionSeg)}</b></span>
-        <span><b>${r.velMax}</b> ${i18n.t('max')}</span>
-        <span><b>${r.velMedia}</b> ${i18n.t('media')}</span>
+        <span><b>${Math.round(Units.speedToUser(r.velMax))}</b> ${i18n.t('max')} ${Units.speedLabel()}</span>
+        <span><b>${Math.round(Units.speedToUser(r.velMedia))}</b> ${i18n.t('media')} ${Units.speedLabel()}</span>
       </div>`;
     lista.appendChild(li);
   });
@@ -177,12 +187,22 @@ function cambiarVista(nombre) {
 window.addEventListener('DOMContentLoaded', async () => {
   i18n.init();
   i18n.aplicar();
+  Units.init();
+  actualizarEtiquetas();
 
   await Mapa.init('map');
 
   $('btn-start').addEventListener('click', iniciarGrabacion);
   $('btn-stop').addEventListener('click', pararGrabacion);
   $('btn-premium').addEventListener('click', () => Premium.comprar());
+
+  // Conmutador de unidades MI / KM
+  $('btn-unidades').addEventListener('click', () => {
+    Units.toggle();
+    actualizarEtiquetas();
+    const activa = document.querySelector('.view.active');
+    if (activa) cambiarVista(activa.id.replace('view-', ''));
+  });
 
   // Navegación: todo elemento con data-view cambia de vista.
   // El botón "Volver" regresa a la última pestaña real.
@@ -204,6 +224,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   });
   sel.addEventListener('change', e => {
     i18n.set(e.target.value);
+    actualizarEtiquetas();
     // re-renderiza la vista activa para traducir su contenido dinámico
     const activa = document.querySelector('.view.active');
     if (activa) cambiarVista(activa.id.replace('view-', ''));
