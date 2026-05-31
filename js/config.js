@@ -27,6 +27,11 @@ const CONFIG = {
   // Vacío = botón en modo demo (activa Premium localmente para probar).
   STRIPE_PAYMENT_LINK: '',
 
+  // --- COMBUSTIBLE / GASOLINA ---
+  PAIS: 'ES',                          // para precio en vivo por país (ES = API oficial gratis)
+  PRECIO_COMBUSTIBLE: 1.65,            // precio por litro (editable; se usa si no hay precio en vivo)
+  TIPO_COMBUSTIBLE: 'gasolina95',      // 'gasolina95' | 'gasolina98' | 'diesel'
+
   // --- GENERAL ---
   IDIOMA_POR_DEFECTO: 'es',            // se autodetecta del navegador si existe
   IDIOMAS: ['es', 'en', 'de', 'fr', 'it']

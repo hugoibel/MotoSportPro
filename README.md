@@ -6,6 +6,9 @@ App (PWA) para motoristas, pensada para **monetizar**. Funciona en **PC** y **m�
 **Funciones actuales:**
 - 🏍️ Conducir: graba rutas con telemetría (velocidad, distancia, tiempo, máx/media) sobre mapa.
 - 🗺️ Rutas: historial guardado en el dispositivo.
+- ⛽ Gasolina: calcula litros y coste según el consumo de **tu** moto y la distancia; busca **gasolineras cercanas reales** (OpenStreetMap + tu GPS) con "cómo llegar".
+- 🏍️ Mi Moto: ficha de la moto con **foto**, datos (marca, modelo, consumo, depósito, km) y **desgaste por mantenimiento** (aceite, cadena, neumáticos…) con barras de aviso.
+- 📅 Eventos: organiza quedadas de club (nombre, lugar, fecha, hora) y compártelas.
 - 🛒 Tienda: piezas y equipo con enlaces de **afiliado** (Amazon + RevZilla) → comisión por venta.
 - 👑 Premium: membresía mensual ($2.99) con paywall listo para Stripe.
 
@@ -19,9 +22,13 @@ Edita `js/config.js` y rellena estas claves (la app funciona en modo demo sin el
 | `AMAZON_TAG` | Amazon Associates (programa de afiliados) | Comisión por compras en Amazon |
 | `REVZILLA_AFILIADO_BASE` | RevZilla vía red **AvantLink** | Comisión por compras en RevZilla |
 | `STRIPE_PAYMENT_LINK` | Stripe → Payment Link de 2.99/mes | Cobrar la membresía Premium |
+| `PAIS` / `PRECIO_COMBUSTIBLE` | Tu país y precio por litro | Cálculo de gasolina. Precio en vivo necesita la fuente oficial de tu país. |
 
 > Todas requieren una cuenta a tu nombre y aprobación de cada programa. Yo dejo
 > el código listo: el día que pegues la clave, esa parte empieza a generar dinero.
+
+> **Gasolineras cercanas** funcionan ya en cualquier país (OpenStreetMap + GPS, sin clave).
+> El **precio en vivo** depende de cada país; dime el tuyo y conecto la fuente oficial gratis si existe.
 
 ## Cómo probarla en el PC
 

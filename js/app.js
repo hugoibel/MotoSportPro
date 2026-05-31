@@ -151,15 +151,26 @@ function renderRutas() {
 }
 
 // --- Navegación entre vistas ---
+const TAB_VIEWS = ['grabar', 'gasolina', 'moto', 'eventos', 'tienda'];
+let vistaTab = 'grabar';  // última pestaña real, para el botón "Volver"
+
 function cambiarVista(nombre) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  $('view-' + nombre).classList.add('active');
-  document.querySelector(`.tab[data-view="${nombre}"]`).classList.add('active');
+  const view = $('view-' + nombre);
+  view.classList.add('active');
+  view.scrollTop = 0;
+  const tabEl = document.querySelector(`.tab[data-view="${nombre}"]`);
+  if (tabEl) tabEl.classList.add('active');
+  if (TAB_VIEWS.includes(nombre)) vistaTab = nombre;
+
   if (nombre === 'rutas') renderRutas();
-  if (nombre === 'tienda') Store.render();
-  if (nombre === 'premium') Premium.render();
-  if (nombre === 'grabar') Mapa.invalidate();
+  else if (nombre === 'tienda') Store.render();
+  else if (nombre === 'premium') Premium.render();
+  else if (nombre === 'gasolina') Fuel.render();
+  else if (nombre === 'moto') Garage.render();
+  else if (nombre === 'eventos') Eventos.render();
+  else if (nombre === 'grabar') Mapa.invalidate();
 }
 
 // --- Arranque ---
@@ -172,8 +183,16 @@ window.addEventListener('DOMContentLoaded', async () => {
   $('btn-start').addEventListener('click', iniciarGrabacion);
   $('btn-stop').addEventListener('click', pararGrabacion);
   $('btn-premium').addEventListener('click', () => Premium.comprar());
-  document.querySelectorAll('.tab').forEach(t =>
-    t.addEventListener('click', () => cambiarVista(t.dataset.view)));
+
+  // Navegación: todo elemento con data-view cambia de vista.
+  // El botón "Volver" regresa a la última pestaña real.
+  document.querySelectorAll('[data-view]').forEach(el => {
+    if (el.classList.contains('btn-back')) {
+      el.addEventListener('click', () => cambiarVista(vistaTab));
+    } else {
+      el.addEventListener('click', () => cambiarVista(el.dataset.view));
+    }
+  });
 
   // Selector de idioma
   const sel = $('selector-idioma');
@@ -185,7 +204,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   });
   sel.addEventListener('change', e => {
     i18n.set(e.target.value);
-    renderRutas(); Store.render(); Premium.render();
+    // re-renderiza la vista activa para traducir su contenido dinámico
+    const activa = document.querySelector('.view.active');
+    if (activa) cambiarVista(activa.id.replace('view-', ''));
   });
 
   Premium.render();

@@ -115,6 +115,108 @@ const I18N = {
   }
 };
 
+// --- Traducciones de las secciones Gasolina / Mi Moto / Eventos ---
+Object.assign(I18N.es, {
+  tab_gasolina: 'Gasolina', tab_moto: 'Mi Moto', tab_eventos: 'Eventos', volver: '← Volver',
+  gas_titulo: 'Gasolina', gas_sub: 'Calcula el coste según tu moto y encuentra gasolineras cerca.',
+  gas_distancia: 'Distancia', gas_consumo: 'Consumo', gas_precio: 'Precio', gas_autonomia: 'Autonomía',
+  gas_estaciones: 'Gasolineras cerca', gas_estaciones_btn: '📍 Buscar gasolineras cerca',
+  gas_buscando: 'Buscando…', gas_sin_estaciones: 'No se encontraron gasolineras cerca.',
+  gas_como_llegar: 'Cómo llegar', gas_precio_vivo_btn: 'Precio en vivo',
+  gas_precio_vivo_no: 'El precio en vivo requiere conectar la fuente oficial de tu país. De momento, edita el precio a mano.',
+  moto_titulo: 'Mi Moto', moto_sin: 'Aún no has añadido tu moto', moto_anadir_foto: 'Añadir foto',
+  moto_marca: 'Marca', moto_modelo: 'Modelo', moto_anio: 'Año', moto_cc: 'Cilindrada (cc)',
+  moto_consumo: 'Consumo (L/100km)', moto_deposito: 'Depósito (L)', moto_km: 'Kilómetros actuales',
+  moto_guardar: 'Guardar', moto_mant_titulo: 'Mantenimiento y desgaste', moto_revisar: '¡Revisar!',
+  moto_set_ultimo: 'Km del último cambio',
+  m_aceite: 'Aceite y filtro', m_filtroAire: 'Filtro de aire', m_bujias: 'Bujías',
+  m_cadena: 'Kit de cadena', m_pastillas: 'Pastillas de freno', m_neumaticos: 'Neumáticos', m_refrigerante: 'Refrigerante',
+  ev_titulo: 'Eventos y quedadas', ev_nombre: 'Nombre del evento', ev_lugar: 'Lugar',
+  ev_fecha: 'Fecha', ev_hora: 'Hora', ev_notas: 'Notas', ev_crear: 'Crear evento',
+  ev_vacio: 'No hay eventos. ¡Organiza una quedada!', ev_borrar: '¿Borrar este evento?',
+  ev_falta: 'Pon al menos un nombre y una fecha.'
+});
+Object.assign(I18N.en, {
+  tab_gasolina: 'Fuel', tab_moto: 'My Bike', tab_eventos: 'Events', volver: '← Back',
+  gas_titulo: 'Fuel', gas_sub: 'Calculate cost based on your bike and find gas stations nearby.',
+  gas_distancia: 'Distance', gas_consumo: 'Consumption', gas_precio: 'Price', gas_autonomia: 'Range',
+  gas_estaciones: 'Gas stations nearby', gas_estaciones_btn: '📍 Find stations nearby',
+  gas_buscando: 'Searching…', gas_sin_estaciones: 'No stations found nearby.',
+  gas_como_llegar: 'Directions', gas_precio_vivo_btn: 'Live price',
+  gas_precio_vivo_no: 'Live price needs your country\'s official source connected. For now, edit the price manually.',
+  moto_titulo: 'My Bike', moto_sin: 'You haven\'t added your bike yet', moto_anadir_foto: 'Add photo',
+  moto_marca: 'Brand', moto_modelo: 'Model', moto_anio: 'Year', moto_cc: 'Displacement (cc)',
+  moto_consumo: 'Consumption (L/100km)', moto_deposito: 'Tank (L)', moto_km: 'Current mileage',
+  moto_guardar: 'Save', moto_mant_titulo: 'Maintenance & wear', moto_revisar: 'Check now!',
+  moto_set_ultimo: 'Mileage at last change',
+  m_aceite: 'Oil & filter', m_filtroAire: 'Air filter', m_bujias: 'Spark plugs',
+  m_cadena: 'Chain kit', m_pastillas: 'Brake pads', m_neumaticos: 'Tyres', m_refrigerante: 'Coolant',
+  ev_titulo: 'Events & meetups', ev_nombre: 'Event name', ev_lugar: 'Place',
+  ev_fecha: 'Date', ev_hora: 'Time', ev_notas: 'Notes', ev_crear: 'Create event',
+  ev_vacio: 'No events. Organize a meetup!', ev_borrar: 'Delete this event?',
+  ev_falta: 'Add at least a name and a date.'
+});
+Object.assign(I18N.de, {
+  tab_gasolina: 'Sprit', tab_moto: 'Mein Bike', tab_eventos: 'Events', volver: '← Zurück',
+  gas_titulo: 'Sprit', gas_sub: 'Berechne die Kosten für dein Motorrad und finde Tankstellen.',
+  gas_distancia: 'Distanz', gas_consumo: 'Verbrauch', gas_precio: 'Preis', gas_autonomia: 'Reichweite',
+  gas_estaciones: 'Tankstellen in der Nähe', gas_estaciones_btn: '📍 Tankstellen suchen',
+  gas_buscando: 'Suche…', gas_sin_estaciones: 'Keine Tankstellen in der Nähe gefunden.',
+  gas_como_llegar: 'Route', gas_precio_vivo_btn: 'Live-Preis',
+  gas_precio_vivo_no: 'Der Live-Preis benötigt die offizielle Quelle deines Landes. Bitte den Preis vorerst manuell eingeben.',
+  moto_titulo: 'Mein Bike', moto_sin: 'Du hast dein Motorrad noch nicht hinzugefügt', moto_anadir_foto: 'Foto hinzufügen',
+  moto_marca: 'Marke', moto_modelo: 'Modell', moto_anio: 'Jahr', moto_cc: 'Hubraum (cc)',
+  moto_consumo: 'Verbrauch (L/100km)', moto_deposito: 'Tank (L)', moto_km: 'Aktueller Kilometerstand',
+  moto_guardar: 'Speichern', moto_mant_titulo: 'Wartung & Verschleiß', moto_revisar: 'Prüfen!',
+  moto_set_ultimo: 'Km beim letzten Wechsel',
+  m_aceite: 'Öl & Filter', m_filtroAire: 'Luftfilter', m_bujias: 'Zündkerzen',
+  m_cadena: 'Kettensatz', m_pastillas: 'Bremsbeläge', m_neumaticos: 'Reifen', m_refrigerante: 'Kühlmittel',
+  ev_titulo: 'Events & Treffen', ev_nombre: 'Eventname', ev_lugar: 'Ort',
+  ev_fecha: 'Datum', ev_hora: 'Uhrzeit', ev_notas: 'Notizen', ev_crear: 'Event erstellen',
+  ev_vacio: 'Keine Events. Organisiere ein Treffen!', ev_borrar: 'Dieses Event löschen?',
+  ev_falta: 'Bitte mindestens Name und Datum angeben.'
+});
+Object.assign(I18N.fr, {
+  tab_gasolina: 'Carburant', tab_moto: 'Ma Moto', tab_eventos: 'Événements', volver: '← Retour',
+  gas_titulo: 'Carburant', gas_sub: 'Calcule le coût selon ta moto et trouve des stations proches.',
+  gas_distancia: 'Distance', gas_consumo: 'Consommation', gas_precio: 'Prix', gas_autonomia: 'Autonomie',
+  gas_estaciones: 'Stations à proximité', gas_estaciones_btn: '📍 Chercher des stations',
+  gas_buscando: 'Recherche…', gas_sin_estaciones: 'Aucune station trouvée à proximité.',
+  gas_como_llegar: 'Itinéraire', gas_precio_vivo_btn: 'Prix en direct',
+  gas_precio_vivo_no: 'Le prix en direct nécessite la source officielle de ton pays. Pour l\'instant, modifie le prix à la main.',
+  moto_titulo: 'Ma Moto', moto_sin: 'Tu n\'as pas encore ajouté ta moto', moto_anadir_foto: 'Ajouter une photo',
+  moto_marca: 'Marque', moto_modelo: 'Modèle', moto_anio: 'Année', moto_cc: 'Cylindrée (cc)',
+  moto_consumo: 'Consommation (L/100km)', moto_deposito: 'Réservoir (L)', moto_km: 'Kilométrage actuel',
+  moto_guardar: 'Enregistrer', moto_mant_titulo: 'Entretien & usure', moto_revisar: 'À vérifier !',
+  moto_set_ultimo: 'Km au dernier changement',
+  m_aceite: 'Huile & filtre', m_filtroAire: 'Filtre à air', m_bujias: 'Bougies',
+  m_cadena: 'Kit chaîne', m_pastillas: 'Plaquettes de frein', m_neumaticos: 'Pneus', m_refrigerante: 'Liquide de refroidissement',
+  ev_titulo: 'Événements & sorties', ev_nombre: 'Nom de l\'événement', ev_lugar: 'Lieu',
+  ev_fecha: 'Date', ev_hora: 'Heure', ev_notas: 'Notes', ev_crear: 'Créer l\'événement',
+  ev_vacio: 'Aucun événement. Organise une sortie !', ev_borrar: 'Supprimer cet événement ?',
+  ev_falta: 'Indique au moins un nom et une date.'
+});
+Object.assign(I18N.it, {
+  tab_gasolina: 'Carburante', tab_moto: 'La mia Moto', tab_eventos: 'Eventi', volver: '← Indietro',
+  gas_titulo: 'Carburante', gas_sub: 'Calcola il costo in base alla tua moto e trova distributori vicini.',
+  gas_distancia: 'Distanza', gas_consumo: 'Consumo', gas_precio: 'Prezzo', gas_autonomia: 'Autonomia',
+  gas_estaciones: 'Distributori vicini', gas_estaciones_btn: '📍 Cerca distributori',
+  gas_buscando: 'Ricerca…', gas_sin_estaciones: 'Nessun distributore trovato vicino.',
+  gas_como_llegar: 'Indicazioni', gas_precio_vivo_btn: 'Prezzo live',
+  gas_precio_vivo_no: 'Il prezzo live richiede la fonte ufficiale del tuo paese. Per ora, modifica il prezzo a mano.',
+  moto_titulo: 'La mia Moto', moto_sin: 'Non hai ancora aggiunto la tua moto', moto_anadir_foto: 'Aggiungi foto',
+  moto_marca: 'Marca', moto_modelo: 'Modello', moto_anio: 'Anno', moto_cc: 'Cilindrata (cc)',
+  moto_consumo: 'Consumo (L/100km)', moto_deposito: 'Serbatoio (L)', moto_km: 'Chilometri attuali',
+  moto_guardar: 'Salva', moto_mant_titulo: 'Manutenzione e usura', moto_revisar: 'Da controllare!',
+  moto_set_ultimo: 'Km all\'ultimo cambio',
+  m_aceite: 'Olio e filtro', m_filtroAire: 'Filtro aria', m_bujias: 'Candele',
+  m_cadena: 'Kit catena', m_pastillas: 'Pastiglie freni', m_neumaticos: 'Pneumatici', m_refrigerante: 'Refrigerante',
+  ev_titulo: 'Eventi e raduni', ev_nombre: 'Nome dell\'evento', ev_lugar: 'Luogo',
+  ev_fecha: 'Data', ev_hora: 'Ora', ev_notas: 'Note', ev_crear: 'Crea evento',
+  ev_vacio: 'Nessun evento. Organizza un raduno!', ev_borrar: 'Eliminare questo evento?',
+  ev_falta: 'Inserisci almeno un nome e una data.'
+});
+
 const NOMBRES_IDIOMA = { es: 'Español', en: 'English', de: 'Deutsch', fr: 'Français', it: 'Italiano' };
 
 const i18n = {
