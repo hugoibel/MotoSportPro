@@ -79,15 +79,47 @@ const Fuel = {
   },
 
   precioEnVivo() {
-    // Precio oficial en vivo: solo disponible por país. ES = API del Gobierno.
-    if (CONFIG.PAIS !== 'ES') {
-      alert(i18n.t('gas_precio_vivo_no'));
+    // Precio oficial en vivo. EE.UU. = API de la EIA (con CORS, sin proxy).
+    if (CONFIG.PAIS === 'US') {
+      if (!CONFIG.EIA_API_KEY) { alert(i18n.t('gas_eia_sin_clave')); return; }
+      const btn = $('f-vivo'), orig = btn.textContent;
+      btn.disabled = true; btn.textContent = i18n.t('gas_precio_cargando');
+      // Florida primero; si no hay dato, media nacional EE.UU.
+      this._fetchEIA('EMM_EPMR_PTE_SFL_DPG')
+        .then(r => r || this._fetchEIA('EMM_EPMR_PTE_NUS_DPG'))
+        .then(r => {
+          btn.disabled = false; btn.textContent = orig;
+          if (!r) { alert(i18n.t('gas_precio_vivo_err')); return; }
+          // EIA da $/galón → al campo según unidad del usuario
+          const precioUser = Units.imperial ? r.value : r.value / L_POR_GAL;
+          $('f-precio').value = precioUser.toFixed(Units.imperial ? 2 : 3);
+          this.calcular();
+          alert(i18n.t('gas_precio_vivo_ok')
+            .replace('{precio}', this.simbolo() + r.value.toFixed(2) + Units.priceLabel())
+            .replace('{fecha}', r.period));
+        })
+        .catch(() => { btn.disabled = false; btn.textContent = orig; alert(i18n.t('gas_precio_vivo_err')); });
       return;
     }
+    // Otros países (incl. ES): pendiente de fuente con CORS.
     alert(i18n.t('gas_precio_vivo_no'));
-    // NOTA: la API oficial española no envía cabeceras CORS, así que un PWA
-    // puro no puede leerla directamente; requiere un pequeño proxy.
-    // Pendiente de activar según el país del usuario.
+  },
+
+  // Consulta a la EIA el último valor semanal de una serie ($/galón).
+  // Devuelve { value, period } o null si no hay dato / error.
+  _fetchEIA(serie) {
+    const base = 'https://api.eia.gov/v2/petroleum/pri/gnd/data/';
+    const q = `?api_key=${encodeURIComponent(CONFIG.EIA_API_KEY)}`
+      + '&frequency=weekly&data[0]=value'
+      + `&facets[series][]=${serie}`
+      + '&sort[0][column]=period&sort[0][direction]=desc&length=1';
+    return fetch(base + q)
+      .then(r => r.ok ? r.json() : null)
+      .then(j => {
+        const row = j && j.response && j.response.data && j.response.data[0];
+        return (row && row.value != null) ? { value: parseFloat(row.value), period: row.period } : null;
+      })
+      .catch(() => null);
   },
 
   buscarEstaciones() {

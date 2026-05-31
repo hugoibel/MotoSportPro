@@ -32,6 +32,12 @@ const CONFIG = {
   PRECIO_COMBUSTIBLE: 1.65,            // precio por LITRO (sistema métrico); en imperial usa ~$/gal
   TIPO_COMBUSTIBLE: 'gasolina95',      // 'gasolina95' | 'gasolina98' | 'diesel'
 
+  // Precio en vivo (EE.UU.): clave GRATIS de la EIA (gobierno US).
+  // Regístrate en https://www.eia.gov/opendata/register.php y pega aquí la clave.
+  // Con clave, el botón "Precio en vivo" trae el precio medio semanal de Florida.
+  // Vacío = el precio se edita a mano.
+  EIA_API_KEY: '',
+
   // --- UNIDADES ---
   SISTEMA_UNIDADES: 'imperial',        // 'imperial' (mi, mph, gal, MPG) | 'metric' (km, km/h, L)
 
