@@ -251,15 +251,27 @@ body.recording .stat.big .value { animation: pulse 1.6s ease-in-out infinite; }
   margin-bottom: 8px;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
 }
+.shop-imgwrap { position: relative; margin-bottom: 10px; line-height: 0; }
 .shop-img {
   width: 100%;
   aspect-ratio: 1 / 1;
   max-width: 120px;
-  object-fit: contain;
-  margin-bottom: 10px;
+  object-fit: cover;
   border-radius: 16px;
   filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.45));
 }
+.shop-foto-btn, .shop-foto-del {
+  position: absolute;
+  top: 6px;
+  width: 30px; height: 30px;
+  border: none; border-radius: 9px;
+  cursor: pointer; font-size: 0.85rem;
+  display: grid; place-items: center;
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+}
+.shop-foto-btn { right: 6px; background: rgba(11, 14, 20, 0.72); }
+.shop-foto-del { left: 6px; background: rgba(255, 59, 92, 0.85); color: #fff; }
+.shop-foto-btn:active, .shop-foto-del:active { transform: scale(0.92); }
 .shop-cat {
   font-size: 0.64rem;
   text-transform: uppercase;

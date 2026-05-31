@@ -26,6 +26,40 @@ const PRODUCTOS = [
 ];
 
 const Store = {
+  FOTOS_KEY: 'msp_tienda_fotos',
+
+  // --- Fotos propias del usuario (guardadas en el dispositivo) ---
+  fotosGet() {
+    try { return JSON.parse(localStorage.getItem(this.FOTOS_KEY)) || {}; }
+    catch { return {}; }
+  },
+  fotoDe(nombre) { return this.fotosGet()[nombre] || null; },
+  quitarFoto(nombre) {
+    const f = this.fotosGet(); delete f[nombre];
+    localStorage.setItem(this.FOTOS_KEY, JSON.stringify(f));
+    this.render();
+  },
+  // Redimensiona a máx 800px y guarda como JPEG ligero
+  ponerFoto(nombre, file) {
+    const fr = new FileReader();
+    fr.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const max = 800, esc = Math.min(1, max / Math.max(img.width, img.height));
+        const cv = document.createElement('canvas');
+        cv.width = img.width * esc; cv.height = img.height * esc;
+        cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+        const fotos = this.fotosGet();
+        fotos[nombre] = cv.toDataURL('image/jpeg', 0.82);
+        try { localStorage.setItem(this.FOTOS_KEY, JSON.stringify(fotos)); }
+        catch (e) { alert('No se pudo guardar: foto demasiado grande o sin espacio.'); }
+        this.render();
+      };
+      img.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  },
+
   // Construye un enlace de Amazon con tu tag de afiliado
   linkAmazon(producto) {
     const dom = CONFIG.AMAZON_DOMINIO || 'amazon.com';
@@ -47,12 +81,19 @@ const Store = {
     const cont = document.getElementById('store-grid');
     if (!cont) return;
     cont.innerHTML = '';
-    PRODUCTOS.forEach(p => {
+    PRODUCTOS.forEach((p, i) => {
+      const foto = this.fotoDe(p.nombre);     // foto propia del usuario, si la hay
+      const src = foto || p.img;               // si no, la ilustración
       const card = document.createElement('div');
       card.className = 'shop-card';
       card.innerHTML = `
-        <img class="shop-img" src="${p.img}" alt="${p.nombre}" loading="lazy"
-             onerror="this.outerHTML='<div class=\\'shop-emoji\\'>${p.emoji}</div>'">
+        <div class="shop-imgwrap">
+          <img class="shop-img" src="${src}" alt="${p.nombre}" loading="lazy"
+               onerror="this.outerHTML='<div class=\\'shop-emoji\\'>${p.emoji}</div>'">
+          <button class="shop-foto-btn" data-foto="${i}" title="${i18n.t('foto_cambiar')}">📷</button>
+          ${foto ? `<button class="shop-foto-del" data-fotodel="${p.nombre}" title="${i18n.t('foto_quitar')}">✕</button>` : ''}
+          <input type="file" accept="image/*" hidden id="tienda-file-${i}">
+        </div>
         <div class="shop-cat">${p.cat}</div>
         <div class="shop-name">${p.nombre}</div>
         <div class="shop-btns">
@@ -61,5 +102,18 @@ const Store = {
         </div>`;
       cont.appendChild(card);
     });
+
+    // Botón cámara → abre el selector de archivo de ese producto
+    cont.querySelectorAll('.shop-foto-btn').forEach(btn => {
+      const i = btn.dataset.foto;
+      const input = document.getElementById('tienda-file-' + i);
+      btn.addEventListener('click', () => input.click());
+      input.addEventListener('change', e => {
+        if (e.target.files[0]) this.ponerFoto(PRODUCTOS[i].nombre, e.target.files[0]);
+      });
+    });
+    // Botón ✕ → quita la foto y vuelve a la ilustración
+    cont.querySelectorAll('.shop-foto-del').forEach(btn =>
+      btn.addEventListener('click', () => this.quitarFoto(btn.dataset.fotodel)));
   }
 };

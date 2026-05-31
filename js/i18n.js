@@ -134,7 +134,8 @@ Object.assign(I18N.es, {
   ev_titulo: 'Eventos y quedadas', ev_nombre: 'Nombre del evento', ev_lugar: 'Lugar',
   ev_fecha: 'Fecha', ev_hora: 'Hora', ev_notas: 'Notas', ev_crear: 'Crear evento',
   ev_vacio: 'No hay eventos. ¡Organiza una quedada!', ev_borrar: '¿Borrar este evento?',
-  ev_falta: 'Pon al menos un nombre y una fecha.'
+  ev_falta: 'Pon al menos un nombre y una fecha.',
+  foto_cambiar: 'Poner mi foto', foto_quitar: 'Quitar foto'
 });
 Object.assign(I18N.en, {
   tab_gasolina: 'Fuel', tab_moto: 'My Bike', tab_eventos: 'Events', volver: '← Back',
@@ -154,7 +155,8 @@ Object.assign(I18N.en, {
   ev_titulo: 'Events & meetups', ev_nombre: 'Event name', ev_lugar: 'Place',
   ev_fecha: 'Date', ev_hora: 'Time', ev_notas: 'Notes', ev_crear: 'Create event',
   ev_vacio: 'No events. Organize a meetup!', ev_borrar: 'Delete this event?',
-  ev_falta: 'Add at least a name and a date.'
+  ev_falta: 'Add at least a name and a date.',
+  foto_cambiar: 'Set my photo', foto_quitar: 'Remove photo'
 });
 Object.assign(I18N.de, {
   tab_gasolina: 'Sprit', tab_moto: 'Mein Bike', tab_eventos: 'Events', volver: '← Zurück',
@@ -174,7 +176,8 @@ Object.assign(I18N.de, {
   ev_titulo: 'Events & Treffen', ev_nombre: 'Eventname', ev_lugar: 'Ort',
   ev_fecha: 'Datum', ev_hora: 'Uhrzeit', ev_notas: 'Notizen', ev_crear: 'Event erstellen',
   ev_vacio: 'Keine Events. Organisiere ein Treffen!', ev_borrar: 'Dieses Event löschen?',
-  ev_falta: 'Bitte mindestens Name und Datum angeben.'
+  ev_falta: 'Bitte mindestens Name und Datum angeben.',
+  foto_cambiar: 'Mein Foto', foto_quitar: 'Foto entfernen'
 });
 Object.assign(I18N.fr, {
   tab_gasolina: 'Carburant', tab_moto: 'Ma Moto', tab_eventos: 'Événements', volver: '← Retour',
@@ -194,7 +197,8 @@ Object.assign(I18N.fr, {
   ev_titulo: 'Événements & sorties', ev_nombre: 'Nom de l\'événement', ev_lugar: 'Lieu',
   ev_fecha: 'Date', ev_hora: 'Heure', ev_notas: 'Notes', ev_crear: 'Créer l\'événement',
   ev_vacio: 'Aucun événement. Organise une sortie !', ev_borrar: 'Supprimer cet événement ?',
-  ev_falta: 'Indique au moins un nom et une date.'
+  ev_falta: 'Indique au moins un nom et une date.',
+  foto_cambiar: 'Ma photo', foto_quitar: 'Retirer la photo'
 });
 Object.assign(I18N.it, {
   tab_gasolina: 'Carburante', tab_moto: 'La mia Moto', tab_eventos: 'Eventi', volver: '← Indietro',
@@ -214,7 +218,8 @@ Object.assign(I18N.it, {
   ev_titulo: 'Eventi e raduni', ev_nombre: 'Nome dell\'evento', ev_lugar: 'Luogo',
   ev_fecha: 'Data', ev_hora: 'Ora', ev_notas: 'Note', ev_crear: 'Crea evento',
   ev_vacio: 'Nessun evento. Organizza un raduno!', ev_borrar: 'Eliminare questo evento?',
-  ev_falta: 'Inserisci almeno un nome e una data.'
+  ev_falta: 'Inserisci almeno un nome e una data.',
+  foto_cambiar: 'La mia foto', foto_quitar: 'Rimuovi foto'
 });
 
 const NOMBRES_IDIOMA = { es: 'Español', en: 'English', de: 'Deutsch', fr: 'Français', it: 'Italiano' };
