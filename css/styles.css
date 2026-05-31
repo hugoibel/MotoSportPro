@@ -191,6 +191,101 @@ body.recording .stat.big .value { animation: pulse 1.6s ease-in-out infinite; }
   box-shadow: 0 6px 18px rgba(255, 59, 92, 0.35);
 }
 
+/* ===== Modo navegación a pantalla completa (estilo Apple Maps) ===== */
+/* Se activa con body.driving al pulsar Iniciar: oculta barras de la app,
+   el mapa ocupa todo y la telemetría flota encima en paneles glass. */
+.rec-pill { display: none; }
+
+body.driving .topbar,
+body.driving .tabbar,
+body.driving .rutas-fab { display: none !important; }
+
+body.driving #map { position: absolute; inset: 0; z-index: 0; }
+
+/* .telemetry deja de ocupar sitio: sus hijos flotan sobre el mapa */
+body.driving .telemetry {
+  display: contents;
+}
+
+/* Velocidad: círculo glass abajo-izquierda (como el velocímetro de Apple Maps) */
+body.driving .stat.big {
+  position: absolute;
+  left: 14px;
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  width: 118px; height: 118px;
+  margin: 0;
+  border-radius: 50%;
+  background: rgba(12, 16, 25, 0.6);
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 10;
+}
+body.driving .stat.big .value { font-size: 3rem; text-shadow: 0 0 16px rgba(255, 92, 42, 0.5); }
+body.driving .stat.big .unit { margin-top: 0; font-size: 0.66rem; }
+
+/* Datos (distancia/tiempo/máx/media): barra glass superior */
+body.driving .stats-grid {
+  position: absolute;
+  top: calc(12px + env(safe-area-inset-top));
+  left: 12px; right: 12px;
+  background: rgba(12, 16, 25, 0.6);
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  padding: 10px 6px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  z-index: 10;
+}
+body.driving .stats-grid .stat { background: transparent; border: none; padding: 4px 2px; }
+
+/* Botón Finalizar: pastilla roja flotante abajo-derecha */
+body.driving .controls {
+  position: absolute;
+  left: 148px; right: 14px;
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  padding: 0;
+  background: transparent;
+  z-index: 10;
+}
+body.driving #btn-start { display: none; }
+body.driving #btn-stop {
+  border-radius: 999px;
+  padding: 20px 16px;
+  box-shadow: 0 10px 30px rgba(255, 59, 92, 0.45);
+}
+
+/* Rótulo "Grabando" arriba del todo */
+body.driving .rec-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  position: absolute;
+  top: calc(76px + env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(12, 16, 25, 0.6);
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text);
+  z-index: 10;
+}
+body.driving .rec-pill .rec-dot {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: var(--danger);
+  box-shadow: 0 0 8px var(--danger);
+  animation: pulse-rec 1.4s ease-in-out infinite;
+}
+@keyframes pulse-rec { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+
 /* ===== Rutas ===== */
 #view-rutas { padding: 16px; overflow-y: auto; }
 #view-rutas h2 { margin-bottom: 14px; }

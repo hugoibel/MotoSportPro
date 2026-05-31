@@ -49,6 +49,19 @@ function liberarWakeLock() {
   if (wakeLock) { wakeLock.release().catch(() => {}); wakeLock = null; }
 }
 
+// --- Pantalla completa (modo navegación tipo Apple Maps) ---
+function entrarPantallaCompleta() {
+  const el = document.documentElement;
+  const req = el.requestFullscreen || el.webkitRequestFullscreen;
+  if (req) { try { req.call(el).catch(() => {}); } catch (e) { /* iOS Safari no lo permite */ } }
+}
+function salirPantallaCompleta() {
+  const sal = document.exitFullscreen || document.webkitExitFullscreen;
+  if (sal && (document.fullscreenElement || document.webkitFullscreenElement)) {
+    try { sal.call(document); } catch (e) { /* nada */ }
+  }
+}
+
 // --- Grabación ---
 function iniciarGrabacion() {
   if (!('geolocation' in navigator)) { alert(i18n.t('sin_gps')); return; }
@@ -62,6 +75,11 @@ function iniciarGrabacion() {
   $('btn-stop').disabled = false;
   cronometro = setInterval(actualizarTiempo, 1000);
   pedirWakeLock();
+
+  // Modo navegación a pantalla completa (estilo Apple Maps)
+  document.body.classList.add('driving');
+  entrarPantallaCompleta();
+  Mapa.invalidate();
 
   watchId = navigator.geolocation.watchPosition(onPosicion, onErrorGps, {
     enableHighAccuracy: true, maximumAge: 1000, timeout: 10000
@@ -113,6 +131,9 @@ function onErrorGps(err) {
 function pararGrabacion() {
   grabando = false;
   document.body.classList.remove('recording');
+  document.body.classList.remove('driving');
+  salirPantallaCompleta();
+  Mapa.invalidate();
   if (watchId != null) navigator.geolocation.clearWatch(watchId);
   clearInterval(cronometro);
   liberarWakeLock();
