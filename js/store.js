@@ -6,22 +6,23 @@
 // Catálogo inicial de ejemplo. Editable: añade tus propios productos.
 // 'img' = ilustración propia (sin marca). 'emoji' = respaldo si la imagen no carga.
 // 'amazonId' = ASIN del producto en Amazon. 'revzillaUrl' = enlace al producto.
+// 'img' = foto real del producto (con respaldo a la ilustración 'svg' y luego al emoji).
 const PRODUCTOS = [
-  { img: 'img/casco.svg', emoji: '🪖', nombre: 'Casco integral', cat: 'Protección',
+  { img: 'img/casco.jpg', svg: 'img/casco.svg', emoji: '🪖', nombre: 'Casco integral', cat: 'Protección',
     amazonId: '', revzillaUrl: 'https://www.revzilla.com/motorcycle-helmets' },
-  { img: 'img/chaqueta.svg', emoji: '🧥', nombre: 'Chaqueta con protecciones', cat: 'Protección',
+  { img: 'img/chaqueta.jpg', svg: 'img/chaqueta.svg', emoji: '🧥', nombre: 'Chaqueta con protecciones', cat: 'Protección',
     amazonId: '', revzillaUrl: 'https://www.revzilla.com/motorcycle-jackets' },
-  { img: 'img/guantes.svg', emoji: '🧤', nombre: 'Guantes de cuero', cat: 'Protección',
+  { img: 'img/guantes.jpg', svg: 'img/guantes.svg', emoji: '🧤', nombre: 'Guantes de cuero', cat: 'Protección',
     amazonId: '', revzillaUrl: 'https://www.revzilla.com/motorcycle-gloves' },
-  { img: 'img/botas.svg', emoji: '👢', nombre: 'Botas de moto', cat: 'Protección',
+  { img: 'img/botas.jpg', svg: 'img/botas.svg', emoji: '👢', nombre: 'Botas de moto', cat: 'Protección',
     amazonId: '', revzillaUrl: 'https://www.revzilla.com/motorcycle-boots' },
-  { img: 'img/aceite.svg', emoji: '🛢️', nombre: 'Aceite y filtro', cat: 'Mantenimiento',
+  { img: 'img/aceite.jpg', svg: 'img/aceite.svg', emoji: '🛢️', nombre: 'Aceite y filtro', cat: 'Mantenimiento',
     amazonId: '', revzillaUrl: 'https://www.revzilla.com/motorcycle-oil' },
-  { img: 'img/cadena.svg', emoji: '🔗', nombre: 'Kit de cadena', cat: 'Mantenimiento',
+  { img: 'img/cadena.jpg', svg: 'img/cadena.svg', emoji: '🔗', nombre: 'Kit de cadena', cat: 'Mantenimiento',
     amazonId: '', revzillaUrl: 'https://www.revzilla.com/motorcycle-chains' },
-  { img: 'img/soporte.svg', emoji: '📱', nombre: 'Soporte de móvil', cat: 'Accesorios',
+  { img: 'img/soporte.jpg', svg: 'img/soporte.svg', emoji: '📱', nombre: 'Soporte de móvil', cat: 'Accesorios',
     amazonId: '', revzillaUrl: 'https://www.revzilla.com/motorcycle-phone-mounts' },
-  { img: 'img/camara.svg', emoji: '🎥', nombre: 'Cámara de acción', cat: 'Accesorios',
+  { img: 'img/camara.jpg', svg: 'img/camara.svg', emoji: '🎥', nombre: 'Cámara de acción', cat: 'Accesorios',
     amazonId: '', revzillaUrl: 'https://www.revzilla.com/motorcycle-cameras' }
 ];
 
@@ -89,7 +90,7 @@ const Store = {
       card.innerHTML = `
         <div class="shop-imgwrap">
           <img class="shop-img" src="${src}" alt="${p.nombre}" loading="lazy"
-               onerror="this.outerHTML='<div class=\\'shop-emoji\\'>${p.emoji}</div>'">
+               onerror="if(!this.dataset.f){this.dataset.f=1;this.src='${p.svg}'}else{this.outerHTML='<div class=\\'shop-emoji\\'>${p.emoji}</div>'}">
           <button class="shop-foto-btn" data-foto="${i}" title="${i18n.t('foto_cambiar')}">📷</button>
           ${foto ? `<button class="shop-foto-del" data-fotodel="${p.nombre}" title="${i18n.t('foto_quitar')}">✕</button>` : ''}
           <input type="file" accept="image/*" hidden id="tienda-file-${i}">
