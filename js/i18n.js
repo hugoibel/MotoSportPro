@@ -4,7 +4,7 @@
 
 const I18N = {
   es: {
-    tab_grabar: '🏍️ Conducir', tab_rutas: '🗺️ Rutas', tab_tienda: '🛒 Tienda', tab_premium: '👑 Premium',
+    tab_grabar: 'Conducir', tab_rutas: 'Rutas', tab_tienda: 'Tienda', tab_premium: 'Premium',
     vel: 'km/h', dist: 'km', tiempo: 'tiempo', max: 'máx km/h', media: 'media km/h',
     iniciar: '▶ Iniciar', parar: '■ Parar y guardar',
     mis_rutas: 'Mis rutas', rutas_vacio: 'Aún no has grabado ninguna ruta.',
@@ -26,7 +26,7 @@ const I18N = {
     borrar_ruta: '¿Borrar esta ruta?'
   },
   en: {
-    tab_grabar: '🏍️ Ride', tab_rutas: '🗺️ Routes', tab_tienda: '🛒 Shop', tab_premium: '👑 Premium',
+    tab_grabar: 'Ride', tab_rutas: 'Routes', tab_tienda: 'Shop', tab_premium: 'Premium',
     vel: 'km/h', dist: 'km', tiempo: 'time', max: 'max km/h', media: 'avg km/h',
     iniciar: '▶ Start', parar: '■ Stop & save',
     mis_rutas: 'My routes', rutas_vacio: 'You haven\'t recorded any route yet.',
@@ -48,7 +48,7 @@ const I18N = {
     borrar_ruta: 'Delete this route?'
   },
   de: {
-    tab_grabar: '🏍️ Fahren', tab_rutas: '🗺️ Routen', tab_tienda: '🛒 Shop', tab_premium: '👑 Premium',
+    tab_grabar: 'Fahren', tab_rutas: 'Routen', tab_tienda: 'Shop', tab_premium: 'Premium',
     vel: 'km/h', dist: 'km', tiempo: 'Zeit', max: 'max km/h', media: 'Ø km/h',
     iniciar: '▶ Start', parar: '■ Stopp & speichern',
     mis_rutas: 'Meine Routen', rutas_vacio: 'Du hast noch keine Route aufgezeichnet.',
@@ -70,7 +70,7 @@ const I18N = {
     borrar_ruta: 'Diese Route löschen?'
   },
   fr: {
-    tab_grabar: '🏍️ Rouler', tab_rutas: '🗺️ Trajets', tab_tienda: '🛒 Boutique', tab_premium: '👑 Premium',
+    tab_grabar: 'Rouler', tab_rutas: 'Trajets', tab_tienda: 'Boutique', tab_premium: 'Premium',
     vel: 'km/h', dist: 'km', tiempo: 'temps', max: 'max km/h', media: 'moy km/h',
     iniciar: '▶ Démarrer', parar: '■ Arrêter et enregistrer',
     mis_rutas: 'Mes trajets', rutas_vacio: 'Vous n\'avez encore enregistré aucun trajet.',
@@ -92,7 +92,7 @@ const I18N = {
     borrar_ruta: 'Supprimer ce trajet ?'
   },
   it: {
-    tab_grabar: '🏍️ Guida', tab_rutas: '🗺️ Percorsi', tab_tienda: '🛒 Negozio', tab_premium: '👑 Premium',
+    tab_grabar: 'Guida', tab_rutas: 'Percorsi', tab_tienda: 'Negozio', tab_premium: 'Premium',
     vel: 'km/h', dist: 'km', tiempo: 'tempo', max: 'max km/h', media: 'media km/h',
     iniciar: '▶ Avvia', parar: '■ Ferma e salva',
     mis_rutas: 'I miei percorsi', rutas_vacio: 'Non hai ancora registrato nessun percorso.',

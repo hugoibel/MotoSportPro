@@ -39,6 +39,7 @@ function iniciarGrabacion() {
   grabando = true;
   distancia = 0; velMax = 0; ultimaPos = null; nPuntos = 0; puntosSesion = [];
   tiempoInicio = Date.now();
+  document.body.classList.add('recording');
   Mapa.reset();
 
   $('btn-start').disabled = true;
@@ -84,6 +85,7 @@ function onErrorGps(err) {
 
 function pararGrabacion() {
   grabando = false;
+  document.body.classList.remove('recording');
   if (watchId != null) navigator.geolocation.clearWatch(watchId);
   clearInterval(cronometro);
   setGps('·', '');

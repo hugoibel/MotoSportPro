@@ -7,6 +7,9 @@
   <title>MotoSportPro</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
@@ -78,10 +81,33 @@
   </main>
 
   <nav class="tabbar">
-    <button class="tab active" data-view="grabar" data-i18n="tab_grabar">🏍️ Conducir</button>
-    <button class="tab" data-view="rutas" data-i18n="tab_rutas">🗺️ Rutas</button>
-    <button class="tab" data-view="tienda" data-i18n="tab_tienda">🛒 Tienda</button>
-    <button class="tab" data-view="premium" data-i18n="tab_premium">👑 Premium</button>
+    <button class="tab active" data-view="grabar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
+        <path d="M4 13a8 8 0 0 1 16 0v3.5a1.5 1.5 0 0 1-1.5 1.5H13l-2-3H7a3 3 0 0 1-3-3z"/>
+        <path d="M11 18l2-3h6"/>
+      </svg>
+      <span data-i18n="tab_grabar">Conducir</span>
+    </button>
+    <button class="tab" data-view="rutas">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
+        <path d="M9 3 3.5 5.5v15L9 18l6 3 5.5-2.5v-15L15 6 9 3z"/>
+        <path d="M9 3v15M15 6v15"/>
+      </svg>
+      <span data-i18n="tab_rutas">Rutas</span>
+    </button>
+    <button class="tab" data-view="tienda">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
+        <path d="M6 8h12l-1 12H7L6 8z"/>
+        <path d="M9 8a3 3 0 0 1 6 0"/>
+      </svg>
+      <span data-i18n="tab_tienda">Tienda</span>
+    </button>
+    <button class="tab" data-view="premium">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
+        <path d="M4 8l3.5 9h9L20 8l-5 3.5L12 5 9 11.5 4 8z"/>
+      </svg>
+      <span data-i18n="tab_premium">Premium</span>
+    </button>
   </nav>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
