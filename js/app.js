@@ -33,6 +33,22 @@ const setGps = (txt, cls) => {
 // guardamos los puntos de la sesión para almacenarlos al parar
 let puntosSesion = [];
 
+// --- Wake Lock: mantener la pantalla encendida mientras se graba ---
+// Sin esto, al apagarse la pantalla el navegador suspende la app y la ruta
+// deja de grabarse. Clave para uso real en moto (móvil en el soporte/bolsillo).
+let wakeLock = null;
+async function pedirWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => { wakeLock = null; });
+    }
+  } catch (e) { /* no soportado o denegado: la grabación sigue igualmente */ }
+}
+function liberarWakeLock() {
+  if (wakeLock) { wakeLock.release().catch(() => {}); wakeLock = null; }
+}
+
 // --- Grabación ---
 function iniciarGrabacion() {
   if (!('geolocation' in navigator)) { alert(i18n.t('sin_gps')); return; }
@@ -45,6 +61,7 @@ function iniciarGrabacion() {
   $('btn-start').disabled = true;
   $('btn-stop').disabled = false;
   cronometro = setInterval(actualizarTiempo, 1000);
+  pedirWakeLock();
 
   watchId = navigator.geolocation.watchPosition(onPosicion, onErrorGps, {
     enableHighAccuracy: true, maximumAge: 1000, timeout: 10000
@@ -98,6 +115,7 @@ function pararGrabacion() {
   document.body.classList.remove('recording');
   if (watchId != null) navigator.geolocation.clearWatch(watchId);
   clearInterval(cronometro);
+  liberarWakeLock();
   setGps('·', '');
   $('btn-start').disabled = false;
   $('btn-stop').disabled = true;
@@ -251,4 +269,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW:', e));
   }
+
+  // Si volvemos a la app y seguimos grabando, re-activar la pantalla encendida.
+  document.addEventListener('visibilitychange', () => {
+    if (grabando && wakeLock === null && document.visibilityState === 'visible') pedirWakeLock();
+  });
 });
