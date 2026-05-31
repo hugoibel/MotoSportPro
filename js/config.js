@@ -36,7 +36,7 @@ const CONFIG = {
   // Regístrate en https://www.eia.gov/opendata/register.php y pega aquí la clave.
   // Con clave, el botón "Precio en vivo" trae el precio medio semanal de Florida.
   // Vacío = el precio se edita a mano.
-  EIA_API_KEY: '',
+  EIA_API_KEY: 'DuYlvbCcRslJGXhtH2SXlScZiecTQeftuRITh0bI',
 
   // --- UNIDADES ---
   SISTEMA_UNIDADES: 'imperial',        // 'imperial' (mi, mph, gal, MPG) | 'metric' (km, km/h, L)
