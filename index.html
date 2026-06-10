@@ -84,6 +84,7 @@
     <section id="view-rutas" class="view scroll">
       <button class="btn-back" data-view="grabar" data-i18n="volver">← Volver</button>
       <h2 data-i18n="mis_rutas">Mis rutas</h2>
+      <div id="rutas-resumen" class="rutas-resumen" style="display:none"></div>
       <ul id="lista-rutas" class="route-list"></ul>
       <p id="rutas-vacio" class="empty" data-i18n="rutas_vacio">Aún no has grabado ninguna ruta.</p>
     </section>
@@ -175,10 +176,27 @@
     </button>
   </nav>
 
+  <!-- Detalle de ruta: mapa con el recorrido + exportar GPX -->
+  <div id="ruta-modal" class="modal" style="display:none">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="rm-titulo"></h3>
+        <button id="rm-cerrar" class="modal-x" aria-label="Cerrar">✕</button>
+      </div>
+      <div id="rm-map"></div>
+      <div id="rm-stats" class="rm-stats"></div>
+      <div class="rm-btns">
+        <button id="rm-gpx" class="btn primary" data-i18n="rm_gpx">⬇ Exportar GPX</button>
+        <button id="rm-borrar" class="btn danger" data-i18n="rm_borrar">🗑 Borrar</button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="js/config.js"></script>
   <script src="js/units.js"></script>
   <script src="js/i18n.js"></script>
+  <script src="js/ui.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/map.js"></script>
   <script src="js/nav.js"></script>

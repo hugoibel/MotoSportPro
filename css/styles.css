@@ -742,3 +742,169 @@ body.driving .nav-info { display: none !important; }
   background: var(--accent);
   box-shadow: 0 0 8px var(--accent);
 }
+
+/* ============================================================
+   ACABADO PREMIUM (v0.15)
+   ============================================================ */
+
+/* Transición suave al cambiar de pestaña */
+.view.active { animation: viewIn 0.22s ease; }
+@keyframes viewIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Scrollbar fino y discreto */
+.view.scroll::-webkit-scrollbar { width: 4px; }
+.view.scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.14); border-radius: 4px; }
+.view.scroll::-webkit-scrollbar-track { background: transparent; }
+
+/* Tarjetas de ruta: pulsables, con flecha y efecto al tocar */
+.route-card { cursor: pointer; position: relative; transition: transform 0.1s, border-color 0.2s; }
+.route-card:active { transform: scale(0.985); }
+.route-card::after {
+  content: "›";
+  position: absolute;
+  right: 14px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.5rem;
+  color: var(--muted);
+}
+
+/* Resumen de totales en Rutas */
+.rutas-resumen {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.rutas-resumen > div {
+  background: linear-gradient(180deg, var(--surface-2), #171d2a);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 10px 4px;
+  text-align: center;
+  display: flex; flex-direction: column;
+}
+.rutas-resumen b {
+  font-family: var(--font-sport);
+  font-size: 1.25rem;
+  font-variant-numeric: tabular-nums;
+}
+.rutas-resumen span {
+  font-size: 0.6rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Avisos flotantes (toasts) */
+.toasts {
+  position: fixed;
+  left: 14px; right: 14px;
+  bottom: calc(86px + env(safe-area-inset-bottom));
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  z-index: 1000;
+  pointer-events: none;
+}
+.toast {
+  max-width: 480px;
+  background: rgba(20, 26, 38, 0.92);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
+  padding: 12px 18px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.3s, transform 0.3s;
+}
+.toast.in { opacity: 1; transform: none; }
+.toast.ok  { border-color: rgba(42, 209, 122, 0.5); box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 14px rgba(42, 209, 122, 0.18); }
+.toast.err { border-color: rgba(255, 59, 92, 0.55); box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 14px rgba(255, 59, 92, 0.2); }
+
+/* Diálogo de confirmación propio */
+.confirm-overlay {
+  position: fixed; inset: 0;
+  background: rgba(5, 7, 11, 0.65);
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  z-index: 1100;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.confirm-overlay.in { opacity: 1; }
+.confirm-card {
+  width: 100%; max-width: 340px;
+  background: linear-gradient(180deg, var(--surface), #11151f);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius);
+  padding: 22px 18px 16px;
+  box-shadow: var(--shadow);
+  transform: scale(0.94);
+  transition: transform 0.2s;
+}
+.confirm-overlay.in .confirm-card { transform: none; }
+.confirm-card p { font-size: 1rem; font-weight: 600; text-align: center; margin-bottom: 18px; }
+.confirm-btns { display: flex; gap: 10px; }
+.confirm-btns .btn { padding: 13px; }
+
+/* Modal de detalle de ruta */
+.modal {
+  position: fixed; inset: 0;
+  background: rgba(5, 7, 11, 0.7);
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+  z-index: 900;
+  opacity: 0;
+  transition: opacity 0.22s;
+}
+.modal.in { opacity: 1; }
+.modal-card {
+  width: 100%; max-width: 520px;
+  max-height: calc(100dvh - 40px);
+  display: flex; flex-direction: column;
+  background: linear-gradient(180deg, var(--surface), #11151f);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transform: translateY(14px) scale(0.97);
+  transition: transform 0.22s;
+}
+.modal.in .modal-card { transform: none; }
+.modal-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px;
+}
+.modal-head h3 { font-family: var(--font-sport); font-size: 1.05rem; letter-spacing: 0.5px; }
+.modal-x {
+  background: var(--surface-2);
+  border: none; border-radius: 50%;
+  width: 34px; height: 34px;
+  color: var(--text);
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+#rm-map { height: 42vh; min-height: 220px; background: #0c1019; }
+.rm-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding: 12px 14px 0;
+}
+.rm-stats > div {
+  background: var(--surface-2);
+  border-radius: 12px;
+  padding: 9px 4px;
+  text-align: center;
+  display: flex; flex-direction: column;
+}
+.rm-stats b { font-family: var(--font-sport); font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+.rm-stats span { font-size: 0.58rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.rm-btns { display: flex; gap: 10px; padding: 12px 14px 14px; }
+.rm-btns .btn { padding: 14px; font-size: 0.88rem; }

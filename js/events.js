@@ -28,9 +28,11 @@ const Eventos = {
   },
 
   borrar(id) {
-    if (!confirm(i18n.t('ev_borrar'))) return;
-    this._guardar(this.listar().filter(e => e.id !== id));
-    this.render();
+    UI.confirmar(i18n.t('ev_borrar')).then(ok => {
+      if (!ok) return;
+      this._guardar(this.listar().filter(e => e.id !== id));
+      this.render();
+    });
   },
 
   compartir(id) {

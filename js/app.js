@@ -64,7 +64,8 @@ function salirPantallaCompleta() {
 
 // --- Grabación ---
 function iniciarGrabacion() {
-  if (!('geolocation' in navigator)) { alert(i18n.t('sin_gps')); return; }
+  if (!('geolocation' in navigator)) { UI.toast(i18n.t('sin_gps'), 'err'); return; }
+  UI.vibrar(30);
   grabando = true;
   distancia = 0; velMax = 0; ultimaPos = null; nPuntos = 0; puntosSesion = [];
   tiempoInicio = Date.now();
@@ -131,10 +132,11 @@ function actualizarEtiquetas() {
 
 function onErrorGps(err) {
   setGps('✕', 'err');
-  if (err.code === 1) alert(i18n.t('permiso_gps'));
+  if (err.code === 1) UI.toast(i18n.t('permiso_gps'), 'err');
 }
 
 function pararGrabacion() {
+  UI.vibrar([30, 50, 30]);
   grabando = false;
   document.body.classList.remove('recording');
   document.body.classList.remove('driving');
@@ -152,7 +154,7 @@ function pararGrabacion() {
   const km = distancia / 1000;
   const media = duracionSeg > 0 ? km / (duracionSeg / 3600) : 0;
 
-  if (nPuntos < 2) { alert(i18n.t('corta')); resetTelemetria(); return; }
+  if (nPuntos < 2) { UI.toast(i18n.t('corta'), 'err'); resetTelemetria(); return; }
 
   Storage.guardarRuta({
     id: Date.now().toString(),
@@ -163,7 +165,7 @@ function pararGrabacion() {
     velMedia: Math.round(media),
     puntos: puntosSesion
   });
-  alert(`${i18n.t('guardada')}: ${Units.distToUser(km).toFixed(2)} ${Units.distLabel()} · ${fmtTiempo(duracionSeg)}`);
+  UI.toast(`✅ ${i18n.t('guardada')}: ${Units.distToUser(km).toFixed(2)} ${Units.distLabel()} · ${fmtTiempo(duracionSeg)}`, 'ok');
   resetTelemetria();
 }
 
@@ -182,6 +184,7 @@ function renderRutas() {
   const rutas = Storage.listarRutas();
   lista.innerHTML = '';
   vacio.style.display = rutas.length ? 'none' : 'block';
+  renderResumenRutas(rutas);
   rutas.forEach(r => {
     const fecha = new Date(r.fecha).toLocaleString(i18n.lang, {
       day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
@@ -197,13 +200,100 @@ function renderRutas() {
         <span><b>${Math.round(Units.speedToUser(r.velMax))}</b> ${i18n.t('max')} ${Units.speedLabel()}</span>
         <span><b>${Math.round(Units.speedToUser(r.velMedia))}</b> ${i18n.t('media')} ${Units.speedLabel()}</span>
       </div>`;
+    // Tocar la tarjeta abre la ruta en el mapa
+    li.addEventListener('click', () => abrirRutaDetalle(r));
     lista.appendChild(li);
   });
   lista.querySelectorAll('.r-del').forEach(btn => {
-    btn.addEventListener('click', () => {
-      if (confirm(i18n.t('borrar_ruta'))) { Storage.borrarRuta(btn.dataset.id); renderRutas(); }
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      UI.confirmar(i18n.t('borrar_ruta')).then(ok => {
+        if (ok) { Storage.borrarRuta(btn.dataset.id); renderRutas(); }
+      });
     });
   });
+}
+
+// Resumen de totales encima de la lista (salidas, distancia, tiempo, vel. máx)
+function renderResumenRutas(rutas) {
+  const el = $('rutas-resumen');
+  if (!el) return;
+  if (!rutas.length) { el.style.display = 'none'; return; }
+  const totKm = rutas.reduce((s, r) => s + (r.distanciaKm || 0), 0);
+  const totSeg = rutas.reduce((s, r) => s + (r.duracionSeg || 0), 0);
+  const vmax = Math.max(...rutas.map(r => r.velMax || 0));
+  el.style.display = 'grid';
+  el.innerHTML = `
+    <div><b>${rutas.length}</b><span>${i18n.t('tot_salidas')}</span></div>
+    <div><b>${Units.distToUser(totKm).toFixed(0)}</b><span>${Units.distLabel()}</span></div>
+    <div><b>${fmtTiempo(totSeg)}</b><span>${i18n.t('tiempo')}</span></div>
+    <div><b>${Math.round(Units.speedToUser(vmax))}</b><span>${i18n.t('max')} ${Units.speedLabel()}</span></div>`;
+}
+
+// --- Detalle de ruta: mapa con el recorrido + exportar GPX ---
+let rmMap = null, rmLine = null, rmIni = null, rmFin = null, rutaAbierta = null;
+
+function abrirRutaDetalle(r) {
+  rutaAbierta = r;
+  const m = $('ruta-modal');
+  m.style.display = 'flex';
+  requestAnimationFrame(() => m.classList.add('in'));
+  $('rm-titulo').textContent = new Date(r.fecha).toLocaleString(i18n.lang, {
+    day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+  });
+  $('rm-stats').innerHTML = `
+    <div><b>${Units.distToUser(r.distanciaKm).toFixed(2)}</b><span>${Units.distLabel()}</span></div>
+    <div><b>${fmtTiempo(r.duracionSeg)}</b><span>${i18n.t('tiempo')}</span></div>
+    <div><b>${Math.round(Units.speedToUser(r.velMax))}</b><span>${i18n.t('max')} ${Units.speedLabel()}</span></div>
+    <div><b>${Math.round(Units.speedToUser(r.velMedia))}</b><span>${i18n.t('media')} ${Units.speedLabel()}</span></div>`;
+
+  // El mapa del detalle siempre usa Leaflet (ya está cargado en la app)
+  if (!rmMap) {
+    rmMap = L.map('rm-map', { zoomControl: false, attributionControl: false });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(rmMap);
+  }
+  [rmLine, rmIni, rmFin].forEach(c => { if (c) rmMap.removeLayer(c); });
+  rmLine = rmIni = rmFin = null;
+  const pts = r.puntos || [];
+  if (pts.length) {
+    rmLine = L.polyline(pts, { color: '#ff5c2a', weight: 5, lineCap: 'round', lineJoin: 'round' }).addTo(rmMap);
+    rmIni = L.circleMarker(pts[0], { radius: 7, color: '#fff', weight: 2, fillColor: '#2ad17a', fillOpacity: 1 }).addTo(rmMap);
+    rmFin = L.circleMarker(pts[pts.length - 1], { radius: 7, color: '#fff', weight: 2, fillColor: '#ff3b5c', fillOpacity: 1 }).addTo(rmMap);
+  }
+  setTimeout(() => {
+    rmMap.invalidateSize();
+    if (rmLine) { try { rmMap.fitBounds(rmLine.getBounds(), { padding: [30, 30] }); } catch (e) {} }
+  }, 150);
+}
+
+function cerrarRutaDetalle() {
+  const m = $('ruta-modal');
+  m.classList.remove('in');
+  setTimeout(() => { m.style.display = 'none'; }, 220);
+  rutaAbierta = null;
+}
+
+// Genera un archivo GPX (estándar que entienden Google Maps, Garmin, Calimoto…)
+function exportarGPX(r) {
+  if (!r || !(r.puntos || []).length) { UI.toast(i18n.t('gpx_vacio'), 'err'); return; }
+  const fecha = new Date(r.fecha).toISOString().slice(0, 16).replace('T', ' ');
+  const pts = r.puntos.map(p => `      <trkpt lat="${p[0]}" lon="${p[1]}"></trkpt>`).join('\n');
+  const gpx = `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="MotoSportPro" xmlns="http://www.topografix.com/GPX/1/1">
+  <trk>
+    <name>MotoSportPro ${fecha}</name>
+    <trkseg>
+${pts}
+    </trkseg>
+  </trk>
+</gpx>`;
+  const blob = new Blob([gpx], { type: 'application/gpx+xml' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `motosportpro-${new Date(r.fecha).toISOString().slice(0, 10)}.gpx`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  UI.toast(i18n.t('gpx_ok'), 'ok');
 }
 
 // --- Navegación entre vistas ---
@@ -245,6 +335,17 @@ window.addEventListener('DOMContentLoaded', async () => {
   // Navegación: buscador de destino + "Comenzar navegación" (arranca la grabación)
   Nav.init();
   $('nav-start').addEventListener('click', () => iniciarGrabacion());
+
+  // Detalle de ruta (mapa + GPX + borrar)
+  $('rm-cerrar').addEventListener('click', cerrarRutaDetalle);
+  $('rm-gpx').addEventListener('click', () => exportarGPX(rutaAbierta));
+  $('rm-borrar').addEventListener('click', () => {
+    if (!rutaAbierta) return;
+    UI.confirmar(i18n.t('borrar_ruta')).then(ok => {
+      if (ok) { Storage.borrarRuta(rutaAbierta.id); cerrarRutaDetalle(); renderRutas(); }
+    });
+  });
+  $('ruta-modal').addEventListener('click', e => { if (e.target === $('ruta-modal')) cerrarRutaDetalle(); });
 
   // Copia de seguridad de fotos (exportar / importar)
   $('btn-export').addEventListener('click', () => Backup.exportar());

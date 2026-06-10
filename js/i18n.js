@@ -277,6 +277,38 @@ Object.assign(I18N.it, {
   backup_vacio: 'Non hai ancora caricato nessuna foto.'
 });
 
+// --- UI premium: confirmaciones, resumen de rutas y GPX ---
+Object.assign(I18N.es, {
+  si: 'Sí, borrar', no: 'Cancelar',
+  tot_salidas: 'salidas',
+  rm_gpx: '⬇ Exportar GPX', rm_borrar: '🗑 Borrar',
+  gpx_ok: '✅ Ruta exportada a GPX', gpx_vacio: 'Esta ruta no tiene puntos para exportar.'
+});
+Object.assign(I18N.en, {
+  si: 'Yes, delete', no: 'Cancel',
+  tot_salidas: 'rides',
+  rm_gpx: '⬇ Export GPX', rm_borrar: '🗑 Delete',
+  gpx_ok: '✅ Route exported to GPX', gpx_vacio: 'This route has no points to export.'
+});
+Object.assign(I18N.de, {
+  si: 'Ja, löschen', no: 'Abbrechen',
+  tot_salidas: 'Fahrten',
+  rm_gpx: '⬇ GPX exportieren', rm_borrar: '🗑 Löschen',
+  gpx_ok: '✅ Route als GPX exportiert', gpx_vacio: 'Diese Route hat keine Punkte zum Exportieren.'
+});
+Object.assign(I18N.fr, {
+  si: 'Oui, supprimer', no: 'Annuler',
+  tot_salidas: 'sorties',
+  rm_gpx: '⬇ Exporter en GPX', rm_borrar: '🗑 Supprimer',
+  gpx_ok: '✅ Trajet exporté en GPX', gpx_vacio: 'Ce trajet n\'a aucun point à exporter.'
+});
+Object.assign(I18N.it, {
+  si: 'Sì, elimina', no: 'Annulla',
+  tot_salidas: 'uscite',
+  rm_gpx: '⬇ Esporta GPX', rm_borrar: '🗑 Elimina',
+  gpx_ok: '✅ Percorso esportato in GPX', gpx_vacio: 'Questo percorso non ha punti da esportare.'
+});
+
 // --- Guía giro a giro (instrucciones de navegación por voz) ---
 Object.assign(I18N.es, {
   g_en: 'En {d}, {inst}',
