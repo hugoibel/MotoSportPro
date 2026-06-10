@@ -76,6 +76,7 @@ function iniciarGrabacion() {
   $('btn-stop').disabled = false;
   cronometro = setInterval(actualizarTiempo, 1000);
   pedirWakeLock();
+  if (typeof SOS !== 'undefined') SOS.armar();   // vigilar caídas (acelerómetro)
 
   // Modo navegación a pantalla completa (estilo Apple Maps)
   document.body.classList.add('driving');
@@ -146,6 +147,7 @@ function pararGrabacion() {
   if (watchId != null) navigator.geolocation.clearWatch(watchId);
   clearInterval(cronometro);
   liberarWakeLock();
+  if (typeof SOS !== 'undefined') SOS.desarmar();
   setGps('·', '');
   $('btn-start').disabled = false;
   $('btn-stop').disabled = true;
@@ -335,6 +337,23 @@ window.addEventListener('DOMContentLoaded', async () => {
   // Navegación: buscador de destino + "Comenzar navegación" (arranca la grabación)
   Nav.init();
   $('nav-start').addEventListener('click', () => iniciarGrabacion());
+
+  // Ajustes (SOS + mapas sin conexión)
+  SOS.init();
+  Offline.init();
+  $('btn-ajustes').addEventListener('click', () => {
+    const m = $('ajustes-modal');
+    m.style.display = 'flex';
+    requestAnimationFrame(() => m.classList.add('in'));
+    Offline.refrescarEstado();
+  });
+  const cerrarAjustes = () => {
+    const m = $('ajustes-modal');
+    m.classList.remove('in');
+    setTimeout(() => { m.style.display = 'none'; }, 220);
+  };
+  $('aj-cerrar').addEventListener('click', cerrarAjustes);
+  $('ajustes-modal').addEventListener('click', e => { if (e.target === $('ajustes-modal')) cerrarAjustes(); });
 
   // Detalle de ruta (mapa + GPX + borrar)
   $('rm-cerrar').addEventListener('click', cerrarRutaDetalle);

@@ -20,6 +20,12 @@
       <button id="btn-premium-top" class="crown-btn" title="Premium" data-view="premium">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 8l3.5 9h9L20 8l-5 3.5L12 5 9 11.5 4 8z"/></svg>
       </button>
+      <button id="btn-ajustes" class="unit-btn" title="Ajustes" data-i18n-title="ajustes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:18px;height:18px;vertical-align:middle">
+          <circle cx="12" cy="12" r="3.2"/>
+          <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.01a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.01a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/>
+        </svg>
+      </button>
       <button id="btn-unidades" class="unit-btn" title="millas / km">MI</button>
       <select id="selector-idioma" class="lang-select" aria-label="Idioma"></select>
       <span id="gps-status" class="gps-badge" title="GPS">GPS ·</span>
@@ -176,6 +182,56 @@
     </button>
   </nav>
 
+  <!-- Ajustes: SOS + mapas sin conexión -->
+  <div id="ajustes-modal" class="modal" style="display:none">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 data-i18n="ajustes">Ajustes</h3>
+        <button id="aj-cerrar" class="modal-x" aria-label="Cerrar">✕</button>
+      </div>
+      <div class="aj-body">
+        <div class="aj-sec">
+          <h4>🛡️ <span data-i18n="sos_titulo">Detección de caídas y SOS</span></h4>
+          <label class="aj-toggle">
+            <input type="checkbox" id="sos-on">
+            <span data-i18n="sos_activar">Detectar caídas mientras conduzco</span>
+          </label>
+          <input id="sos-tel" type="tel" inputmode="tel" class="aj-input" placeholder="+1 555 123 4567">
+          <p class="aj-nota" data-i18n="sos_nota">Si detecta un golpe fuerte y no respondes, prepara un SOS con tu ubicación.</p>
+          <button id="sos-test" class="btn" data-i18n="sos_probar">Probar la alarma</button>
+        </div>
+        <div class="aj-sec">
+          <h4>🗺️ <span data-i18n="mapa_off_titulo">Mapas sin conexión</span></h4>
+          <p class="aj-nota" data-i18n="mapa_off_nota">Las zonas que veas se guardan solas. Descarga tu zona para tenerla siempre.</p>
+          <p id="off-estado" class="aj-nota"></p>
+          <button id="off-desc" class="btn primary" data-i18n="mapa_off_desc">⬇ Descargar mi zona</button>
+          <button id="off-borrar" class="btn" data-i18n="mapa_off_borrar">Borrar mapas guardados</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alarma de caída / pantalla SOS -->
+  <div id="sos-overlay" class="sos-overlay" style="display:none">
+    <div id="sos-pregunta-bloque" class="sos-bloque">
+      <div class="sos-icon">🆘</div>
+      <h2 data-i18n="sos_pregunta">¿Estás bien?</h2>
+      <div id="sos-cuenta" class="sos-cuenta">30</div>
+      <p id="sos-sub" class="sos-sub"></p>
+      <button id="sos-bien" class="btn sos-bien" data-i18n="sos_bien">ESTOY BIEN ✓</button>
+      <button id="sos-ya" class="btn danger" data-i18n="sos_ahora">SOS AHORA</button>
+    </div>
+    <div id="sos-acciones" class="sos-bloque" style="display:none">
+      <div class="sos-icon">🆘</div>
+      <h2>SOS</h2>
+      <p id="sos-ubic" class="sos-sub"></p>
+      <a id="sos-sms" class="btn danger sos-link">💬 SMS</a>
+      <a id="sos-tel-btn" class="btn sos-link">📞</a>
+      <a href="tel:911" class="btn sos-link">🚨 911</a>
+      <button id="sos-cerrar" class="btn sos-bien" data-i18n="sos_bien">ESTOY BIEN ✓</button>
+    </div>
+  </div>
+
   <!-- Detalle de ruta: mapa con el recorrido + exportar GPX -->
   <div id="ruta-modal" class="modal" style="display:none">
     <div class="modal-card">
@@ -197,6 +253,8 @@
   <script src="js/units.js"></script>
   <script src="js/i18n.js"></script>
   <script src="js/ui.js"></script>
+  <script src="js/sos.js"></script>
+  <script src="js/offline.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/map.js"></script>
   <script src="js/nav.js"></script>

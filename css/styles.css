@@ -908,3 +908,84 @@ body.driving .nav-info { display: none !important; }
 .rm-stats span { font-size: 0.58rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
 .rm-btns { display: flex; gap: 10px; padding: 12px 14px 14px; }
 .rm-btns .btn { padding: 14px; font-size: 0.88rem; }
+
+/* ============================================================
+   AJUSTES + SOS + MAPAS OFFLINE (v0.16)
+   ============================================================ */
+
+/* Cuerpo del modal de Ajustes */
+.aj-body { overflow-y: auto; padding: 0 14px 14px; display: flex; flex-direction: column; gap: 14px; }
+.aj-sec {
+  background: var(--surface-2);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.aj-sec h4 { font-family: var(--font-sport); font-size: 1rem; letter-spacing: 0.4px; }
+.aj-nota { font-size: 0.8rem; color: var(--muted); line-height: 1.35; }
+.aj-input {
+  background: var(--surface-3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 1rem;
+  padding: 11px 12px;
+  width: 100%;
+}
+.aj-input:focus { outline: none; border-color: var(--accent); }
+.aj-sec .btn { padding: 12px; font-size: 0.85rem; }
+
+/* Interruptor (toggle) */
+.aj-toggle { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+.aj-toggle input {
+  appearance: none; -webkit-appearance: none;
+  width: 46px; height: 26px; border-radius: 999px;
+  background: var(--surface-3);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  position: relative; flex: none; cursor: pointer;
+  transition: background 0.2s;
+}
+.aj-toggle input::after {
+  content: "";
+  position: absolute; top: 2px; left: 3px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: #fff;
+  transition: left 0.2s;
+}
+.aj-toggle input:checked { background: var(--accent-2); border-color: var(--accent-2); }
+.aj-toggle input:checked::after { left: 21px; }
+
+/* Pantalla de alarma de caída / SOS */
+.sos-overlay {
+  position: fixed; inset: 0;
+  z-index: 1300;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(circle at 50% 30%, rgba(120, 8, 25, 0.96), rgba(40, 3, 10, 0.98));
+  animation: sosPulse 1s ease-in-out infinite;
+  padding: 24px;
+}
+@keyframes sosPulse {
+  0%, 100% { background-color: rgba(120, 8, 25, 0.96); }
+  50% { background-color: rgba(190, 16, 40, 0.96); }
+}
+.sos-bloque {
+  width: 100%; max-width: 360px;
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  text-align: center;
+}
+.sos-icon { font-size: 3.2rem; }
+.sos-bloque h2 { font-family: var(--font-sport); font-size: 2rem; letter-spacing: 1px; color: #fff; }
+.sos-cuenta {
+  font-family: var(--font-sport);
+  font-size: 4.5rem; font-weight: 700; line-height: 1;
+  color: #fff; text-shadow: 0 0 24px rgba(255, 255, 255, 0.5);
+  font-variant-numeric: tabular-nums;
+}
+.sos-sub { color: rgba(255, 255, 255, 0.85); font-size: 0.95rem; }
+.sos-bloque .btn { width: 100%; padding: 18px; font-size: 1.05rem; }
+.sos-bien {
+  background: linear-gradient(135deg, #1da75f, #2ad17a);
+  box-shadow: 0 8px 24px rgba(42, 209, 122, 0.45);
+}
+.sos-link { text-decoration: none; display: flex; align-items: center; justify-content: center; }

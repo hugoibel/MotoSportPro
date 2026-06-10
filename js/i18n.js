@@ -309,6 +309,88 @@ Object.assign(I18N.it, {
   gpx_ok: '✅ Percorso esportato in GPX', gpx_vacio: 'Questo percorso non ha punti da esportare.'
 });
 
+// --- Detección de caídas + SOS y mapas sin conexión ---
+Object.assign(I18N.es, {
+  sos_titulo: 'Detección de caídas y SOS', sos_activar: 'Detectar caídas mientras conduzco',
+  sos_nota: 'Si la app detecta un golpe muy fuerte y no respondes en 30 segundos, prepara un SOS con tu ubicación para tu contacto de emergencia.',
+  sos_probar: 'Probar la alarma', sos_pregunta: '¿Estás bien?',
+  sos_bien: 'ESTOY BIEN ✓', sos_ahora: 'SOS AHORA',
+  sos_detectada: 'Posible caída detectada', sos_enviando: 'SOS en {s} segundos…',
+  sos_activado_voz: 'SOS activado. Pidiendo ayuda.',
+  sos_llamar: 'Llamar a', sos_sms: 'SMS con mi ubicación',
+  sos_msj: 'SOS: posible caída en moto. Mi ubicación:',
+  sos_sin_tel: 'Configura un teléfono de emergencia en Ajustes.',
+  mapa_off_titulo: 'Mapas sin conexión',
+  mapa_off_nota: 'Las zonas del mapa que veas con internet se guardan solas. Descarga tu zona para tenerla siempre disponible.',
+  mapa_off_desc: '⬇ Descargar mi zona', mapa_off_prog: 'Descargando… {p}%',
+  mapa_off_ok: '✅ Tu zona ya funciona sin conexión', mapa_off_err: 'No se pudo descargar ahora. Inténtalo más tarde.',
+  mapa_off_borrar: 'Borrar mapas guardados', mapa_off_estado: '{n} trozos de mapa guardados (~{mb} MB)'
+});
+Object.assign(I18N.en, {
+  sos_titulo: 'Crash detection & SOS', sos_activar: 'Detect crashes while riding',
+  sos_nota: 'If the app detects a hard impact and you don\'t respond within 30 seconds, it prepares an SOS with your location for your emergency contact.',
+  sos_probar: 'Test the alarm', sos_pregunta: 'Are you OK?',
+  sos_bien: 'I\'M OK ✓', sos_ahora: 'SOS NOW',
+  sos_detectada: 'Possible crash detected', sos_enviando: 'SOS in {s} seconds…',
+  sos_activado_voz: 'SOS activated. Calling for help.',
+  sos_llamar: 'Call', sos_sms: 'Text my location',
+  sos_msj: 'SOS: possible motorcycle crash. My location:',
+  sos_sin_tel: 'Set an emergency phone number in Settings.',
+  mapa_off_titulo: 'Offline maps',
+  mapa_off_nota: 'Map areas you view online are saved automatically. Download your area to always have it available.',
+  mapa_off_desc: '⬇ Download my area', mapa_off_prog: 'Downloading… {p}%',
+  mapa_off_ok: '✅ Your area now works offline', mapa_off_err: 'Could not download now. Try again later.',
+  mapa_off_borrar: 'Delete saved maps', mapa_off_estado: '{n} map tiles saved (~{mb} MB)'
+});
+Object.assign(I18N.de, {
+  sos_titulo: 'Sturzerkennung & SOS', sos_activar: 'Stürze während der Fahrt erkennen',
+  sos_nota: 'Erkennt die App einen harten Aufprall und du reagierst nicht innerhalb von 30 Sekunden, bereitet sie ein SOS mit deinem Standort für deinen Notfallkontakt vor.',
+  sos_probar: 'Alarm testen', sos_pregunta: 'Geht es dir gut?',
+  sos_bien: 'MIR GEHT ES GUT ✓', sos_ahora: 'SOS JETZT',
+  sos_detectada: 'Möglicher Sturz erkannt', sos_enviando: 'SOS in {s} Sekunden…',
+  sos_activado_voz: 'SOS aktiviert. Hilfe wird gerufen.',
+  sos_llamar: 'Anrufen:', sos_sms: 'SMS mit meinem Standort',
+  sos_msj: 'SOS: möglicher Motorradsturz. Mein Standort:',
+  sos_sin_tel: 'Lege in den Einstellungen eine Notfallnummer fest.',
+  mapa_off_titulo: 'Offline-Karten',
+  mapa_off_nota: 'Kartenbereiche, die du online ansiehst, werden automatisch gespeichert. Lade deine Gegend herunter, um sie immer zu haben.',
+  mapa_off_desc: '⬇ Meine Gegend laden', mapa_off_prog: 'Lädt… {p}%',
+  mapa_off_ok: '✅ Deine Gegend funktioniert jetzt offline', mapa_off_err: 'Download gerade nicht möglich. Später erneut versuchen.',
+  mapa_off_borrar: 'Gespeicherte Karten löschen', mapa_off_estado: '{n} Kartenteile gespeichert (~{mb} MB)'
+});
+Object.assign(I18N.fr, {
+  sos_titulo: 'Détection de chute & SOS', sos_activar: 'Détecter les chutes pendant que je roule',
+  sos_nota: 'Si l\'app détecte un choc violent et que tu ne réponds pas sous 30 secondes, elle prépare un SOS avec ta position pour ton contact d\'urgence.',
+  sos_probar: 'Tester l\'alarme', sos_pregunta: 'Ça va ?',
+  sos_bien: 'JE VAIS BIEN ✓', sos_ahora: 'SOS MAINTENANT',
+  sos_detectada: 'Chute possible détectée', sos_enviando: 'SOS dans {s} secondes…',
+  sos_activado_voz: 'SOS activé. Appel à l\'aide.',
+  sos_llamar: 'Appeler', sos_sms: 'SMS avec ma position',
+  sos_msj: 'SOS : chute possible à moto. Ma position :',
+  sos_sin_tel: 'Configure un numéro d\'urgence dans les Réglages.',
+  mapa_off_titulo: 'Cartes hors ligne',
+  mapa_off_nota: 'Les zones de carte vues en ligne sont enregistrées automatiquement. Télécharge ta zone pour l\'avoir toujours.',
+  mapa_off_desc: '⬇ Télécharger ma zone', mapa_off_prog: 'Téléchargement… {p}%',
+  mapa_off_ok: '✅ Ta zone fonctionne maintenant hors ligne', mapa_off_err: 'Téléchargement impossible pour le moment. Réessaie plus tard.',
+  mapa_off_borrar: 'Supprimer les cartes enregistrées', mapa_off_estado: '{n} morceaux de carte enregistrés (~{mb} Mo)'
+});
+Object.assign(I18N.it, {
+  sos_titulo: 'Rilevamento cadute & SOS', sos_activar: 'Rileva cadute mentre guido',
+  sos_nota: 'Se l\'app rileva un urto violento e non rispondi entro 30 secondi, prepara un SOS con la tua posizione per il tuo contatto di emergenza.',
+  sos_probar: 'Prova l\'allarme', sos_pregunta: 'Stai bene?',
+  sos_bien: 'STO BENE ✓', sos_ahora: 'SOS ORA',
+  sos_detectada: 'Possibile caduta rilevata', sos_enviando: 'SOS tra {s} secondi…',
+  sos_activado_voz: 'SOS attivato. Chiedo aiuto.',
+  sos_llamar: 'Chiama', sos_sms: 'SMS con la mia posizione',
+  sos_msj: 'SOS: possibile caduta in moto. La mia posizione:',
+  sos_sin_tel: 'Imposta un numero di emergenza nelle Impostazioni.',
+  mapa_off_titulo: 'Mappe offline',
+  mapa_off_nota: 'Le zone della mappa che vedi online si salvano da sole. Scarica la tua zona per averla sempre.',
+  mapa_off_desc: '⬇ Scarica la mia zona', mapa_off_prog: 'Download… {p}%',
+  mapa_off_ok: '✅ La tua zona ora funziona offline', mapa_off_err: 'Impossibile scaricare ora. Riprova più tardi.',
+  mapa_off_borrar: 'Elimina mappe salvate', mapa_off_estado: '{n} pezzi di mappa salvati (~{mb} MB)'
+});
+
 // --- Guía giro a giro (instrucciones de navegación por voz) ---
 Object.assign(I18N.es, {
   g_en: 'En {d}, {inst}',

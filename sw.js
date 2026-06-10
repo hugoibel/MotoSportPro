@@ -1,6 +1,9 @@
 // Service Worker — cachea la app para que funcione sin conexión.
-// (Los mapas de OpenStreetMap sí necesitan internet para descargar nuevas zonas.)
-const CACHE = 'motosportpro-v15';
+// Desde v16 también guarda los trozos de mapa que vas viendo (caché
+// msp-tiles), así el mapa de tus zonas funciona sin internet.
+const CACHE = 'motosportpro-v16';
+const TILES = 'msp-tiles';
+const TILES_MAX = 4500;   // tope de trozos guardados (~70 MB)
 const ASSETS = [
   './',
   './index.html',
@@ -9,6 +12,8 @@ const ASSETS = [
   './js/units.js',
   './js/i18n.js',
   './js/ui.js',
+  './js/sos.js',
+  './js/offline.js',
   './js/storage.js',
   './js/map.js',
   './js/nav.js',
@@ -49,15 +54,39 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+      // OJO: la caché de mapas (TILES) se conserva entre versiones
+      Promise.all(keys.filter(k => k !== CACHE && k !== TILES).map(k => caches.delete(k)))
     ).then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', e => {
   const url = e.request.url;
-  // Los tiles del mapa siempre desde la red (no cachear, son muchísimos)
-  if (url.includes('tile.openstreetmap.org')) return;
+
+  // Trozos de mapa: primero la caché (mapas sin conexión), si no hay se
+  // descarga y se guarda. Se normaliza el subdominio a/b/c para que el
+  // mismo trozo valga venga de donde venga.
+  if (url.includes('tile.openstreetmap.org')) {
+    const clave = url.replace(/:\/\/[abc]\.tile\./, '://tile.');
+    e.respondWith(
+      caches.open(TILES).then(c =>
+        c.match(clave).then(hit => hit || fetch(e.request).then(resp => {
+          // Las imágenes del mapa llegan como respuesta "opaque" (ok=false): también valen
+          if (resp.ok || resp.type === 'opaque') {
+            c.put(clave, resp.clone());
+            // De vez en cuando, recortar la caché si crece demasiado
+            if (Math.random() < 0.01) {
+              c.keys().then(ks => {
+                if (ks.length > TILES_MAX) ks.slice(0, ks.length - TILES_MAX + 500).forEach(k => c.delete(k));
+              });
+            }
+          }
+          return resp;
+        }))
+      )
+    );
+    return;
+  }
 
   e.respondWith(
     caches.match(e.request).then(cached => cached || fetch(e.request))
