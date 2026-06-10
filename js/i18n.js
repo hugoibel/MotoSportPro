@@ -277,6 +277,63 @@ Object.assign(I18N.it, {
   backup_vacio: 'Non hai ancora caricato nessuna foto.'
 });
 
+// --- Guía giro a giro (instrucciones de navegación por voz) ---
+Object.assign(I18N.es, {
+  g_en: 'En {d}, {inst}',
+  g_izq: 'gira a la izquierda', g_der: 'gira a la derecha',
+  g_lig_izq: 'gira ligeramente a la izquierda', g_lig_der: 'gira ligeramente a la derecha',
+  g_cer_izq: 'gira cerrado a la izquierda', g_cer_der: 'gira cerrado a la derecha',
+  g_recto: 'sigue recto', g_uturn: 'da media vuelta',
+  g_incorporate: 'incorpórate', g_acceso: 'toma el acceso', g_tomar_salida: 'toma la salida',
+  g_rotonda: 'en la rotonda, toma la salida {n}', g_rotonda_salir: 'sal de la rotonda',
+  g_destino: 'has llegado a tu destino', g_recalc: 'Recalculando ruta',
+  g_m: 'metros', g_km: 'kilómetros', g_ft: 'pies', g_mi: 'millas'
+});
+Object.assign(I18N.en, {
+  g_en: 'In {d}, {inst}',
+  g_izq: 'turn left', g_der: 'turn right',
+  g_lig_izq: 'turn slightly left', g_lig_der: 'turn slightly right',
+  g_cer_izq: 'make a sharp left', g_cer_der: 'make a sharp right',
+  g_recto: 'continue straight', g_uturn: 'make a U-turn',
+  g_incorporate: 'merge', g_acceso: 'take the ramp', g_tomar_salida: 'take the exit',
+  g_rotonda: 'at the roundabout, take exit {n}', g_rotonda_salir: 'exit the roundabout',
+  g_destino: 'you have arrived at your destination', g_recalc: 'Rerouting',
+  g_m: 'meters', g_km: 'kilometers', g_ft: 'feet', g_mi: 'miles'
+});
+Object.assign(I18N.de, {
+  g_en: 'In {d} {inst}',
+  g_izq: 'links abbiegen', g_der: 'rechts abbiegen',
+  g_lig_izq: 'leicht links halten', g_lig_der: 'leicht rechts halten',
+  g_cer_izq: 'scharf links abbiegen', g_cer_der: 'scharf rechts abbiegen',
+  g_recto: 'geradeaus weiterfahren', g_uturn: 'bitte wenden',
+  g_incorporate: 'einfädeln', g_acceso: 'die Auffahrt nehmen', g_tomar_salida: 'die Ausfahrt nehmen',
+  g_rotonda: 'im Kreisverkehr die Ausfahrt {n} nehmen', g_rotonda_salir: 'den Kreisverkehr verlassen',
+  g_destino: 'Sie haben Ihr Ziel erreicht', g_recalc: 'Route wird neu berechnet',
+  g_m: 'Metern', g_km: 'Kilometern', g_ft: 'Fuß', g_mi: 'Meilen'
+});
+Object.assign(I18N.fr, {
+  g_en: 'Dans {d}, {inst}',
+  g_izq: 'tournez à gauche', g_der: 'tournez à droite',
+  g_lig_izq: 'tournez légèrement à gauche', g_lig_der: 'tournez légèrement à droite',
+  g_cer_izq: 'tournez fortement à gauche', g_cer_der: 'tournez fortement à droite',
+  g_recto: 'continuez tout droit', g_uturn: 'faites demi-tour',
+  g_incorporate: 'insérez-vous', g_acceso: 'prenez la bretelle', g_tomar_salida: 'prenez la sortie',
+  g_rotonda: 'au rond-point, prenez la sortie {n}', g_rotonda_salir: 'sortez du rond-point',
+  g_destino: 'vous êtes arrivé à destination', g_recalc: 'Recalcul de l\'itinéraire',
+  g_m: 'mètres', g_km: 'kilomètres', g_ft: 'pieds', g_mi: 'miles'
+});
+Object.assign(I18N.it, {
+  g_en: 'Tra {d}, {inst}',
+  g_izq: 'gira a sinistra', g_der: 'gira a destra',
+  g_lig_izq: 'gira leggermente a sinistra', g_lig_der: 'gira leggermente a destra',
+  g_cer_izq: 'fai una curva stretta a sinistra', g_cer_der: 'fai una curva stretta a destra',
+  g_recto: 'prosegui dritto', g_uturn: 'inverti il senso di marcia',
+  g_incorporate: 'immettiti', g_acceso: 'prendi la rampa', g_tomar_salida: 'prendi l\'uscita',
+  g_rotonda: 'alla rotonda, prendi l\'uscita {n}', g_rotonda_salir: 'esci dalla rotonda',
+  g_destino: 'sei arrivato a destinazione', g_recalc: 'Ricalcolo del percorso',
+  g_m: 'metri', g_km: 'chilometri', g_ft: 'piedi', g_mi: 'miglia'
+});
+
 const NOMBRES_IDIOMA = { es: 'Español', en: 'English', de: 'Deutsch', fr: 'Français', it: 'Italiano' };
 
 const i18n = {

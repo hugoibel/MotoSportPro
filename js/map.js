@@ -109,15 +109,16 @@ const Mapa = {
     }
   },
   // coords = [[lat, lng], ...]  (línea azul de la ruta planificada)
-  dibujarRutaPlan(coords) {
+  // encuadrar=false al recalcular en marcha: no alejar el mapa mientras se conduce
+  dibujarRutaPlan(coords, encuadrar = true) {
     this.limpiarRutaPlan();
     if (this.motor === 'google') {
       const path = coords.map(c => ({ lat: c[0], lng: c[1] }));
       this._routePlan = new google.maps.Polyline({ map: this._map, path, strokeColor: '#0a84ff', strokeWeight: 7, strokeOpacity: 0.9, zIndex: 1 });
-      const b = new google.maps.LatLngBounds(); path.forEach(p => b.extend(p)); this._map.fitBounds(b);
+      if (encuadrar) { const b = new google.maps.LatLngBounds(); path.forEach(p => b.extend(p)); this._map.fitBounds(b); }
     } else {
       this._routePlan = L.polyline(coords, { color: '#0a84ff', weight: 7, opacity: 0.85, lineCap: 'round', lineJoin: 'round' }).addTo(this._map);
-      try { this._map.fitBounds(this._routePlan.getBounds(), { padding: [60, 60] }); } catch (e) { /* ruta vacía */ }
+      if (encuadrar) { try { this._map.fitBounds(this._routePlan.getBounds(), { padding: [60, 60] }); } catch (e) { /* ruta vacía */ } }
     }
   },
   limpiarDestino() {

@@ -81,6 +81,9 @@ function iniciarGrabacion() {
   entrarPantallaCompleta();
   Mapa.invalidate();
 
+  // Si hay un destino con ruta calculada, arranca la guía giro a giro por voz
+  if (typeof Nav !== 'undefined' && Nav.destino && Nav.pasos) Nav.iniciarGuia();
+
   watchId = navigator.geolocation.watchPosition(onPosicion, onErrorGps, {
     enableHighAccuracy: true, maximumAge: 1000, timeout: 10000
   });
@@ -99,6 +102,9 @@ function onPosicion(pos) {
   if (velMs > velMax) velMax = velMs;
 
   Mapa.addPoint(latitude, longitude);
+
+  // Guía giro a giro: actualizar banner y avisos de voz con cada posición
+  if (typeof Nav !== 'undefined' && Nav.guiando) Nav.actualizarGuia(latitude, longitude);
 
   $('t-velocidad').textContent = Math.round(Units.speedToUser(velMs * 3.6));
   $('t-distancia').textContent = Units.distToUser(distancia / 1000).toFixed(2);

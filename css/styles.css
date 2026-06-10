@@ -286,6 +286,39 @@ body.driving .rec-pill .rec-dot {
 }
 @keyframes pulse-rec { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
 
+/* ===== Banner de guía giro a giro (debajo de la barra de datos) ===== */
+.nav-guide { display: none; }
+body.driving.navigating .rec-pill { display: none; }   /* la instrucción sustituye al rótulo "Grabando" */
+body.driving .nav-guide {
+  position: absolute;
+  top: calc(76px + env(safe-area-inset-top));
+  left: 12px; right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(8, 66, 42, 0.78);          /* verde navegador */
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 18px;
+  padding: 12px 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  z-index: 11;
+}
+.nav-guide .ng-arrow { font-size: 2rem; line-height: 1; min-width: 40px; text-align: center; }
+.nav-guide .ng-text { flex: 1; display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
+.nav-guide .ng-text b { font-family: var(--font-sport); font-size: 1.35rem; }
+.nav-guide .ng-text span {
+  font-size: 0.92rem; color: rgba(255, 255, 255, 0.92);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.nav-guide .ng-voice {
+  background: rgba(255, 255, 255, 0.12);
+  border: none; border-radius: 50%;
+  width: 42px; height: 42px;
+  font-size: 1.15rem;
+  cursor: pointer;
+}
+
 /* ===== Rutas ===== */
 #view-rutas { padding: 16px; overflow-y: auto; }
 #view-rutas h2 { margin-bottom: 14px; }
