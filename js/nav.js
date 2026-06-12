@@ -13,12 +13,28 @@ const Nav = {
   guiando: false,
   idx: 0,          // índice de la próxima maniobra
   vozOn: true,
+  curvas: false,   // modo "ruta con curvas": elegir la alternativa más sinuosa
 
   init() {
     const input = $('nav-input');
     if (!input) return;
     input.placeholder = i18n.t('nav_buscar');
     $('nav-go').addEventListener('click', () => this.buscar(input.value));
+
+    // Botón 🌀: alterna entre la ruta más rápida y la más curvera (estilo Calimoto)
+    this.curvas = localStorage.getItem('msp_curvas') === '1';
+    const bc = $('nav-curvas');
+    if (bc) {
+      bc.classList.toggle('on', this.curvas);
+      bc.addEventListener('click', () => {
+        this.curvas = !this.curvas;
+        localStorage.setItem('msp_curvas', this.curvas ? '1' : '0');
+        bc.classList.toggle('on', this.curvas);
+        UI.toast(i18n.t(this.curvas ? 'nav_curvas_on' : 'nav_curvas_off'), 'ok');
+        // Si ya hay un destino elegido (y aún no se conduce), recalcular la ruta
+        if (this.destino && !this.guiando) this.elegir(this.destino.lat, this.destino.lng, this.destino.nombre);
+      });
+    }
     input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); this.buscar(input.value); } });
     $('nav-cancel').addEventListener('click', () => this.cancelar());
     this.vozOn = localStorage.getItem('msp_voz') !== '0';
@@ -85,13 +101,25 @@ const Nav = {
     }, () => { Mapa.center(lat, lng, 14); this._error(); }, { enableHighAccuracy: true, timeout: 10000 });
   },
 
-  // Pide a OSRM la ruta desde (lat,lng) hasta el destino, con las maniobras (steps)
+  // Pide a OSRM la ruta desde (lat,lng) hasta el destino, con las maniobras (steps).
+  // En modo curvas pide alternativas y elige la más SINUOSA (más curva por km).
   async _pedirRuta(lat, lng) {
     try {
-      const url = `https://router.project-osrm.org/route/v1/driving/${lng},${lat};${this.destino.lng},${this.destino.lat}?overview=full&geometries=geojson&steps=true`;
+      const alt = this.curvas ? '&alternatives=3' : '';
+      const url = `https://router.project-osrm.org/route/v1/driving/${lng},${lat};${this.destino.lng},${this.destino.lat}?overview=full&geometries=geojson&steps=true${alt}`;
       const r = await fetch(url);
       const data = await r.json();
-      return (data.routes && data.routes[0]) || null;
+      const rutas = data.routes || [];
+      if (!rutas.length) return null;
+      if (!this.curvas || rutas.length === 1) return rutas[0];
+      // Sinuosidad = distancia real / distancia en línea recta. Más alta = más curvas.
+      const recta = Math.max(distanciaMetros([lat, lng], [this.destino.lat, this.destino.lng]), 1);
+      let mejor = rutas[0], mejorS = 0;
+      rutas.forEach(rt => {
+        const s = rt.distance / recta;
+        if (s > mejorS) { mejorS = s; mejor = rt; }
+      });
+      return mejor;
     } catch (e) { return null; }
   },
 

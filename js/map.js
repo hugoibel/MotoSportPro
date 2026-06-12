@@ -66,9 +66,11 @@ const Mapa = {
 
   seguirZoom: 17,   // zoom de seguimiento al conducir (más cerca = se ve mejor por dónde voy)
 
-  // Marca/actualiza mi posición con un "puck" azul estilo Apple Maps
-  marcarPosicion(lat, lng) {
+  // Marca/actualiza mi posición con el emoji 3D de la moto del usuario
+  // (🏍️ o 🛵 según su marca/modelo/cc de "Mi Moto"), orientado al rumbo.
+  marcarPosicion(lat, lng, heading) {
     if (this.motor === 'google') {
+      // Google Maps no rota etiquetas: se mantiene el círculo azul clásico
       if (!this._marker) {
         this._marker = new google.maps.Marker({
           map: this._map, position: { lat, lng }, zIndex: 999,
@@ -78,21 +80,57 @@ const Mapa = {
     } else {
       if (!this._marker) {
         this._marker = L.marker([lat, lng], {
-          icon: L.divIcon({ className: 'puck-icon', html: '<div class="gps-puck"></div>', iconSize: [24, 24], iconAnchor: [12, 12] }),
+          icon: L.divIcon({
+            className: 'moto-icon',
+            html: `<div class="moto-marker"><div class="moto-halo"></div><span class="moto-emoji" id="moto-emoji-live">${this._emojiMoto()}</span></div>`,
+            iconSize: [44, 44], iconAnchor: [22, 22]
+          }),
           interactive: false, keyboard: false, zIndexOffset: 1000
         }).addTo(this._map);
       } else this._marker.setLatLng([lat, lng]);
+      this._orientarEmoji(heading);
     }
   },
 
-  addPoint(lat, lng) {
+  // El emoji mira hacia donde conduces y se inclina un poco (efecto 3D).
+  // El emoji de serie mira a la IZQUIERDA: rumbo este → se voltea.
+  _orientarEmoji(h) {
+    if (h == null || isNaN(h)) return;   // parado: el GPS no da rumbo, se mantiene el último
+    const el = document.getElementById('moto-emoji-live');
+    if (!el) return;
+    h = ((h % 360) + 360) % 360;
+    let tilt, t;
+    if (h <= 180) {            // hacia el este → voltear para mirar a la derecha
+      tilt = Math.max(-25, Math.min(25, (h - 90) * 0.28));
+      t = `rotate(${tilt}deg) scaleX(-1)`;
+    } else {                   // hacia el oeste → mirando a la izquierda (natural)
+      tilt = Math.max(-25, Math.min(25, (h - 270) * 0.28));
+      t = `rotate(${tilt}deg)`;
+    }
+    el.style.transform = t;
+  },
+
+  // Elige el emoji según la moto guardada en "Mi Moto"
+  _emojiMoto() {
+    let m = {};
+    try { m = JSON.parse(localStorage.getItem('msp_moto')) || {}; } catch (e) {}
+    const txt = `${m.marca || ''} ${m.modelo || ''}`.toLowerCase();
+    const cc = parseFloat(m.cc);
+    const SCOOTERS = ['vespa', 'scooter', 'pcx', 'xmax', 'x-max', 'nmax', 'n-max', 'burgman',
+      'primavera', 'beverly', 'medley', 'lambretta', 'forza', 'agility', 'address',
+      'symphony', 'fiddle', 'joymax', 'citycom', 'liberty', 'zip', 'typhoon', 'gts'];
+    if (SCOOTERS.some(p => txt.includes(p)) || (!isNaN(cc) && cc > 0 && cc <= 180)) return '🛵';
+    return '🏍️';
+  },
+
+  addPoint(lat, lng, heading) {
     this._pts.push([lat, lng]);
     if (this.motor === 'google') {
       this._line.getPath().push(new google.maps.LatLng(lat, lng));
     } else {
       this._line.addLatLng([lat, lng]);
     }
-    this.marcarPosicion(lat, lng);
+    this.marcarPosicion(lat, lng, heading);
     this.center(lat, lng, this.seguirZoom);
   },
 

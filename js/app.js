@@ -31,7 +31,26 @@ const setGps = (txt, cls) => {
 };
 
 // guardamos los puntos de la sesión para almacenarlos al parar
+// (cada punto = [lat, lng, velocidad km/h] para colorear el recorrido después)
 let puntosSesion = [];
+
+// --- Inclinación (lean angle) calculada con el GPS ---
+// Física de una curva coordinada: inclinación = atan(velocidad × giro / gravedad).
+// No depende de cómo va montado el móvil (a diferencia del acelerómetro).
+let leanMax = 0, leanSuave = 0, _leanHead = null, _leanT = 0;
+function calcularLean(velMs, heading, t) {
+  if (heading == null || isNaN(heading) || velMs < 5) { _leanHead = null; return 0; } // <18 km/h: ruido
+  if (_leanHead == null) { _leanHead = heading; _leanT = t; return 0; }
+  const dt = (t - _leanT) / 1000;
+  if (dt <= 0.2 || dt > 4) { _leanHead = heading; _leanT = t; return 0; }
+  let dh = heading - _leanHead;
+  if (dh > 180) dh -= 360;
+  if (dh < -180) dh += 360;
+  _leanHead = heading; _leanT = t;
+  const omega = (dh * Math.PI / 180) / dt;                       // velocidad de giro (rad/s)
+  const lean = Math.atan(Math.abs(velMs * omega) / 9.81) * 180 / Math.PI;
+  return Math.min(lean, 65);
+}
 
 // --- Wake Lock: mantener la pantalla encendida mientras se graba ---
 // Sin esto, al apagarse la pantalla el navegador suspende la app y la ruta
@@ -68,6 +87,7 @@ function iniciarGrabacion() {
   UI.vibrar(30);
   grabando = true;
   distancia = 0; velMax = 0; ultimaPos = null; nPuntos = 0; puntosSesion = [];
+  leanMax = 0; leanSuave = 0; _leanHead = null;
   tiempoInicio = Date.now();
   document.body.classList.add('recording');
   Mapa.reset();
@@ -93,17 +113,24 @@ function iniciarGrabacion() {
 
 function onPosicion(pos) {
   setGps('●', 'ok');
-  const { latitude, longitude, speed } = pos.coords;
+  const { latitude, longitude, speed, heading } = pos.coords;
   const punto = [latitude, longitude];
   if (ultimaPos) distancia += distanciaMetros(ultimaPos, punto);
   ultimaPos = punto;
-  puntosSesion.push(punto);
   nPuntos++;
 
   let velMs = (speed != null && speed >= 0) ? speed : 0;
   if (velMs > velMax) velMax = velMs;
+  puntosSesion.push([latitude, longitude, +(velMs * 3.6).toFixed(1)]);
 
-  Mapa.addPoint(latitude, longitude);
+  // Inclinación en vivo (suavizada para que no baile)
+  const lean = calcularLean(velMs, heading, pos.timestamp || Date.now());
+  leanSuave = leanSuave * 0.6 + lean * 0.4;
+  if (leanSuave > leanMax) leanMax = leanSuave;
+  const lv = $('lean-val');
+  if (lv) lv.textContent = Math.round(leanSuave) + '°';
+
+  Mapa.addPoint(latitude, longitude, heading);
 
   // Guía giro a giro: actualizar banner y avisos de voz con cada posición
   if (typeof Nav !== 'undefined' && Nav.guiando) Nav.actualizarGuia(latitude, longitude);
@@ -127,6 +154,8 @@ function actualizarEtiquetas() {
   $('t-dist-label').textContent = Units.distLabel();
   $('t-max-label').textContent = `${i18n.t('max')} ${Units.speedLabel()}`;
   $('t-media-label').textContent = `${i18n.t('media')} ${Units.speedLabel()}`;
+  const ll = $('lean-label');
+  if (ll) ll.textContent = i18n.t('lean');
   const b = $('btn-unidades');
   if (b) b.textContent = Units.botonTexto();
 }
@@ -165,6 +194,7 @@ function pararGrabacion() {
     duracionSeg: Math.round(duracionSeg),
     velMax: Math.round(velMax * 3.6),
     velMedia: Math.round(media),
+    leanMax: Math.round(leanMax),
     puntos: puntosSesion
   });
   UI.toast(`✅ ${i18n.t('guardada')}: ${Units.distToUser(km).toFixed(2)} ${Units.distLabel()} · ${fmtTiempo(duracionSeg)}`, 'ok');
@@ -178,6 +208,8 @@ function resetTelemetria() {
   $('t-tiempo').textContent = '00:00';
   $('t-maxima').textContent = '0';
   $('t-media').textContent = '0';
+  const lv = $('lean-val');
+  if (lv) lv.textContent = '0°';
 }
 
 // --- Lista de rutas ---
@@ -243,11 +275,14 @@ function abrirRutaDetalle(r) {
   $('rm-titulo').textContent = new Date(r.fecha).toLocaleString(i18n.lang, {
     day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
   });
+  const leanStat = (r.leanMax > 0)
+    ? `<div><b>${r.leanMax}°</b><span>${i18n.t('lean')}</span></div>` : '';
   $('rm-stats').innerHTML = `
     <div><b>${Units.distToUser(r.distanciaKm).toFixed(2)}</b><span>${Units.distLabel()}</span></div>
     <div><b>${fmtTiempo(r.duracionSeg)}</b><span>${i18n.t('tiempo')}</span></div>
     <div><b>${Math.round(Units.speedToUser(r.velMax))}</b><span>${i18n.t('max')} ${Units.speedLabel()}</span></div>
-    <div><b>${Math.round(Units.speedToUser(r.velMedia))}</b><span>${i18n.t('media')} ${Units.speedLabel()}</span></div>`;
+    <div><b>${Math.round(Units.speedToUser(r.velMedia))}</b><span>${i18n.t('media')} ${Units.speedLabel()}</span></div>
+    ${leanStat}`;
 
   // El mapa del detalle siempre usa Leaflet (ya está cargado en la app)
   if (!rmMap) {
@@ -258,13 +293,30 @@ function abrirRutaDetalle(r) {
   rmLine = rmIni = rmFin = null;
   const pts = r.puntos || [];
   if (pts.length) {
-    rmLine = L.polyline(pts, { color: '#ff5c2a', weight: 5, lineCap: 'round', lineJoin: 'round' }).addTo(rmMap);
-    rmIni = L.circleMarker(pts[0], { radius: 7, color: '#fff', weight: 2, fillColor: '#2ad17a', fillOpacity: 1 }).addTo(rmMap);
-    rmFin = L.circleMarker(pts[pts.length - 1], { radius: 7, color: '#fff', weight: 2, fillColor: '#ff3b5c', fillOpacity: 1 }).addTo(rmMap);
+    // Si los puntos traen velocidad (rutas nuevas), el recorrido se colorea
+    // por tramos: verde = lento → amarillo → rojo = rápido. Si no, naranja.
+    const conVel = pts[0].length >= 3;
+    if (conVel && pts.length > 1) {
+      const vmax = Math.max(...pts.map(p => p[2] || 0), 1);
+      rmLine = L.layerGroup().addTo(rmMap);
+      for (let i = 1; i < pts.length; i++) {
+        const f = Math.min((pts[i][2] || 0) / vmax, 1);             // 0 = parado, 1 = vel. máx
+        const color = `hsl(${Math.round(120 * (1 - f))}, 85%, 52%)`;
+        L.polyline([[pts[i - 1][0], pts[i - 1][1]], [pts[i][0], pts[i][1]]],
+          { color, weight: 5, lineCap: 'round', lineJoin: 'round' }).addTo(rmLine);
+      }
+    } else {
+      rmLine = L.polyline(pts.map(p => [p[0], p[1]]),
+        { color: '#ff5c2a', weight: 5, lineCap: 'round', lineJoin: 'round' }).addTo(rmMap);
+    }
+    rmIni = L.circleMarker([pts[0][0], pts[0][1]], { radius: 7, color: '#fff', weight: 2, fillColor: '#2ad17a', fillOpacity: 1 }).addTo(rmMap);
+    rmFin = L.circleMarker([pts[pts.length - 1][0], pts[pts.length - 1][1]], { radius: 7, color: '#fff', weight: 2, fillColor: '#ff3b5c', fillOpacity: 1 }).addTo(rmMap);
   }
   setTimeout(() => {
     rmMap.invalidateSize();
-    if (rmLine) { try { rmMap.fitBounds(rmLine.getBounds(), { padding: [30, 30] }); } catch (e) {} }
+    if (pts.length) {
+      try { rmMap.fitBounds(L.latLngBounds(pts.map(p => [p[0], p[1]])), { padding: [30, 30] }); } catch (e) {}
+    }
   }, 150);
 }
 
@@ -338,6 +390,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   Nav.init();
   $('nav-start').addEventListener('click', () => iniciarGrabacion());
 
+  // Clima (chip con temperatura + lluvia)
+  Weather.init();
+
   // Ajustes (SOS + mapas sin conexión)
   SOS.init();
   Offline.init();
@@ -377,6 +432,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   $('btn-unidades').addEventListener('click', () => {
     Units.toggle();
     actualizarEtiquetas();
+    Weather.refrescarUnidades();   // la temperatura cambia de °C a °F
     const activa = document.querySelector('.view.active');
     if (activa) cambiarVista(activa.id.replace('view-', ''));
   });
@@ -412,7 +468,10 @@ window.addEventListener('DOMContentLoaded', async () => {
   // Centrar en posición actual al abrir
   if ('geolocation' in navigator) {
     navigator.geolocation.getCurrentPosition(
-      pos => Mapa.center(pos.coords.latitude, pos.coords.longitude, 15),
+      pos => {
+        Mapa.center(pos.coords.latitude, pos.coords.longitude, 15);
+        Weather.cargar(pos.coords.latitude, pos.coords.longitude);
+      },
       () => setGps('·', ''),
       { enableHighAccuracy: true, timeout: 8000 }
     );

@@ -448,6 +448,43 @@ Object.assign(I18N.it, {
   g_m: 'metri', g_km: 'chilometri', g_ft: 'piedi', g_mi: 'miglia'
 });
 
+// --- GPS premium v0.17: inclinación, modo curvas y clima ---
+Object.assign(I18N.es, {
+  lean: 'inclinación',
+  nav_curvas: 'Ruta con curvas',
+  nav_curvas_on: '🌀 Modo curvas: buscaré la ruta más divertida',
+  nav_curvas_off: 'Modo curvas desactivado: ruta más rápida',
+  clima_prob: 'lluvia en las próximas horas: {p}%'
+});
+Object.assign(I18N.en, {
+  lean: 'lean',
+  nav_curvas: 'Twisty route',
+  nav_curvas_on: '🌀 Twisty mode: I\'ll pick the most fun route',
+  nav_curvas_off: 'Twisty mode off: fastest route',
+  clima_prob: 'rain in the next few hours: {p}%'
+});
+Object.assign(I18N.de, {
+  lean: 'Schräglage',
+  nav_curvas: 'Kurvenreiche Route',
+  nav_curvas_on: '🌀 Kurvenmodus: die kurvenreichste Route wird gewählt',
+  nav_curvas_off: 'Kurvenmodus aus: schnellste Route',
+  clima_prob: 'Regen in den nächsten Stunden: {p}%'
+});
+Object.assign(I18N.fr, {
+  lean: 'inclinaison',
+  nav_curvas: 'Itinéraire sinueux',
+  nav_curvas_on: '🌀 Mode virages : je choisirai l\'itinéraire le plus sinueux',
+  nav_curvas_off: 'Mode virages désactivé : itinéraire le plus rapide',
+  clima_prob: 'pluie dans les prochaines heures : {p}%'
+});
+Object.assign(I18N.it, {
+  lean: 'piega',
+  nav_curvas: 'Percorso con curve',
+  nav_curvas_on: '🌀 Modalità curve: sceglierò il percorso più divertente',
+  nav_curvas_off: 'Modalità curve disattivata: percorso più veloce',
+  clima_prob: 'pioggia nelle prossime ore: {p}%'
+});
+
 const NOMBRES_IDIOMA = { es: 'Español', en: 'English', de: 'Deutsch', fr: 'Français', it: 'Italiano' };
 
 const i18n = {
@@ -476,6 +513,10 @@ const i18n = {
   aplicar() {
     document.querySelectorAll('[data-i18n]').forEach(el => {
       el.textContent = this.t(el.dataset.i18n);
+    });
+    // También los títulos (texto al mantener pulsado / pasar el ratón)
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+      el.title = this.t(el.dataset.i18nTitle);
     });
     document.dispatchEvent(new Event('idioma-cambiado'));
   }

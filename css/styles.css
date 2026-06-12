@@ -610,6 +610,31 @@ body.driving .nav-info { display: none !important; }
 }
 .dest-pin { font-size: 30px; line-height: 1; filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.55)); }
 
+/* Marcador de posición: TU moto (emoji 🏍️/🛵) con halo azul pulsante */
+.moto-icon { background: none; border: none; }
+.moto-marker {
+  position: relative; width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+}
+.moto-halo {
+  position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(10, 132, 255, 0.28);
+  box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.22);
+  animation: moto-halo 2s ease-out infinite;
+}
+@keyframes moto-halo {
+  0% { width: 30px; height: 30px; opacity: 0.7; }
+  100% { width: 62px; height: 62px; opacity: 0; }
+}
+.moto-emoji {
+  position: relative; z-index: 1;
+  font-size: 30px; line-height: 1; display: inline-block;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+  transition: transform 0.5s ease;
+}
+
 /* ===== Formularios (Mi Moto / Gasolina / Eventos) ===== */
 .view.scroll { padding: 16px; overflow-y: auto; }
 .view input:not([type="file"]), .view textarea {
@@ -989,3 +1014,63 @@ body.driving .nav-info { display: none !important; }
   box-shadow: 0 8px 24px rgba(42, 209, 122, 0.45);
 }
 .sos-link { text-decoration: none; display: flex; align-items: center; justify-content: center; }
+
+/* ============================================================
+   GPS PREMIUM (v0.17): clima, modo curvas e inclinación
+   ============================================================ */
+
+/* Chip del clima: flotando sobre el mapa, arriba a la derecha */
+.weather-chip {
+  position: absolute; top: 64px; right: 12px; z-index: 1000;
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(20, 25, 37, 0.92);
+  color: var(--text); border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 99px; padding: 8px 13px;
+  font-size: 0.82rem; font-weight: 700; font-family: var(--font-sport);
+  letter-spacing: 0.4px; cursor: pointer;
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  box-shadow: var(--shadow);
+}
+body.driving .weather-chip { display: none !important; }
+
+/* Botón 🌀 modo curvas, dentro del buscador de destino */
+.nav-curvas {
+  flex: none; width: 40px; height: 40px; border: none; cursor: pointer;
+  border-radius: 11px; font-size: 1.15rem;
+  background: var(--surface-3, #1a2030);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  filter: grayscale(1); opacity: 0.65;
+  transition: filter 0.2s, opacity 0.2s, box-shadow 0.2s;
+}
+.nav-curvas.on {
+  filter: none; opacity: 1;
+  border-color: var(--accent);
+  box-shadow: 0 0 12px rgba(255, 92, 42, 0.45);
+}
+.nav-curvas:active { transform: scale(0.95); }
+
+/* Inclinación: círculo glass encima del velocímetro (solo conduciendo) */
+.lean-pill { display: none; }
+body.driving .lean-pill {
+  position: absolute;
+  left: 14px;
+  bottom: calc(148px + env(safe-area-inset-bottom));
+  width: 74px; height: 74px;
+  border-radius: 50%;
+  background: rgba(12, 16, 25, 0.6);
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 10;
+}
+body.driving .lean-pill #lean-val {
+  font-family: var(--font-sport);
+  font-size: 1.45rem; font-weight: 700; line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: #fff; text-shadow: 0 0 12px rgba(10, 132, 255, 0.55);
+}
+body.driving .lean-pill small {
+  font-size: 0.5rem; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.6px; margin-top: 2px;
+}
