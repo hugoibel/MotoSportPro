@@ -1074,3 +1074,92 @@ body.driving .lean-pill small {
   font-size: 0.5rem; color: var(--muted);
   text-transform: uppercase; letter-spacing: 0.6px; margin-top: 2px;
 }
+
+/* ============================================================
+   MAPA PREMIUM (v0.18): estilos, marcador, ETA, re-centrar,
+   alerta de velocidad — lo mejor de Waze
+   ============================================================ */
+
+/* El marcador creció a 48px (sitio para la flecha/moto girando) */
+.moto-marker { width: 48px; height: 48px; }
+
+/* Contenedor que gira 360° con el rumbo (flecha navegador / moto deportiva) */
+.mk-rot {
+  position: relative; z-index: 1;
+  display: flex; align-items: center; justify-content: center;
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.65));
+  transition: transform 0.45s ease;
+  will-change: transform;
+}
+
+/* Chips de Ajustes (estilo del mapa / marcador) */
+.aj-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.aj-chips .chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--surface-3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px; padding: 9px 13px;
+  color: var(--text); font-size: 0.8rem; font-weight: 600;
+  cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s;
+}
+.aj-chips .chip.on {
+  border-color: var(--accent);
+  box-shadow: 0 0 10px rgba(255, 92, 42, 0.4);
+  background: linear-gradient(180deg, rgba(255, 92, 42, 0.16), var(--surface-3));
+}
+
+/* Límite de velocidad: campo + unidad */
+.vel-row { display: flex; align-items: center; gap: 10px; }
+.vel-row .aj-input { max-width: 120px; text-align: center; font-family: var(--font-sport); font-size: 1.15rem; }
+.vel-unit { color: var(--muted); font-size: 0.85rem; font-weight: 600; }
+
+/* Hora de llegada 🏁 (pastilla glass abajo-centro, solo navegando) */
+.eta-pill { display: none; }
+body.driving .eta-pill {
+  position: absolute;
+  left: 50%; transform: translateX(-50%);
+  bottom: calc(92px + env(safe-area-inset-bottom));
+  align-items: center;
+  background: rgba(12, 16, 25, 0.65);
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px; padding: 8px 16px;
+  font-family: var(--font-sport);
+  font-size: 0.95rem; font-weight: 700; letter-spacing: 0.4px;
+  font-variant-numeric: tabular-nums;
+  color: #fff; white-space: nowrap;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  z-index: 10;
+}
+
+/* Botón Re-centrar (aparece al arrastrar el mapa mientras conduces) */
+/* display lo controla JS (inline): none ↔ inline-flex */
+.btn-recentrar { display: none; }
+body.driving .btn-recentrar {
+  position: absolute;
+  left: 50%; transform: translateX(-50%);
+  bottom: calc(140px + env(safe-area-inset-bottom));
+  align-items: center; gap: 7px;
+  background: rgba(10, 132, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px; padding: 11px 18px;
+  color: #fff; font-size: 0.88rem; font-weight: 700;
+  font-family: var(--font-sport); letter-spacing: 0.5px; text-transform: uppercase;
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(10, 132, 255, 0.45);
+  z-index: 12;
+}
+.btn-recentrar:active { transform: translateX(-50%) scale(0.96); }
+
+/* Exceso de velocidad: el velocímetro se pone rojo y pulsa */
+body.speeding.driving .stat.big {
+  border-color: rgba(255, 59, 92, 0.85);
+  box-shadow: 0 0 0 3px rgba(255, 59, 92, 0.35), 0 10px 30px rgba(255, 59, 92, 0.45);
+  animation: speedingPulse 1s ease-in-out infinite;
+}
+body.speeding .stat.big .value { color: #ff3b5c; text-shadow: 0 0 18px rgba(255, 59, 92, 0.8); }
+@keyframes speedingPulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(255, 59, 92, 0.35), 0 10px 30px rgba(255, 59, 92, 0.45); }
+  50% { box-shadow: 0 0 0 7px rgba(255, 59, 92, 0.5), 0 10px 34px rgba(255, 59, 92, 0.6); }
+}

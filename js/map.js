@@ -7,8 +7,34 @@ const Mapa = {
   motor: null,        // 'google' | 'leaflet'
   _map: null,
   _line: null,
+  _lineCasing: null,  // borde oscuro bajo la línea (acabado premium)
   _marker: null,
   _pts: [],
+  _seguir: true,      // seguir mi posición; se pausa si el usuario arrastra el mapa
+  _lastPos: null,
+  _lastHead: null,
+
+  // --- Estilos de mapa elegibles (Ajustes → Mapa) ---
+  // CARTO es gratis y sin clave (con atribución); OSM es el clásico.
+  ESTILOS: {
+    oscuro:  { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', sub: 'abcd' },
+    dia:     { url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', sub: 'abcd' },
+    clasico: { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', sub: 'abc' }
+  },
+  estiloActual() {
+    const e = localStorage.getItem('msp_mapa_estilo');
+    return this.ESTILOS[e] ? e : 'oscuro';
+  },
+  tileUrl() { return this.ESTILOS[this.estiloActual()].url; },
+  tileSub() { return this.ESTILOS[this.estiloActual()].sub; },
+  setEstilo(id) {
+    if (!this.ESTILOS[id]) return;
+    localStorage.setItem('msp_mapa_estilo', id);
+    if (this.motor === 'leaflet' && this._map && this._tiles) {
+      this._map.removeLayer(this._tiles);
+      this._tiles = L.tileLayer(this.tileUrl(), { maxZoom: 19, subdomains: this.tileSub() }).addTo(this._map);
+    }
+  },
 
   usaGoogle() {
     return !!(CONFIG.GOOGLE_MAPS_API_KEY && CONFIG.GOOGLE_MAPS_API_KEY.trim());
@@ -48,11 +74,29 @@ const Mapa = {
     });
   },
 
-  // --- Leaflet / OpenStreetMap ---
+  // --- Leaflet ---
   _initLeaflet(elId, c) {
     this._map = L.map(elId, { zoomControl: false, attributionControl: false }).setView(c, 14);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(this._map);
-    this._line = L.polyline([], { color: '#ff5c2a', weight: 5 }).addTo(this._map);
+    this._tiles = L.tileLayer(this.tileUrl(), { maxZoom: 19, subdomains: this.tileSub() }).addTo(this._map);
+    // La línea recorrida lleva un borde oscuro debajo (casing) — se ve premium
+    this._lineCasing = L.polyline([], { color: '#8c2c0e', weight: 9, opacity: 0.85, lineCap: 'round', lineJoin: 'round' }).addTo(this._map);
+    this._line = L.polyline([], { color: '#ff5c2a', weight: 5, lineCap: 'round', lineJoin: 'round' }).addTo(this._map);
+    // Si el usuario arrastra el mapa mientras conduce, dejamos de seguirle
+    // y aparece el botón "Re-centrar" (como Waze / Google Maps)
+    this._map.on('dragstart', () => {
+      if (!document.body.classList.contains('driving')) return;
+      this._seguir = false;
+      const b = document.getElementById('btn-recentrar');
+      if (b) b.style.display = 'inline-flex';
+    });
+  },
+
+  // Vuelve a seguir mi posición (botón Re-centrar)
+  recentrar() {
+    this._seguir = true;
+    const b = document.getElementById('btn-recentrar');
+    if (b) b.style.display = 'none';
+    if (this._lastPos) this.center(this._lastPos[0], this._lastPos[1], this.seguirZoom);
   },
 
   center(lat, lng, zoom) {
@@ -66,9 +110,33 @@ const Mapa = {
 
   seguirZoom: 17,   // zoom de seguimiento al conducir (más cerca = se ve mejor por dónde voy)
 
-  // Marca/actualiza mi posición con el emoji 3D de la moto del usuario
-  // (🏍️ o 🛵 según su marca/modelo/cc de "Mi Moto"), orientado al rumbo.
+  // --- Tipo de marcador elegible (Ajustes → Mapa): emoji / flecha / moto ---
+  marcadorTipo() {
+    const t = localStorage.getItem('msp_marcador');
+    return ['auto', 'flecha', 'moto'].includes(t) ? t : 'auto';
+  },
+  // Flecha navegador estilo Waze (gira 360° con el rumbo)
+  _svgFlecha() {
+    return `<svg viewBox="0 0 24 24" width="32" height="32">
+      <path d="M12 2.2 19.6 20 12 15.6 4.4 20z" fill="#0a84ff" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/>
+    </svg>`;
+  },
+  // Moto deportiva vista desde arriba (gira 360° con el rumbo)
+  _svgMoto() {
+    return `<svg viewBox="0 0 24 44" width="26" height="46">
+      <rect x="10" y="1" width="4" height="9" rx="2" fill="#1c1f26" stroke="#5a6170" stroke-width="0.9"/>
+      <rect x="10" y="34" width="4" height="9" rx="2" fill="#1c1f26" stroke="#5a6170" stroke-width="0.9"/>
+      <path d="M12 5.5 C15.2 9.5 15.6 13 14.6 17 L14.9 24 C15.1 30 14.2 36.5 12 38.8 C9.8 36.5 8.9 30 9.1 24 L9.4 17 C8.4 13 8.8 9.5 12 5.5 Z"
+            fill="#ff5c2a" stroke="#ffd2c0" stroke-width="0.7"/>
+      <path d="M4.6 11.5 10.4 13.8 M19.4 11.5 13.6 13.8" stroke="#cfd6e4" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="12" cy="21.5" r="3.4" fill="#11151f" stroke="#fff" stroke-width="0.9"/>
+    </svg>`;
+  },
+
+  // Marca/actualiza mi posición con el marcador elegido, orientado al rumbo
   marcarPosicion(lat, lng, heading) {
+    this._lastPos = [lat, lng];
+    if (heading != null && !isNaN(heading)) this._lastHead = heading;
     if (this.motor === 'google') {
       // Google Maps no rota etiquetas: se mantiene el círculo azul clásico
       if (!this._marker) {
@@ -78,18 +146,39 @@ const Mapa = {
         });
       } else this._marker.setPosition({ lat, lng });
     } else {
+      const tipo = this.marcadorTipo();
       if (!this._marker) {
+        const dentro = (tipo === 'flecha') ? `<div class="mk-rot" id="mk-rot">${this._svgFlecha()}</div>`
+          : (tipo === 'moto') ? `<div class="mk-rot" id="mk-rot">${this._svgMoto()}</div>`
+          : `<span class="moto-emoji" id="moto-emoji-live">${this._emojiMoto()}</span>`;
         this._marker = L.marker([lat, lng], {
           icon: L.divIcon({
             className: 'moto-icon',
-            html: `<div class="moto-marker"><div class="moto-halo"></div><span class="moto-emoji" id="moto-emoji-live">${this._emojiMoto()}</span></div>`,
-            iconSize: [44, 44], iconAnchor: [22, 22]
+            html: `<div class="moto-marker"><div class="moto-halo"></div>${dentro}</div>`,
+            iconSize: [48, 48], iconAnchor: [24, 24]
           }),
           interactive: false, keyboard: false, zIndexOffset: 1000
         }).addTo(this._map);
       } else this._marker.setLatLng([lat, lng]);
-      this._orientarEmoji(heading);
+      if (tipo === 'auto') this._orientarEmoji(heading);
+      else this._rotarMarcador(this._lastHead);
     }
+  },
+
+  // Recrea el marcador al cambiar de tipo en Ajustes
+  refrescarMarcador() {
+    if (this._marker && this.motor === 'leaflet') {
+      this._map.removeLayer(this._marker);
+      this._marker = null;
+      if (this._lastPos) this.marcarPosicion(this._lastPos[0], this._lastPos[1], this._lastHead);
+    }
+  },
+
+  // Flecha/moto: rotación completa hacia el rumbo (como el coche de Waze)
+  _rotarMarcador(h) {
+    if (h == null || isNaN(h)) return;
+    const el = document.getElementById('mk-rot');
+    if (el) el.style.transform = `rotate(${Math.round(h)}deg)`;
   },
 
   // El emoji mira hacia donde conduces y se inclina un poco (efecto 3D).
@@ -123,15 +212,29 @@ const Mapa = {
     return '🏍️';
   },
 
-  addPoint(lat, lng, heading) {
+  // Zoom según velocidad (como Waze): rápido = mapa más abierto para ver más allá
+  _zoomVel(velKmh) {
+    if (velKmh == null || isNaN(velKmh)) return this.seguirZoom;
+    if (velKmh >= 75) return 15;
+    if (velKmh >= 40) return 16;
+    return this.seguirZoom;   // 17
+  },
+
+  addPoint(lat, lng, heading, velKmh) {
     this._pts.push([lat, lng]);
     if (this.motor === 'google') {
       this._line.getPath().push(new google.maps.LatLng(lat, lng));
     } else {
       this._line.addLatLng([lat, lng]);
+      if (this._lineCasing) this._lineCasing.addLatLng([lat, lng]);
     }
     this.marcarPosicion(lat, lng, heading);
-    this.center(lat, lng, this.seguirZoom);
+    if (!this._seguir) return;   // el usuario está mirando otra zona: no recentrar
+    if (this.motor === 'leaflet') {
+      this._map.setView([lat, lng], this._zoomVel(velKmh), { animate: true });
+    } else {
+      this.center(lat, lng, this.seguirZoom);
+    }
   },
 
   // --- Navegación: destino + ruta trazada hasta él ---
@@ -155,7 +258,9 @@ const Mapa = {
       this._routePlan = new google.maps.Polyline({ map: this._map, path, strokeColor: '#0a84ff', strokeWeight: 7, strokeOpacity: 0.9, zIndex: 1 });
       if (encuadrar) { const b = new google.maps.LatLngBounds(); path.forEach(p => b.extend(p)); this._map.fitBounds(b); }
     } else {
-      this._routePlan = L.polyline(coords, { color: '#0a84ff', weight: 7, opacity: 0.85, lineCap: 'round', lineJoin: 'round' }).addTo(this._map);
+      // Borde azul oscuro debajo (casing): acabado tipo Google/Waze
+      this._routePlanCasing = L.polyline(coords, { color: '#063a78', weight: 11, opacity: 0.9, lineCap: 'round', lineJoin: 'round' }).addTo(this._map);
+      this._routePlan = L.polyline(coords, { color: '#0a84ff', weight: 7, opacity: 0.95, lineCap: 'round', lineJoin: 'round' }).addTo(this._map);
       if (encuadrar) { try { this._map.fitBounds(this._routePlan.getBounds(), { padding: [60, 60] }); } catch (e) { /* ruta vacía */ } }
     }
   },
@@ -166,6 +271,7 @@ const Mapa = {
     this._destMarker = null;
   },
   limpiarRutaPlan() {
+    if (this._routePlanCasing) { this._map.removeLayer(this._routePlanCasing); this._routePlanCasing = null; }
     if (!this._routePlan) return;
     if (this.motor === 'google') this._routePlan.setMap(null);
     else this._map.removeLayer(this._routePlan);
@@ -175,11 +281,15 @@ const Mapa = {
 
   reset() {
     this._pts = [];
+    this._seguir = true;
+    const b = document.getElementById('btn-recentrar');
+    if (b) b.style.display = 'none';
     if (this.motor === 'google') {
       this._line.setPath([]);
       if (this._marker) { this._marker.setMap(null); this._marker = null; }
     } else {
       this._line.setLatLngs([]);
+      if (this._lineCasing) this._lineCasing.setLatLngs([]);
       if (this._marker) { this._map.removeLayer(this._marker); this._marker = null; }
     }
   },

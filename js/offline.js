@@ -82,6 +82,16 @@ const Offline = {
     this.refrescarEstado();
   },
 
+  // URL de un trozo del estilo de mapa ACTIVO, sin subdominio (la misma clave
+  // normalizada que usa el service worker) y con @2x si la pantalla es retina
+  // (así coincide con lo que pedirá el mapa en vivo al quedarse sin conexión).
+  _urlTile(z, x, y) {
+    return Mapa.tileUrl()
+      .replace('{s}.', '')
+      .replace('{r}', (window.devicePixelRatio || 1) > 1 ? '@2x' : '')
+      .replace('{z}', z).replace('{x}', x).replace('{y}', y);
+  },
+
   // URLs de todos los trozos de mapa alrededor de (lat,lng) según ZONA
   _urlsZona(lat, lng) {
     const urls = [];
@@ -94,7 +104,7 @@ const Offline = {
       const max = Math.pow(2, z) - 1;
       for (let x = Math.max(0, x1); x <= Math.min(max, x2); x++)
         for (let y = Math.max(0, y1); y <= Math.min(max, y2); y++)
-          urls.push(`https://tile.openstreetmap.org/${z}/${x}/${y}.png`);
+          urls.push(this._urlTile(z, x, y));
     }
     return urls;
   },

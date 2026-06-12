@@ -8,6 +8,8 @@ App (PWA) para motoristas, pensada para **monetizar**. Funciona en **PC** y **m�
 - 🧭 Navegación giro a giro **por voz** con recálculo automático, y modo **ruta con curvas** 🌀 (elige la alternativa más divertida, estilo Calimoto).
 - 📐 **Inclinación en curva** (lean angle) en vivo calculada por GPS, con el máximo guardado en cada ruta.
 - 🌤️ **Clima** en la pantalla Conducir (temperatura + aviso de lluvia de las próximas horas, sin clave).
+- 🗺️ **3 estilos de mapa** elegibles (Oscuro premium / Día / Clásico, CARTO+OSM sin clave) y **tu icono en el mapa** a elegir: emoji de tu moto, flecha navegador estilo Waze o moto deportiva vista desde arriba (giran con el rumbo).
+- 🚦 **Lo mejor de Waze**: hora de llegada 🏁 en vivo, auto-zoom según velocidad, botón "Re-centrar" al mover el mapa, y **alerta de velocidad** con voz/pitido si superas tu límite.
 - 🛡️ **Detección de caídas + SOS** (acelerómetro, cuenta atrás, SMS con tu ubicación).
 - 🗺️ Rutas: historial guardado en el dispositivo, detalle con el **recorrido coloreado por velocidad** y exportación **GPX**. Mapas **sin conexión**.
 - ⛽ Gasolina: calcula litros y coste según el consumo de **tu** moto y la distancia; busca **gasolineras cercanas reales** (OpenStreetMap + tu GPS) con "cómo llegar".
@@ -93,7 +95,7 @@ Inspirado en lo más valorado de las apps líderes, para añadir por fases:
 - [x] **Rutas curvas** (estilo *Calimoto* / *Scenic*): modo 🌀 que elige la alternativa más sinuosa. (v0.17)
 - [ ] **Comunidad y quedadas** (estilo *REVER*): compartir rutas, retos, perfiles.
 - [x] **Detección de caídas + SOS** (estilo *Detecht* / *EatSleepRIDE*). (v0.16)
-- [ ] **Alertas en tiempo real** (estilo *Waze*): radares, peligros, tráfico.
+- [x] **Lo mejor de Waze**: ETA en vivo, auto-zoom, re-centrar, alerta de velocidad, icono elegible. (v0.18) — pendiente: radares/peligros comunitarios (necesita servidor).
 - [x] **Mapas sin conexión** para viajes largos. (v0.16)
 - [x] **Mi moto**: mantenimiento, desgaste, consumo.
 - [x] **Inclinación en curva** (lean angle por GPS) y recorrido coloreado por velocidad. (v0.17)

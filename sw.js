@@ -1,7 +1,7 @@
 // Service Worker — cachea la app para que funcione sin conexión.
 // Desde v16 también guarda los trozos de mapa que vas viendo (caché
 // msp-tiles), así el mapa de tus zonas funciona sin internet.
-const CACHE = 'motosportpro-v17';
+const CACHE = 'motosportpro-v18';
 const TILES = 'msp-tiles';
 const TILES_MAX = 4500;   // tope de trozos guardados (~70 MB)
 const ASSETS = [
@@ -64,11 +64,11 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const url = e.request.url;
 
-  // Trozos de mapa: primero la caché (mapas sin conexión), si no hay se
-  // descarga y se guarda. Se normaliza el subdominio a/b/c para que el
-  // mismo trozo valga venga de donde venga.
-  if (url.includes('tile.openstreetmap.org')) {
-    const clave = url.replace(/:\/\/[abc]\.tile\./, '://tile.');
+  // Trozos de mapa (OSM clásico + estilos CARTO oscuro/día): primero la caché
+  // (mapas sin conexión), si no hay se descarga y se guarda. Se normaliza el
+  // subdominio a/b/c/d para que el mismo trozo valga venga de donde venga.
+  if (url.includes('tile.openstreetmap.org') || url.includes('basemaps.cartocdn.com')) {
+    const clave = url.replace(/:\/\/[abc]\.tile\./, '://tile.').replace(/:\/\/[abcd]\.basemaps\./, '://basemaps.');
     e.respondWith(
       caches.open(TILES).then(c =>
         c.match(clave).then(hit => hit || fetch(e.request).then(resp => {

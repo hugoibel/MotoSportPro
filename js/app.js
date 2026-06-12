@@ -81,6 +81,43 @@ function salirPantallaCompleta() {
   }
 }
 
+// --- Alerta de velocidad (estilo Waze): voz + pitido si supero mi límite ---
+// El límite se guarda en km/h (base) y se muestra/edita en las unidades del usuario.
+let _velCtx = null, _velUltAviso = 0;
+function velAlertaActiva() { return localStorage.getItem('msp_vel_on') === '1'; }
+function velLimite() { return parseFloat(localStorage.getItem('msp_vel_lim')) || 0; }
+function _pitido() {
+  try {
+    if (!_velCtx) return;
+    const o = _velCtx.createOscillator(), g = _velCtx.createGain();
+    o.type = 'sine'; o.frequency.value = 880; g.gain.value = 0.4;
+    o.connect(g); g.connect(_velCtx.destination);
+    o.start(); o.stop(_velCtx.currentTime + 0.18);
+  } catch (e) { /* sin audio */ }
+}
+function _decirAlerta(txt) {
+  try {
+    const u = new SpeechSynthesisUtterance(txt);
+    u.lang = ({ es: 'es-ES', en: 'en-US', de: 'de-DE', fr: 'fr-FR', it: 'it-IT' })[i18n.lang] || 'en-US';
+    speechSynthesis.speak(u);
+  } catch (e) {}
+}
+function vigilarVelocidad(velKmh) {
+  if (!velAlertaActiva() || velLimite() <= 0) return;
+  const lim = velLimite();
+  if (velKmh > lim) {
+    document.body.classList.add('speeding');
+    if (Date.now() - _velUltAviso > 20000) {       // re-avisar como mucho cada 20 s
+      _velUltAviso = Date.now();
+      _pitido();
+      UI.vibrar([80, 60, 80]);
+      _decirAlerta(i18n.t('vel_alerta_voz'));
+    }
+  } else if (velKmh < lim - 3) {                   // histéresis: no parpadear en el límite
+    document.body.classList.remove('speeding');
+  }
+}
+
 // --- Grabación ---
 function iniciarGrabacion() {
   if (!('geolocation' in navigator)) { UI.toast(i18n.t('sin_gps'), 'err'); return; }
@@ -96,6 +133,15 @@ function iniciarGrabacion() {
   $('btn-stop').disabled = false;
   cronometro = setInterval(actualizarTiempo, 1000);
   pedirWakeLock();
+  // El audio del pitido de velocidad debe crearse desde el toque (iOS)
+  if (velAlertaActiva()) {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (AC && !_velCtx) _velCtx = new AC();
+      if (_velCtx && _velCtx.state === 'suspended') _velCtx.resume();
+    } catch (e) {}
+  }
+  _velUltAviso = 0;
   if (typeof SOS !== 'undefined') SOS.armar();   // vigilar caídas (acelerómetro)
 
   // Modo navegación a pantalla completa (estilo Apple Maps)
@@ -130,7 +176,8 @@ function onPosicion(pos) {
   const lv = $('lean-val');
   if (lv) lv.textContent = Math.round(leanSuave) + '°';
 
-  Mapa.addPoint(latitude, longitude, heading);
+  Mapa.addPoint(latitude, longitude, heading, velMs * 3.6);
+  vigilarVelocidad(velMs * 3.6);
 
   // Guía giro a giro: actualizar banner y avisos de voz con cada posición
   if (typeof Nav !== 'undefined' && Nav.guiando) Nav.actualizarGuia(latitude, longitude);
@@ -170,6 +217,7 @@ function pararGrabacion() {
   grabando = false;
   document.body.classList.remove('recording');
   document.body.classList.remove('driving');
+  document.body.classList.remove('speeding');
   salirPantallaCompleta();
   if (typeof Nav !== 'undefined') Nav.cancelar();
   Mapa.invalidate();
@@ -266,6 +314,7 @@ function renderResumenRutas(rutas) {
 
 // --- Detalle de ruta: mapa con el recorrido + exportar GPX ---
 let rmMap = null, rmLine = null, rmIni = null, rmFin = null, rutaAbierta = null;
+let rmTiles = null, rmTilesUrl = '';
 
 function abrirRutaDetalle(r) {
   rutaAbierta = r;
@@ -287,7 +336,12 @@ function abrirRutaDetalle(r) {
   // El mapa del detalle siempre usa Leaflet (ya está cargado en la app)
   if (!rmMap) {
     rmMap = L.map('rm-map', { zoomControl: false, attributionControl: false });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(rmMap);
+  }
+  // Mismo estilo de mapa que el principal (y se actualiza si lo cambias en Ajustes)
+  if (rmTilesUrl !== Mapa.tileUrl()) {
+    if (rmTiles) rmMap.removeLayer(rmTiles);
+    rmTilesUrl = Mapa.tileUrl();
+    rmTiles = L.tileLayer(rmTilesUrl, { maxZoom: 19, subdomains: Mapa.tileSub() }).addTo(rmMap);
   }
   [rmLine, rmIni, rmFin].forEach(c => { if (c) rmMap.removeLayer(c); });
   rmLine = rmIni = rmFin = null;
@@ -350,6 +404,61 @@ ${pts}
   UI.toast(i18n.t('gpx_ok'), 'ok');
 }
 
+// --- Ajustes → Mapa: estilo, marcador y alerta de velocidad ---
+function initAjustesMapa() {
+  // Chips de estilo del mapa (oscuro / día / clásico)
+  const pintarEstilos = () => {
+    document.querySelectorAll('#estilo-chips .chip').forEach(b =>
+      b.classList.toggle('on', b.dataset.estilo === Mapa.estiloActual()));
+  };
+  document.querySelectorAll('#estilo-chips .chip').forEach(b => {
+    b.addEventListener('click', () => { Mapa.setEstilo(b.dataset.estilo); pintarEstilos(); });
+  });
+  pintarEstilos();
+
+  // Chips del marcador (emoji / flecha / moto)
+  const pintarMk = () => {
+    document.querySelectorAll('#marcador-chips .chip').forEach(b =>
+      b.classList.toggle('on', b.dataset.mk === Mapa.marcadorTipo()));
+  };
+  document.querySelectorAll('#marcador-chips .chip').forEach(b => {
+    b.addEventListener('click', () => {
+      localStorage.setItem('msp_marcador', b.dataset.mk);
+      Mapa.refrescarMarcador();
+      pintarMk();
+    });
+  });
+  pintarMk();
+
+  // Alerta de velocidad: toggle + límite en las unidades del usuario
+  const chk = $('vel-on'), inp = $('vel-lim');
+  if (chk) {
+    chk.checked = velAlertaActiva();
+    chk.addEventListener('change', () => localStorage.setItem('msp_vel_on', chk.checked ? '1' : '0'));
+  }
+  if (inp) {
+    const lim = velLimite();
+    if (lim > 0) inp.value = Math.round(Units.speedToUser(lim));
+    inp.addEventListener('change', () => {
+      const v = parseFloat(inp.value);
+      if (v > 0) localStorage.setItem('msp_vel_lim', Units.imperial ? v / 0.621371 : v);
+      else localStorage.removeItem('msp_vel_lim');
+    });
+  }
+  actualizarVelUnidad();
+}
+
+// Etiqueta y valor del límite al alternar MI/KM
+function actualizarVelUnidad() {
+  const u = $('vel-unit'), inp = $('vel-lim');
+  if (u) u.textContent = Units.speedLabel();
+  if (inp) {
+    const lim = velLimite();
+    inp.value = lim > 0 ? Math.round(Units.speedToUser(lim)) : '';
+    inp.placeholder = Units.imperial ? '70' : '110';
+  }
+}
+
 // --- Navegación entre vistas ---
 const TAB_VIEWS = ['grabar', 'gasolina', 'moto', 'eventos', 'tienda'];
 let vistaTab = 'grabar';  // última pestaña real, para el botón "Volver"
@@ -393,9 +502,13 @@ window.addEventListener('DOMContentLoaded', async () => {
   // Clima (chip con temperatura + lluvia)
   Weather.init();
 
+  // Botón "Re-centrar" (aparece al arrastrar el mapa mientras conduces)
+  $('btn-recentrar').addEventListener('click', () => Mapa.recentrar());
+
   // Ajustes (SOS + mapas sin conexión)
   SOS.init();
   Offline.init();
+  initAjustesMapa();
   $('btn-ajustes').addEventListener('click', () => {
     const m = $('ajustes-modal');
     m.style.display = 'flex';
@@ -433,6 +546,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     Units.toggle();
     actualizarEtiquetas();
     Weather.refrescarUnidades();   // la temperatura cambia de °C a °F
+    actualizarVelUnidad();         // el límite de velocidad cambia de km/h a mph
     const activa = document.querySelector('.view.active');
     if (activa) cambiarVista(activa.id.replace('view-', ''));
   });

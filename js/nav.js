@@ -97,7 +97,7 @@ const Nav = {
       this._setRuta(route, true);
       const distU = Units.distToUser(this.ruta.distanciaKm).toFixed(1);
       $('nav-dist').textContent = `${distU} ${Units.distLabel()}`;
-      $('nav-time').textContent = `${Math.round(this.ruta.duracionMin)} ${i18n.t('nav_min')}`;
+      $('nav-time').textContent = `${Math.round(this.ruta.duracionMin)} ${i18n.t('nav_min')} · 🏁 ${this._hora(this.ruta.duracionMin * 60)}`;
     }, () => { Mapa.center(lat, lng, 14); this._error(); }, { enableHighAccuracy: true, timeout: 10000 });
   },
 
@@ -128,6 +128,7 @@ const Nav = {
     const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);  // [lon,lat] → [lat,lng]
     Mapa.dibujarRutaPlan(coords, encuadrar);
     this.ruta = { distanciaKm: route.distance / 1000, duracionMin: route.duration / 60 };
+    this._mps = route.distance / Math.max(route.duration, 1);   // velocidad media prevista (m/s) para la hora de llegada
     const steps = (route.legs && route.legs[0] && route.legs[0].steps) || [];
     this.pasos = steps.map(s => ({
       lat: s.maneuver.location[1], lng: s.maneuver.location[0],
@@ -155,11 +156,28 @@ const Nav = {
     document.body.classList.add('navigating');
     const g = $('nav-guide');
     if (g) g.style.display = 'flex';
+    const ep = $('eta-pill');
+    if (ep) ep.style.display = 'inline-flex';
     this._pintarVoz();
     const p = this.pasos[1];
     this._pintarPaso(p, this.pasos[0].dist);
     // Hablar desde el toque del botón también desbloquea la voz en iOS
     this._hablar(i18n.t('g_en').replace('{d}', this._fmtDist(this.pasos[0].dist, true)).replace('{inst}', this._instruccion(p)));
+  },
+
+  // Hora de llegada dentro de "seg" segundos, en formato local (14:35 / 2:35 PM)
+  _hora(seg) {
+    return new Date(Date.now() + seg * 1000)
+      .toLocaleTimeString(i18n.lang, { hour: '2-digit', minute: '2-digit' });
+  },
+
+  // Actualiza la pastilla 🏁 hora de llegada + distancia restante (estilo Waze)
+  _pintarETA(distRestante) {
+    const el = $('eta-pill');
+    if (!el) return;
+    const seg = distRestante / Math.max(this._mps || 11, 1);
+    const distU = Units.distToUser(distRestante / 1000);
+    el.textContent = `🏁 ${this._hora(seg)} · ${distU < 10 ? distU.toFixed(1) : Math.round(distU)} ${Units.distLabel()}`;
   },
 
   // La llama app.js con cada posición GPS mientras se graba
@@ -169,6 +187,11 @@ const Nav = {
     const p = this.pasos[this.idx];
     const d = distanciaMetros([lat, lng], [p.lat, p.lng]);
     this._pintarPaso(p, d);
+
+    // Distancia restante = lo que falta hasta el próximo giro + el resto de tramos
+    let resto = d;
+    for (let i = this.idx; i < this.pasos.length; i++) resto += this.pasos[i].dist || 0;
+    this._pintarETA(resto);
 
     // Desvío: si me estoy alejando claramente del próximo giro, recalcular la ruta
     if (d < this._minDist) this._minDist = d;
@@ -206,6 +229,8 @@ const Nav = {
 
   terminarGuia(llegado) {
     this.guiando = false;
+    const ep = $('eta-pill');
+    if (ep) ep.style.display = 'none';
     const g = $('nav-guide');
     if (llegado) {
       const t = i18n.t('g_destino');
@@ -319,10 +344,11 @@ const Nav = {
     if (window.speechSynthesis) { try { speechSynthesis.cancel(); } catch (e) {} }
     document.body.classList.remove('navigating');
     if (typeof Mapa !== 'undefined') Mapa.limpiarNav();
-    const info = $('nav-info'), res = $('nav-results'), input = $('nav-input'), g = $('nav-guide');
+    const info = $('nav-info'), res = $('nav-results'), input = $('nav-input'), g = $('nav-guide'), ep = $('eta-pill');
     if (info) info.style.display = 'none';
     if (res) res.style.display = 'none';
     if (input) input.value = '';
     if (g) g.style.display = 'none';
+    if (ep) ep.style.display = 'none';
   }
 };

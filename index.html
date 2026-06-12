@@ -68,6 +68,12 @@
       <!-- Inclinación en vivo (solo en modo conducción) -->
       <div id="lean-pill" class="lean-pill"><span id="lean-val">0°</span><small id="lean-label">inclinación</small></div>
 
+      <!-- Hora de llegada (solo navegando) -->
+      <div id="eta-pill" class="eta-pill" style="display:none"></div>
+
+      <!-- Re-centrar el mapa en mi posición (aparece al arrastrar el mapa conduciendo) -->
+      <button id="btn-recentrar" class="btn-recentrar" style="display:none">⌖ <span data-i18n="recentrar">Re-centrar</span></button>
+
       <button class="rutas-fab" data-view="rutas">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
           <path d="M9 3 3.5 5.5v15L9 18l6 3 5.5-2.5v-15L15 6 9 3z"/><path d="M9 3v15M15 6v15"/>
@@ -197,6 +203,32 @@
         <button id="aj-cerrar" class="modal-x" aria-label="Cerrar">✕</button>
       </div>
       <div class="aj-body">
+        <div class="aj-sec">
+          <h4>🗺️ <span data-i18n="aj_mapa">Mapa</span></h4>
+          <p class="aj-nota" data-i18n="mapa_estilo">Estilo del mapa</p>
+          <div class="aj-chips" id="estilo-chips">
+            <button class="chip" data-estilo="oscuro">🌙 <span data-i18n="estilo_oscuro">Oscuro</span></button>
+            <button class="chip" data-estilo="dia">☀️ <span data-i18n="estilo_dia">Día</span></button>
+            <button class="chip" data-estilo="clasico">🗺️ <span data-i18n="estilo_clasico">Clásico</span></button>
+          </div>
+          <p class="aj-nota" data-i18n="mapa_marcador">Tu icono en el mapa</p>
+          <div class="aj-chips" id="marcador-chips">
+            <button class="chip" data-mk="auto">🏍️ <span data-i18n="mk_auto">Emoji de mi moto</span></button>
+            <button class="chip" data-mk="flecha">🧭 <span data-i18n="mk_flecha">Flecha navegador</span></button>
+            <button class="chip" data-mk="moto">🏁 <span data-i18n="mk_moto">Moto deportiva</span></button>
+          </div>
+        </div>
+        <div class="aj-sec">
+          <h4>🚦 <span data-i18n="vel_titulo">Alerta de velocidad</span></h4>
+          <label class="aj-toggle">
+            <input type="checkbox" id="vel-on">
+            <span data-i18n="vel_activar">Avisarme con voz si supero el límite</span>
+          </label>
+          <div class="vel-row">
+            <input id="vel-lim" type="number" inputmode="numeric" min="10" class="aj-input">
+            <span id="vel-unit" class="vel-unit">mph</span>
+          </div>
+        </div>
         <div class="aj-sec">
           <h4>🛡️ <span data-i18n="sos_titulo">Detección de caídas y SOS</span></h4>
           <label class="aj-toggle">

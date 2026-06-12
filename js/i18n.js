@@ -485,6 +485,53 @@ Object.assign(I18N.it, {
   clima_prob: 'pioggia nelle prossime ore: {p}%'
 });
 
+// --- Mapa premium v0.18: estilos, marcador, ETA, re-centrar y alerta de velocidad ---
+Object.assign(I18N.es, {
+  aj_mapa: 'Mapa', mapa_estilo: 'Estilo del mapa',
+  estilo_oscuro: 'Oscuro', estilo_dia: 'Día', estilo_clasico: 'Clásico',
+  mapa_marcador: 'Tu icono en el mapa',
+  mk_auto: 'Emoji de mi moto', mk_flecha: 'Flecha navegador', mk_moto: 'Moto deportiva',
+  vel_titulo: 'Alerta de velocidad', vel_activar: 'Avisarme con voz si supero el límite',
+  vel_alerta_voz: 'Reduce la velocidad',
+  recentrar: 'Re-centrar'
+});
+Object.assign(I18N.en, {
+  aj_mapa: 'Map', mapa_estilo: 'Map style',
+  estilo_oscuro: 'Dark', estilo_dia: 'Day', estilo_clasico: 'Classic',
+  mapa_marcador: 'Your map icon',
+  mk_auto: 'My bike emoji', mk_flecha: 'Navigator arrow', mk_moto: 'Sport bike',
+  vel_titulo: 'Speed alert', vel_activar: 'Warn me by voice if I exceed the limit',
+  vel_alerta_voz: 'Slow down',
+  recentrar: 'Re-center'
+});
+Object.assign(I18N.de, {
+  aj_mapa: 'Karte', mapa_estilo: 'Kartenstil',
+  estilo_oscuro: 'Dunkel', estilo_dia: 'Tag', estilo_clasico: 'Klassisch',
+  mapa_marcador: 'Dein Symbol auf der Karte',
+  mk_auto: 'Emoji meines Motorrads', mk_flecha: 'Navigationspfeil', mk_moto: 'Sportmotorrad',
+  vel_titulo: 'Tempowarnung', vel_activar: 'Mit Stimme warnen, wenn ich das Limit überschreite',
+  vel_alerta_voz: 'Bitte langsamer fahren',
+  recentrar: 'Zentrieren'
+});
+Object.assign(I18N.fr, {
+  aj_mapa: 'Carte', mapa_estilo: 'Style de la carte',
+  estilo_oscuro: 'Sombre', estilo_dia: 'Jour', estilo_clasico: 'Classique',
+  mapa_marcador: 'Votre icône sur la carte',
+  mk_auto: 'Émoji de ma moto', mk_flecha: 'Flèche de navigation', mk_moto: 'Moto sportive',
+  vel_titulo: 'Alerte de vitesse', vel_activar: 'M\'avertir par la voix si je dépasse la limite',
+  vel_alerta_voz: 'Ralentissez',
+  recentrar: 'Recentrer'
+});
+Object.assign(I18N.it, {
+  aj_mapa: 'Mappa', mapa_estilo: 'Stile della mappa',
+  estilo_oscuro: 'Scuro', estilo_dia: 'Giorno', estilo_clasico: 'Classico',
+  mapa_marcador: 'La tua icona sulla mappa',
+  mk_auto: 'Emoji della mia moto', mk_flecha: 'Freccia navigatore', mk_moto: 'Moto sportiva',
+  vel_titulo: 'Avviso di velocità', vel_activar: 'Avvisami con la voce se supero il limite',
+  vel_alerta_voz: 'Rallenta',
+  recentrar: 'Ricentra'
+});
+
 const NOMBRES_IDIOMA = { es: 'Español', en: 'English', de: 'Deutsch', fr: 'Français', it: 'Italiano' };
 
 const i18n = {
