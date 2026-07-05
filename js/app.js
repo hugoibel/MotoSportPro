@@ -34,6 +34,10 @@ const setGps = (txt, cls) => {
 // (cada punto = [lat, lng, velocidad km/h] para colorear el recorrido después)
 let puntosSesion = [];
 
+// Auto-pausa: contamos aparte el tiempo EN MOVIMIENTO, así los semáforos
+// y las paradas no hunden la velocidad media (como en las apps deportivas).
+let segMov = 0, _ultVelKmh = 0, _ultFixT = 0;
+
 // --- Inclinación (lean angle) calculada con el GPS ---
 // Física de una curva coordinada: inclinación = atan(velocidad × giro / gravedad).
 // No depende de cómo va montado el móvil (a diferencia del acelerómetro).
@@ -125,6 +129,8 @@ function iniciarGrabacion() {
   grabando = true;
   distancia = 0; velMax = 0; ultimaPos = null; nPuntos = 0; puntosSesion = [];
   leanMax = 0; leanSuave = 0; _leanHead = null;
+  segMov = 0; _ultVelKmh = 0; _ultFixT = 0;
+  document.body.classList.remove('paused');
   tiempoInicio = Date.now();
   document.body.classList.add('recording');
   Mapa.reset();
@@ -167,6 +173,7 @@ function onPosicion(pos) {
 
   let velMs = (speed != null && speed >= 0) ? speed : 0;
   if (velMs > velMax) velMax = velMs;
+  _ultVelKmh = velMs * 3.6; _ultFixT = Date.now();
   puntosSesion.push([latitude, longitude, +(velMs * 3.6).toFixed(1)]);
 
   // Inclinación en vivo (suavizada para que no baile)
@@ -190,9 +197,20 @@ function onPosicion(pos) {
 function actualizarTiempo() {
   const seg = (Date.now() - tiempoInicio) / 1000;
   $('t-tiempo').textContent = fmtTiempo(seg);
-  const horas = seg / 3600;
-  const media = horas > 0 ? (distancia / 1000) / horas : 0;
+  // Solo cuenta como "en movimiento" si el GPS es reciente y hay velocidad real
+  const moviendo = (Date.now() - _ultFixT < 4000) && _ultVelKmh > 4;
+  if (moviendo) segMov++;
+  marcarPausa(!moviendo && distancia > 40);   // hasta arrancar no molesta con "En pausa"
+  const media = segMov > 0 ? (distancia / 1000) / (segMov / 3600) : 0;
   $('t-media').textContent = Math.round(Units.speedToUser(media));
+}
+
+// Rótulo "Grabando" ↔ "En pausa" (punto rojo ↔ ámbar) según si te mueves
+function marcarPausa(p) {
+  if (document.body.classList.contains('paused') === p) return;
+  document.body.classList.toggle('paused', p);
+  const el = document.querySelector('.rec-pill [data-i18n]');
+  if (el) el.textContent = i18n.t(p ? 'pausa' : 'grabando');
 }
 
 // Actualiza las etiquetas de unidad de la pantalla Conducir (km/h ↔ mph, km ↔ mi)
@@ -218,6 +236,7 @@ function pararGrabacion() {
   document.body.classList.remove('recording');
   document.body.classList.remove('driving');
   document.body.classList.remove('speeding');
+  document.body.classList.remove('paused');
   salirPantallaCompleta();
   if (typeof Nav !== 'undefined') Nav.cancelar();
   Mapa.invalidate();
@@ -231,22 +250,28 @@ function pararGrabacion() {
 
   const duracionSeg = (Date.now() - tiempoInicio) / 1000;
   const km = distancia / 1000;
-  const media = duracionSeg > 0 ? km / (duracionSeg / 3600) : 0;
+  // Velocidad media sobre el tiempo EN MOVIMIENTO (las paradas no cuentan)
+  const media = segMov > 0 ? km / (segMov / 3600)
+    : (duracionSeg > 0 ? km / (duracionSeg / 3600) : 0);
 
   if (nPuntos < 2) { UI.toast(i18n.t('corta'), 'err'); resetTelemetria(); return; }
 
-  Storage.guardarRuta({
+  const ruta = {
     id: Date.now().toString(),
     fecha: new Date().toISOString(),
     distanciaKm: +km.toFixed(2),
     duracionSeg: Math.round(duracionSeg),
+    movSeg: Math.round(segMov),
     velMax: Math.round(velMax * 3.6),
     velMedia: Math.round(media),
     leanMax: Math.round(leanMax),
     puntos: puntosSesion
-  });
+  };
+  Storage.guardarRuta(ruta);
   UI.toast(`✅ ${i18n.t('guardada')}: ${Units.distToUser(km).toFixed(2)} ${Units.distLabel()} · ${fmtTiempo(duracionSeg)}`, 'ok');
   resetTelemetria();
+  // Resumen de la salida: se abre solo el detalle de la ruta recién guardada
+  setTimeout(() => abrirRutaDetalle(ruta), 450);
 }
 
 function resetTelemetria() {
@@ -326,12 +351,14 @@ function abrirRutaDetalle(r) {
   });
   const leanStat = (r.leanMax > 0)
     ? `<div><b>${r.leanMax}°</b><span>${i18n.t('lean')}</span></div>` : '';
+  const movStat = (r.movSeg > 0 && r.movSeg < r.duracionSeg)
+    ? `<div><b>${fmtTiempo(r.movSeg)}</b><span>${i18n.t('mov')}</span></div>` : '';
   $('rm-stats').innerHTML = `
     <div><b>${Units.distToUser(r.distanciaKm).toFixed(2)}</b><span>${Units.distLabel()}</span></div>
     <div><b>${fmtTiempo(r.duracionSeg)}</b><span>${i18n.t('tiempo')}</span></div>
     <div><b>${Math.round(Units.speedToUser(r.velMax))}</b><span>${i18n.t('max')} ${Units.speedLabel()}</span></div>
     <div><b>${Math.round(Units.speedToUser(r.velMedia))}</b><span>${i18n.t('media')} ${Units.speedLabel()}</span></div>
-    ${leanStat}`;
+    ${movStat}${leanStat}`;
 
   // El mapa del detalle siempre usa Leaflet (ya está cargado en la app)
   if (!rmMap) {
@@ -402,6 +429,27 @@ ${pts}
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
   UI.toast(i18n.t('gpx_ok'), 'ok');
+}
+
+// Compartir el resumen de la salida (WhatsApp, SMS…) con la hoja nativa del
+// móvil; si el navegador no la tiene, se copia al portapapeles.
+async function compartirRuta(r) {
+  if (!r) return;
+  const fecha = new Date(r.fecha).toLocaleDateString(i18n.lang, { day: '2-digit', month: 'short', year: 'numeric' });
+  const u = Units.speedLabel();
+  const txt = `🏍️ MotoSportPro · ${fecha}\n`
+    + `📏 ${Units.distToUser(r.distanciaKm).toFixed(1)} ${Units.distLabel()} · ⏱ ${fmtTiempo(r.duracionSeg)}\n`
+    + `🚀 ${i18n.t('max')} ${Math.round(Units.speedToUser(r.velMax))} ${u} · ${i18n.t('media')} ${Math.round(Units.speedToUser(r.velMedia))} ${u}`
+    + (r.leanMax > 0 ? ` · 🏍️ ${r.leanMax}°` : '')
+    + `\nhttps://hugoibel.github.io/MotoSportPro/`;
+  if (navigator.share) {
+    try { await navigator.share({ text: txt }); return; }
+    catch (e) { if (e && e.name === 'AbortError') return; /* canceló: nada */ }
+  }
+  try {
+    await navigator.clipboard.writeText(txt);
+    UI.toast(i18n.t('share_copiado'), 'ok');
+  } catch (e) { UI.toast(txt); }
 }
 
 // --- Ajustes → Mapa: estilo, marcador y alerta de velocidad ---
@@ -525,6 +573,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   // Detalle de ruta (mapa + GPX + borrar)
   $('rm-cerrar').addEventListener('click', cerrarRutaDetalle);
+  $('rm-share').addEventListener('click', () => compartirRuta(rutaAbierta));
   $('rm-gpx').addEventListener('click', () => exportarGPX(rutaAbierta));
   $('rm-borrar').addEventListener('click', () => {
     if (!rutaAbierta) return;

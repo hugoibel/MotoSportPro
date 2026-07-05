@@ -532,6 +532,43 @@ Object.assign(I18N.it, {
   recentrar: 'Ricentra'
 });
 
+// --- v0.19: resumen al terminar + compartir, auto-pausa y lluvia en la ruta ---
+Object.assign(I18N.es, {
+  pausa: 'En pausa',
+  mov: 'en movimiento',
+  rm_share: 'Compartir',
+  share_copiado: 'Resumen copiado — pégalo donde quieras',
+  lluvia_ruta: '🌧️ Lluvia probable en tu ruta ({p}%)'
+});
+Object.assign(I18N.en, {
+  pausa: 'Paused',
+  mov: 'moving',
+  rm_share: 'Share',
+  share_copiado: 'Summary copied — paste it anywhere',
+  lluvia_ruta: '🌧️ Rain likely on your route ({p}%)'
+});
+Object.assign(I18N.de, {
+  pausa: 'Pausiert',
+  mov: 'in Bewegung',
+  rm_share: 'Teilen',
+  share_copiado: 'Zusammenfassung kopiert — überall einfügbar',
+  lluvia_ruta: '🌧️ Regen auf deiner Route wahrscheinlich ({p} %)'
+});
+Object.assign(I18N.fr, {
+  pausa: 'En pause',
+  mov: 'en mouvement',
+  rm_share: 'Partager',
+  share_copiado: 'Résumé copié — collez-le où vous voulez',
+  lluvia_ruta: '🌧️ Pluie probable sur votre itinéraire ({p} %)'
+});
+Object.assign(I18N.it, {
+  pausa: 'In pausa',
+  mov: 'in movimento',
+  rm_share: 'Condividi',
+  share_copiado: 'Riepilogo copiato — incollalo dove vuoi',
+  lluvia_ruta: '🌧️ Pioggia probabile sul percorso ({p}%)'
+});
+
 const NOMBRES_IDIOMA = { es: 'Español', en: 'English', de: 'Deutsch', fr: 'Français', it: 'Italiano' };
 
 const i18n = {

@@ -88,6 +88,8 @@ const Nav = {
     info.style.display = 'flex';
     $('nav-dist').textContent = '…';
     $('nav-time').textContent = '';
+    const rain = $('nav-rain');
+    if (rain) rain.style.display = 'none';
 
     if (!('geolocation' in navigator)) { Mapa.center(lat, lng, 14); this._error(); return; }
     navigator.geolocation.getCurrentPosition(async pos => {
@@ -98,7 +100,49 @@ const Nav = {
       const distU = Units.distToUser(this.ruta.distanciaKm).toFixed(1);
       $('nav-dist').textContent = `${distU} ${Units.distLabel()}`;
       $('nav-time').textContent = `${Math.round(this.ruta.duracionMin)} ${i18n.t('nav_min')} · 🏁 ${this._hora(this.ruta.duracionMin * 60)}`;
+      this._lluviaRuta(route);   // ¿lloverá por donde voy a pasar? (no bloquea nada)
     }, () => { Mapa.center(lat, lng, 14); this._error(); }, { enableHighAccuracy: true, timeout: 10000 });
+  },
+
+  // Comprueba la probabilidad de lluvia en varios puntos de la ruta, cada uno
+  // a la HORA en la que se prevé pasar por él (Open-Meteo, gratis sin clave).
+  // Si en alguno es ≥40%, muestra el aviso 🌧️ en el panel de navegación.
+  async _lluviaRuta(route) {
+    const el = $('nav-rain');
+    if (!el) return;
+    el.style.display = 'none';
+    const req = this._lluviaN = (this._lluviaN || 0) + 1;
+    try {
+      const coords = route.geometry.coordinates;                    // [lng,lat]
+      if (!coords || coords.length < 2) return;
+      const n = Math.min(5, coords.length);
+      const idx = [];
+      for (let i = 0; i < n; i++) idx.push(Math.round(i * (coords.length - 1) / (n - 1)));
+      const horasRuta = route.duration / 3600;
+      const horas = Math.min(24, Math.max(2, Math.ceil(horasRuta) + 1));
+      const lats = idx.map(i => coords[i][1].toFixed(3)).join(',');
+      const lngs = idx.map(i => coords[i][0].toFixed(3)).join(',');
+      const r = await fetch('https://api.open-meteo.com/v1/forecast'
+        + `?latitude=${lats}&longitude=${lngs}`
+        + `&hourly=precipitation_probability&forecast_hours=${horas}&timezone=auto`);
+      const d = await r.json();
+      if (req !== this._lluviaN || !this.destino) return;           // ya hay otro destino
+      const locs = Array.isArray(d) ? d : [d];
+      let peor = 0;
+      locs.forEach((loc, i) => {
+        const probs = (loc.hourly && loc.hourly.precipitation_probability) || [];
+        if (!probs.length) return;
+        // hora prevista de paso por ese punto (0 = ahora mismo)
+        const h = Math.min(probs.length - 1, Math.round((i / Math.max(locs.length - 1, 1)) * horasRuta));
+        const p = Math.max(probs[h] || 0, probs[Math.max(h - 1, 0)] || 0);
+        if (p > peor) peor = p;
+      });
+      if (peor >= 40) {
+        el.textContent = `🌧️ ${peor}%`;
+        el.style.display = 'inline-flex';
+        UI.toast(i18n.t('lluvia_ruta').replace('{p}', peor), 'err');
+      }
+    } catch (e) { /* sin datos de lluvia: la ruta sigue igual */ }
   },
 
   // Pide a OSRM la ruta desde (lat,lng) hasta el destino, con las maniobras (steps).
@@ -344,11 +388,12 @@ const Nav = {
     if (window.speechSynthesis) { try { speechSynthesis.cancel(); } catch (e) {} }
     document.body.classList.remove('navigating');
     if (typeof Mapa !== 'undefined') Mapa.limpiarNav();
-    const info = $('nav-info'), res = $('nav-results'), input = $('nav-input'), g = $('nav-guide'), ep = $('eta-pill');
+    const info = $('nav-info'), res = $('nav-results'), input = $('nav-input'), g = $('nav-guide'), ep = $('eta-pill'), rain = $('nav-rain');
     if (info) info.style.display = 'none';
     if (res) res.style.display = 'none';
     if (input) input.value = '';
     if (g) g.style.display = 'none';
     if (ep) ep.style.display = 'none';
+    if (rain) rain.style.display = 'none';
   }
 };

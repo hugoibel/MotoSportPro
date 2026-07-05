@@ -1163,3 +1163,33 @@ body.speeding .stat.big .value { color: #ff3b5c; text-shadow: 0 0 18px rgba(255,
   0%, 100% { box-shadow: 0 0 0 3px rgba(255, 59, 92, 0.35), 0 10px 30px rgba(255, 59, 92, 0.45); }
   50% { box-shadow: 0 0 0 7px rgba(255, 59, 92, 0.5), 0 10px 34px rgba(255, 59, 92, 0.6); }
 }
+
+/* ============================================================
+   v0.19 — auto-pausa, compartir y lluvia en la ruta
+   ============================================================ */
+
+/* En pausa (parado en un semáforo): el punto rojo pasa a ámbar fijo */
+body.paused .rec-pill .rec-dot {
+  background: #ffb020;
+  box-shadow: 0 0 8px #ffb020;
+  animation: none;
+}
+
+/* Aviso de lluvia en la ruta planificada (panel de navegación) */
+.nav-rain {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  background: rgba(46, 124, 255, 0.16);
+  border: 1px solid rgba(46, 124, 255, 0.45);
+  color: #9ec5ff;
+  border-radius: 10px;
+  padding: 6px 9px;
+  font-weight: 700;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+/* Con 3 botones (Compartir + GPX + Borrar) en móviles estrechos, que salten de línea */
+.rm-btns { flex-wrap: wrap; }
+.rm-btns .btn { flex: 1 1 auto; }
