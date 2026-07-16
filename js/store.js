@@ -87,13 +87,12 @@ const Store = {
       const src = foto || p.img;               // si no, la ilustración
       const card = document.createElement('div');
       card.className = 'shop-card';
+      // v0.22: tarjetas limpias — sin botones de gestión de fotos (📷/✕);
+      // si el usuario subió una foto propia en su día, se sigue mostrando.
       card.innerHTML = `
         <div class="shop-imgwrap">
           <img class="shop-img" src="${src}" alt="${p.nombre}" loading="lazy"
                onerror="if(!this.dataset.f){this.dataset.f=1;this.src='${p.svg}'}else{this.outerHTML='<div class=\\'shop-emoji\\'>${p.emoji}</div>'}">
-          <button class="shop-foto-btn" data-foto="${i}" title="${i18n.t('foto_cambiar')}">📷</button>
-          ${foto ? `<button class="shop-foto-del" data-fotodel="${p.nombre}" title="${i18n.t('foto_quitar')}">✕</button>` : ''}
-          <input type="file" accept="image/*" hidden id="tienda-file-${i}">
         </div>
         <div class="shop-cat">${p.cat}</div>
         <div class="shop-name">${p.nombre}</div>
@@ -103,18 +102,5 @@ const Store = {
         </div>`;
       cont.appendChild(card);
     });
-
-    // Botón cámara → abre el selector de archivo de ese producto
-    cont.querySelectorAll('.shop-foto-btn').forEach(btn => {
-      const i = btn.dataset.foto;
-      const input = document.getElementById('tienda-file-' + i);
-      btn.addEventListener('click', () => input.click());
-      input.addEventListener('change', e => {
-        if (e.target.files[0]) this.ponerFoto(PRODUCTOS[i].nombre, e.target.files[0]);
-      });
-    });
-    // Botón ✕ → quita la foto y vuelve a la ilustración
-    cont.querySelectorAll('.shop-foto-del').forEach(btn =>
-      btn.addEventListener('click', () => this.quitarFoto(btn.dataset.fotodel)));
   }
 };

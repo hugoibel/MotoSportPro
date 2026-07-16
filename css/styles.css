@@ -388,18 +388,6 @@ body.driving .nav-guide {
   border-radius: 16px;
   filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.45));
 }
-.shop-foto-btn, .shop-foto-del {
-  position: absolute;
-  top: 6px;
-  width: 30px; height: 30px;
-  border: none; border-radius: 9px;
-  cursor: pointer; font-size: 0.85rem;
-  display: grid; place-items: center;
-  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
-}
-.shop-foto-btn { right: 6px; background: rgba(11, 14, 20, 0.72); }
-.shop-foto-del { left: 6px; background: rgba(255, 59, 92, 0.85); color: #fff; }
-.shop-foto-btn:active, .shop-foto-del:active { transform: scale(0.92); }
 .shop-cat {
   font-size: 0.64rem;
   text-transform: uppercase;
@@ -424,16 +412,7 @@ body.driving .nav-guide {
 .shop-btn.amazon { background: linear-gradient(135deg, #ffb400, #ff9900); }
 .shop-btn.revzilla { background: linear-gradient(135deg, #ffffff, #d7dbe3); }
 
-/* Copia de seguridad de fotos */
-.backup-box {
-  margin-top: 22px;
-  padding: 16px;
-  background: var(--surface);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: var(--radius);
-}
-.backup-box h3 { font-family: var(--font-sport); font-size: 1.1rem; margin-bottom: 4px; }
-.backup-box .muted { margin-bottom: 12px; }
+/* Copia de seguridad de fotos (v0.22: vive en Ajustes, ya no en la Tienda) */
 .backup-btns { display: flex; gap: 10px; }
 .backup-btns .btn { padding: 13px; font-size: 0.85rem; }
 
