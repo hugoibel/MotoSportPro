@@ -645,6 +645,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   if ('geolocation' in navigator) {
     navigator.geolocation.getCurrentPosition(
       pos => {
+        ultimaPos = [pos.coords.latitude, pos.coords.longitude];   // para la búsqueda "cerca de mí" y el SOS
         Mapa.center(pos.coords.latitude, pos.coords.longitude, 15);
         Weather.cargar(pos.coords.latitude, pos.coords.longitude);
       },

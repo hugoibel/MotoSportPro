@@ -49,7 +49,10 @@ const Nav = {
     document.addEventListener('idioma-cambiado', () => { input.placeholder = i18n.t('nav_buscar'); });
   },
 
-  // Busca direcciones que coincidan con el texto y muestra una lista
+  // Busca direcciones que coincidan con el texto y muestra una lista.
+  // v0.23 "near me": primero busca SOLO cerca de mi posición (~80 km) y ordena
+  // por distancia ("walmart" = los Walmart de mi zona, no uno de Pensilvania);
+  // si cerca no hay nada (una ciudad lejana, otra dirección), busca en todas partes.
   async buscar(q) {
     q = (q || '').trim();
     if (!q) return;
@@ -58,21 +61,61 @@ const Nav = {
     res.style.display = 'block';
     res.innerHTML = `<div class="nav-msg">${i18n.t('nav_buscando')}</div>`;
     try {
-      const url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&q=' + encodeURIComponent(q);
-      const r = await fetch(url, { headers: { 'Accept-Language': i18n.lang } });
-      const data = await r.json();
+      const pos = await this._miPos();
+      let data = await this._nominatim(q, pos, true);            // solo cerca
+      if (pos && !data.length) data = await this._nominatim(q, pos, false);   // lejos: como antes
       if (!data.length) { res.innerHTML = `<div class="nav-msg">${i18n.t('nav_sin_resultados')}</div>`; return; }
+
+      // Ordenar por cercanía y enseñar a cuánto queda cada resultado
+      if (pos) {
+        data.forEach(d => { d._dist = distanciaMetros(pos, [parseFloat(d.lat), parseFloat(d.lon)]); });
+        data.sort((a, b) => a._dist - b._dist);
+      }
       res.innerHTML = '';
       data.forEach(d => {
         const b = document.createElement('button');
         b.className = 'nav-result';
-        b.innerHTML = `<span>📍</span><span>${d.display_name}</span>`;
+        const partes = d.display_name.split(',');
+        const nombre = partes.shift().trim();
+        const dir = partes.join(',').trim();
+        let distTxt = '';
+        if (d._dist != null) {
+          const du = Units.distToUser(d._dist / 1000);
+          distTxt = `<em>${du < 10 ? du.toFixed(1) : Math.round(du)} ${Units.distLabel()}</em>`;
+        }
+        b.innerHTML = `<span>📍</span><span class="nr-txt"><b>${nombre}</b>${dir ? `<small>${dir}</small>` : ''}</span>${distTxt}`;
         b.addEventListener('click', () => this.elegir(parseFloat(d.lat), parseFloat(d.lon), d.display_name));
         res.appendChild(b);
       });
     } catch (e) {
       res.innerHTML = `<div class="nav-msg">${i18n.t('nav_error')}</div>`;
     }
+  },
+
+  // Mi posición para la búsqueda: GPS rápido (vale uno de hace ≤2 min)
+  // y, si no responde, la última posición conocida de la app.
+  _miPos() {
+    return new Promise(resolve => {
+      if (!('geolocation' in navigator)) { resolve(ultimaPos || null); return; }
+      navigator.geolocation.getCurrentPosition(
+        p => resolve([p.coords.latitude, p.coords.longitude]),
+        () => resolve(ultimaPos || null),
+        { maximumAge: 120000, timeout: 4000 }
+      );
+    });
+  },
+
+  // Llama a Nominatim; con "cerca" limita a un recuadro de ~±0.7° (~50 mi) alrededor
+  _nominatim(q, pos, cerca) {
+    let url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&q=' + encodeURIComponent(q);
+    if (pos && cerca) {
+      const d = 0.7;
+      url += `&viewbox=${(pos[1] - d).toFixed(3)},${(pos[0] + d).toFixed(3)},${(pos[1] + d).toFixed(3)},${(pos[0] - d).toFixed(3)}&bounded=1`;
+    }
+    return fetch(url, { headers: { 'Accept-Language': i18n.lang } })
+      .then(r => r.json())
+      .then(d => Array.isArray(d) ? d : [])
+      .catch(() => []);
   },
 
   // Fija el destino, lo pinta en el mapa y calcula la ruta desde mi posición
