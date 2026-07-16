@@ -611,6 +611,48 @@ Object.assign(I18N.it, {
   install_cerrar: 'Chiudi'
 });
 
+// --- Modo Pista v0.21 ---
+Object.assign(I18N.es, {
+  pista_btn: 'Modo pista',
+  pista_titulo: 'Modo Pista',
+  pista_actual: 'vuelta actual',
+  pista_vuelta: 'Vuelta',
+  pista_ultima: 'última',
+  pista_mejor: 'mejor'
+});
+Object.assign(I18N.en, {
+  pista_btn: 'Track mode',
+  pista_titulo: 'Track Mode',
+  pista_actual: 'current lap',
+  pista_vuelta: 'Lap',
+  pista_ultima: 'last',
+  pista_mejor: 'best'
+});
+Object.assign(I18N.de, {
+  pista_btn: 'Rennmodus',
+  pista_titulo: 'Rennmodus',
+  pista_actual: 'aktuelle Runde',
+  pista_vuelta: 'Runde',
+  pista_ultima: 'letzte',
+  pista_mejor: 'beste'
+});
+Object.assign(I18N.fr, {
+  pista_btn: 'Mode circuit',
+  pista_titulo: 'Mode Circuit',
+  pista_actual: 'tour en cours',
+  pista_vuelta: 'Tour',
+  pista_ultima: 'dernier',
+  pista_mejor: 'meilleur'
+});
+Object.assign(I18N.it, {
+  pista_btn: 'Modalità pista',
+  pista_titulo: 'Modalità Pista',
+  pista_actual: 'giro attuale',
+  pista_vuelta: 'Giro',
+  pista_ultima: 'ultimo',
+  pista_mejor: 'migliore'
+});
+
 const NOMBRES_IDIOMA = { es: 'Español', en: 'English', de: 'Deutsch', fr: 'Français', it: 'Italiano' };
 
 const i18n = {

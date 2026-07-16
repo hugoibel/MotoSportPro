@@ -81,6 +81,9 @@
       <!-- Re-centrar el mapa en mi posición (aparece al arrastrar el mapa conduciendo) -->
       <button id="btn-recentrar" class="btn-recentrar" style="display:none">⌖ <span data-i18n="recentrar">Re-centrar</span></button>
 
+      <!-- Modo Pista: se abre con este botón mientras conduces -->
+      <button id="btn-pista" class="btn-pista" data-i18n-title="pista_btn" title="Modo pista">🏁</button>
+
       <button class="rutas-fab" data-view="rutas">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
           <path d="M9 3 3.5 5.5v15L9 18l6 3 5.5-2.5v-15L15 6 9 3z"/><path d="M9 3v15M15 6v15"/>
@@ -295,6 +298,71 @@
     </div>
   </div>
 
+  <!-- ===== MODO PISTA: tacómetro digital + vueltas (se abre con 🏁 al conducir) ===== -->
+  <div id="pista-overlay" class="pista-overlay" style="display:none">
+    <div class="pista-head">
+      <span class="pista-flag">🏁</span>
+      <h2 data-i18n="pista_titulo">Modo Pista</h2>
+      <button id="pista-cerrar" class="pista-x" aria-label="Cerrar">✕</button>
+    </div>
+
+    <!-- Tacómetro digital: dial de 240° coloreado por velocidad -->
+    <div class="pista-gauge">
+      <svg viewBox="0 0 200 152" aria-hidden="true">
+        <defs>
+          <linearGradient id="pista-grad" x1="0" y1="1" x2="1" y2="1">
+            <stop offset="0%" stop-color="#2ad17a"/>
+            <stop offset="50%" stop-color="#ffd23a"/>
+            <stop offset="78%" stop-color="#ff8a3a"/>
+            <stop offset="100%" stop-color="#ff3b5c"/>
+          </linearGradient>
+        </defs>
+        <path class="pg-track" d="M 29 141 A 82 82 0 1 1 171 141"/>
+        <path id="pg-fill" class="pg-fill" d="M 29 141 A 82 82 0 1 1 171 141"/>
+        <g id="pg-ticks"></g>
+      </svg>
+      <div class="pg-center">
+        <b id="pg-vel">0</b>
+        <span id="pg-unit">mph</span>
+      </div>
+      <div class="pg-max"><span data-i18n="max">máx</span> <b id="pg-max">0</b></div>
+    </div>
+
+    <!-- Inclinación: barra desde el centro hacia el lado de la curva -->
+    <div class="pista-lean">
+      <div class="pl-head">
+        <span data-i18n="lean">inclinación</span>
+        <b id="pl-val">0°</b>
+        <small id="pl-max">máx 0°</small>
+      </div>
+      <div class="pl-bar">
+        <div id="pl-fill" class="pl-fill"></div>
+        <div class="pl-notch"></div>
+      </div>
+    </div>
+
+    <!-- Cronómetro de vueltas -->
+    <div class="pista-laps">
+      <div class="lap-now">
+        <span data-i18n="pista_actual">vuelta actual</span>
+        <b id="lap-time">0:00.0</b>
+      </div>
+      <button id="lap-btn" class="lap-btn">🏁 <span data-i18n="pista_vuelta">Vuelta</span> <em id="lap-n">1</em></button>
+      <div class="lap-chips">
+        <div><span data-i18n="pista_ultima">última</span><b id="lap-ult">—</b></div>
+        <div class="lap-best"><span data-i18n="pista_mejor">mejor</span><b id="lap-mejor">—</b></div>
+      </div>
+    </div>
+
+    <!-- Datos de la sesión -->
+    <div class="pista-stats">
+      <div><b id="ps-dist">0.00</b><span id="ps-dist-u">mi</span></div>
+      <div><b id="ps-tiempo">00:00</b><span data-i18n="tiempo">tiempo</span></div>
+      <div><b id="ps-max">0</b><span data-i18n="max">máx</span></div>
+      <div><b id="ps-media">0</b><span data-i18n="media">media</span></div>
+    </div>
+  </div>
+
   <!-- Aviso: instalar MotoSportPro como app en el móvil (PWA) -->
   <div id="install-banner" class="install-banner" role="dialog" aria-live="polite" style="display:none">
     <button id="install-close" class="install-close" aria-label="Cerrar" data-i18n-title="install_cerrar">✕</button>
@@ -331,6 +399,7 @@
   <script src="js/fuel.js"></script>
   <script src="js/events.js"></script>
   <script src="js/install.js"></script>
+  <script src="js/pista.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

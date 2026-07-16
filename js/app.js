@@ -42,6 +42,7 @@ let segMov = 0, _ultVelKmh = 0, _ultFixT = 0;
 // Física de una curva coordinada: inclinación = atan(velocidad × giro / gravedad).
 // No depende de cómo va montado el móvil (a diferencia del acelerómetro).
 let leanMax = 0, leanSuave = 0, _leanHead = null, _leanT = 0;
+let _leanSigno = 1;   // lado de la curva: +1 derecha, −1 izquierda (para el Modo Pista)
 function calcularLean(velMs, heading, t) {
   if (heading == null || isNaN(heading) || velMs < 5) { _leanHead = null; return 0; } // <18 km/h: ruido
   if (_leanHead == null) { _leanHead = heading; _leanT = t; return 0; }
@@ -50,6 +51,7 @@ function calcularLean(velMs, heading, t) {
   let dh = heading - _leanHead;
   if (dh > 180) dh -= 360;
   if (dh < -180) dh += 360;
+  _leanSigno = dh >= 0 ? 1 : -1;
   _leanHead = heading; _leanT = t;
   const omega = (dh * Math.PI / 180) / dt;                       // velocidad de giro (rad/s)
   const lean = Math.atan(Math.abs(velMs * omega) / 9.81) * 180 / Math.PI;
@@ -149,6 +151,7 @@ function iniciarGrabacion() {
   }
   _velUltAviso = 0;
   if (typeof SOS !== 'undefined') SOS.armar();   // vigilar caídas (acelerómetro)
+  if (typeof Pista !== 'undefined') Pista.reset();   // la vuelta 1 arranca con la grabación
 
   // Modo navegación a pantalla completa (estilo Apple Maps)
   document.body.classList.add('driving');
@@ -192,6 +195,11 @@ function onPosicion(pos) {
   $('t-velocidad').textContent = Math.round(Units.speedToUser(velMs * 3.6));
   $('t-distancia').textContent = Units.distToUser(distancia / 1000).toFixed(2);
   $('t-maxima').textContent = Math.round(Units.speedToUser(velMax * 3.6));
+
+  // Modo Pista: alimentar el tacómetro digital si está abierto
+  if (typeof Pista !== 'undefined') {
+    Pista.onVel({ vel: velMs * 3.6, max: velMax * 3.6, dist: distancia, lean: leanSuave, signo: _leanSigno });
+  }
 }
 
 function actualizarTiempo() {
@@ -203,6 +211,7 @@ function actualizarTiempo() {
   marcarPausa(!moviendo && distancia > 40);   // hasta arrancar no molesta con "En pausa"
   const media = segMov > 0 ? (distancia / 1000) / (segMov / 3600) : 0;
   $('t-media').textContent = Math.round(Units.speedToUser(media));
+  if (typeof Pista !== 'undefined') Pista.onTiempo(seg, media);
 }
 
 // Rótulo "Grabando" ↔ "En pausa" (punto rojo ↔ ámbar) según si te mueves
@@ -233,6 +242,7 @@ function onErrorGps(err) {
 function pararGrabacion() {
   UI.vibrar([30, 50, 30]);
   grabando = false;
+  if (typeof Pista !== 'undefined') Pista.cerrar(true);   // cerrar el Modo Pista si estaba abierto
   document.body.classList.remove('recording');
   document.body.classList.remove('driving');
   document.body.classList.remove('speeding');
@@ -549,6 +559,9 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   // Clima (chip con temperatura + lluvia)
   Weather.init();
+
+  // Modo Pista (tacómetro digital + vueltas)
+  if (typeof Pista !== 'undefined') Pista.init();
 
   // Botón "Re-centrar" (aparece al arrastrar el mapa mientras conduces)
   $('btn-recentrar').addEventListener('click', () => Mapa.recentrar());

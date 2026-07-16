@@ -1271,3 +1271,250 @@ body.paused .rec-pill .rec-dot {
   padding: 3px;
   cursor: pointer;
 }
+
+/* ===== AJUSTE A PANTALLA DE MÓVIL (v0.21) =====
+   La cabecera sumaba ~480px de ancho (logo + 5 controles) y desbordaba
+   en cualquier iPhone (375-430px). Se compacta por tramos de ancho. */
+body { overscroll-behavior-y: none; }   /* sin rebote/pull-to-refresh accidental */
+.topbar h1 { min-width: 0; white-space: nowrap; }
+
+@media (max-width: 480px) {
+  .topbar { padding-left: 10px; padding-right: 10px; }
+  .topbar h1 { font-size: 1.1rem; letter-spacing: 0.8px; }
+  .topbar h1::before { width: 8px; height: 8px; margin-right: 5px; }
+  .topbar-right { gap: 5px; }
+  .crown-btn { width: 30px; height: 30px; }
+  .crown-btn svg { width: 17px; height: 17px; }
+  .unit-btn { width: 32px; height: 30px; font-size: 0.7rem; }
+  .lang-select { padding: 4px 5px; font-size: 0.7rem; }
+  .gps-badge { padding: 4px 8px; font-size: 0.66rem; }
+}
+@media (max-width: 370px) {
+  .topbar h1 { font-size: 0.95rem; letter-spacing: 0.4px; }
+  .topbar-right { gap: 4px; }
+  .stats-grid { gap: 5px; }
+  .stats-grid .value { font-size: 1.2rem; }
+}
+
+/* Conduciendo, el chip del clima chocaba con la barra de datos flotante
+   (su top fijo de 64px no contaba la zona segura del notch del iPhone). */
+body.driving .weather-chip { top: calc(80px + env(safe-area-inset-top)); }
+body.driving.navigating .weather-chip { display: none; }   /* ahí va la guía de giros */
+
+/* ===== MODO PISTA (v0.21): tacómetro digital + vueltas ===== */
+
+/* Botón 🏁 para entrar (solo visible conduciendo, sobre el botón Finalizar) */
+.btn-pista { display: none; }
+body.driving .btn-pista {
+  display: grid; place-items: center;
+  position: absolute;
+  right: 14px;
+  bottom: calc(96px + env(safe-area-inset-bottom));
+  width: 54px; height: 54px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 138, 58, 0.5);
+  background: rgba(12, 16, 25, 0.65);
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 14px rgba(255, 92, 42, 0.25);
+  font-size: 1.5rem;
+  cursor: pointer;
+  z-index: 12;
+}
+.btn-pista:active { transform: scale(0.94); }
+
+/* La ventana: pantalla completa estilo salpicadero racing */
+.pista-overlay {
+  position: fixed; inset: 0;
+  z-index: 1250;               /* por debajo del SOS (1300): la alarma siempre gana */
+  display: flex; flex-direction: column;
+  gap: 10px;
+  padding: calc(10px + env(safe-area-inset-top)) 16px calc(14px + env(safe-area-inset-bottom));
+  background:
+    radial-gradient(900px 480px at 50% -12%, rgba(255, 92, 42, 0.16), transparent 60%),
+    linear-gradient(180deg, #0d1017, #06080c);
+  overflow-y: auto;
+}
+.pista-head { display: flex; align-items: center; gap: 10px; }
+.pista-flag { font-size: 1.3rem; }
+.pista-head h2 {
+  flex: 1;
+  font-family: var(--font-sport);
+  font-size: 1.25rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, #fff, var(--accent-light));
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.pista-x {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+/* Tacómetro */
+.pista-gauge {
+  position: relative;
+  width: min(88vw, 330px);
+  margin: 0 auto;
+  flex-shrink: 0;
+}
+.pista-gauge svg { width: 100%; display: block; }
+.pg-track {
+  fill: none;
+  stroke: #1a2130;
+  stroke-width: 12;
+  stroke-linecap: round;
+}
+.pg-fill {
+  fill: none;
+  stroke: url(#pista-grad);
+  stroke-width: 12;
+  stroke-linecap: round;
+  stroke-dasharray: 343.6;
+  stroke-dashoffset: 343.6;
+  transition: stroke-dashoffset 0.35s ease;
+  filter: drop-shadow(0 0 7px rgba(255, 92, 42, 0.45));
+}
+.pg-center {
+  position: absolute;
+  left: 0; right: 0; top: 34%;
+  text-align: center;
+  pointer-events: none;
+}
+.pg-center b {
+  display: block;
+  font-family: var(--font-sport);
+  font-size: 4rem;
+  font-weight: 700;
+  line-height: 0.95;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  text-shadow: 0 0 22px rgba(255, 92, 42, 0.55);
+}
+.pg-center span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+.pg-max {
+  position: absolute;
+  left: 50%; bottom: 2%;
+  transform: translateX(-50%);
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 99px;
+  padding: 4px 12px;
+  font-size: 0.7rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.pg-max b { color: #fff; font-family: var(--font-sport); font-size: 0.95rem; }
+
+/* Inclinación */
+.pista-lean, .pista-laps {
+  background: linear-gradient(180deg, var(--surface-2), #151b28);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  padding: 12px 14px;
+  flex-shrink: 0;
+}
+.pl-head {
+  display: flex; align-items: baseline; gap: 10px;
+  margin-bottom: 9px;
+}
+.pl-head span { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; flex: 1; }
+.pl-head b { font-family: var(--font-sport); font-size: 1.5rem; color: #39c2ff; }
+.pl-head small { font-size: 0.7rem; color: var(--muted); }
+.pl-bar {
+  position: relative;
+  height: 12px;
+  border-radius: 99px;
+  background: #131926;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+.pl-fill {
+  position: absolute; top: 0; bottom: 0;
+  width: 0;
+  background: linear-gradient(90deg, #39c2ff, #7a5cff);
+  border-radius: 99px;
+  transition: width 0.25s ease;
+}
+.pl-notch {
+  position: absolute; left: 50%; top: 0; bottom: 0;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.45);
+}
+
+/* Vueltas */
+.pista-laps { display: grid; grid-template-columns: 1fr auto; gap: 10px 12px; align-items: center; }
+.lap-now span { display: block; font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+.lap-now b {
+  font-family: var(--font-sport);
+  font-size: 2.3rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #39c2ff;
+  text-shadow: 0 0 16px rgba(57, 194, 255, 0.4);
+}
+.lap-btn {
+  border: none;
+  border-radius: 14px;
+  padding: 16px 18px;
+  font-family: var(--font-sport);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  box-shadow: 0 6px 18px rgba(255, 92, 42, 0.4);
+  cursor: pointer;
+}
+.lap-btn:active { transform: scale(0.95); }
+.lap-btn em { font-style: normal; opacity: 0.8; }
+.lap-chips { grid-column: 1 / -1; display: flex; gap: 8px; }
+.lap-chips > div {
+  flex: 1;
+  display: flex; align-items: baseline; justify-content: space-between; gap: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+  padding: 7px 11px;
+}
+.lap-chips span { font-size: 0.64rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+.lap-chips b { font-family: var(--font-sport); font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+.lap-chips .lap-best b { color: var(--accent-2); }
+
+/* Datos de la sesión */
+.pista-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; flex-shrink: 0; }
+.pista-stats > div {
+  background: linear-gradient(180deg, var(--surface-2), #151b28);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 10px 4px;
+  text-align: center;
+}
+.pista-stats b {
+  display: block;
+  font-family: var(--font-sport);
+  font-size: 1.3rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.pista-stats span { font-size: 0.6rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* Pantallas bajas (apaisado o móviles pequeños): dial más contenido */
+@media (max-height: 640px) {
+  .pista-gauge { width: min(60vw, 250px); }
+  .pg-center b { font-size: 3rem; }
+  .lap-now b { font-size: 1.8rem; }
+}
