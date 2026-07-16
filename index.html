@@ -4,8 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#0b0e14" />
+  <!-- iOS/Android: abrir como app a pantalla completa (sin barra del navegador) -->
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="MotoSport" />
   <title>MotoSportPro</title>
   <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -289,6 +295,24 @@
     </div>
   </div>
 
+  <!-- Aviso: instalar MotoSportPro como app en el móvil (PWA) -->
+  <div id="install-banner" class="install-banner" role="dialog" aria-live="polite" style="display:none">
+    <button id="install-close" class="install-close" aria-label="Cerrar" data-i18n-title="install_cerrar">✕</button>
+    <img class="install-logo" src="icons/apple-touch-icon.png" alt="" />
+    <div class="install-main">
+      <b class="install-title" data-i18n="install_titulo">Instala MotoSportPro</b>
+      <div id="install-ios" class="install-ios" style="display:none">
+        <span data-i18n="install_ios_toca">Toca</span>
+        <svg class="ib-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l4 4-1.4 1.4L13 6.8V15h-2V6.8L9.4 8.4 8 7l4-4z"/><path d="M6 10h2v9h8v-9h2v9a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-9z"/></svg>
+        <span data-i18n="install_ios_luego">y elige «Añadir a pantalla de inicio»</span>
+      </div>
+      <div id="install-android" class="install-android" style="display:none">
+        <span data-i18n="install_android_sub">Añádela a tu móvil: pantalla completa y acceso directo.</span>
+      </div>
+    </div>
+    <button id="install-btn" class="install-btn" style="display:none" data-i18n="install_boton">Instalar</button>
+  </div>
+
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="js/config.js"></script>
   <script src="js/units.js"></script>
@@ -306,6 +330,7 @@
   <script src="js/garage.js"></script>
   <script src="js/fuel.js"></script>
   <script src="js/events.js"></script>
+  <script src="js/install.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

@@ -1,8 +1,11 @@
 {
   "name": "MotoSportPro",
   "short_name": "MotoSport",
-  "description": "Graba tus rutas en moto con telemetría: velocidad, distancia, tiempo y mapa GPS.",
+  "description": "Tu copiloto en moto: navegación GPS giro a giro, rutas con curvas, telemetría, clima, gasolineras y SOS por caída.",
   "start_url": "./index.html",
+  "scope": "./",
+  "lang": "es",
+  "categories": ["navigation", "travel", "sports"],
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0b0e14",

@@ -1,7 +1,7 @@
 // Service Worker — cachea la app para que funcione sin conexión.
 // Desde v16 también guarda los trozos de mapa que vas viendo (caché
 // msp-tiles), así el mapa de tus zonas funciona sin internet.
-const CACHE = 'motosportpro-v19';
+const CACHE = 'motosportpro-v20';
 const TILES = 'msp-tiles';
 const TILES_MAX = 4500;   // tope de trozos guardados (~70 MB)
 const ASSETS = [
@@ -24,10 +24,12 @@ const ASSETS = [
   './js/garage.js',
   './js/fuel.js',
   './js/events.js',
+  './js/install.js',
   './js/app.js',
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',
+  './icons/apple-touch-icon.png',
   './img/casco.jpg',
   './img/chaqueta.jpg',
   './img/guantes.jpg',

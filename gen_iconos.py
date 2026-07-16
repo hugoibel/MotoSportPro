@@ -116,4 +116,5 @@ def make_png(S, path):
 here = os.path.dirname(os.path.abspath(__file__))
 make_png(192, os.path.join(here, 'icons', 'icon-192.png'))
 make_png(512, os.path.join(here, 'icons', 'icon-512.png'))
+make_png(180, os.path.join(here, 'icons', 'apple-touch-icon.png'))  # iOS pantalla de inicio (180x180)
 print('Listo.')

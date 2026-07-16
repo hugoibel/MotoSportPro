@@ -569,6 +569,48 @@ Object.assign(I18N.it, {
   lluvia_ruta: '🌧️ Pioggia probabile sul percorso ({p}%)'
 });
 
+// --- Guía de instalación como app (PWA) v0.20 ---
+Object.assign(I18N.es, {
+  install_titulo: 'Instala MotoSportPro',
+  install_ios_toca: 'Toca',
+  install_ios_luego: 'y elige «Añadir a pantalla de inicio»',
+  install_android_sub: 'Añádela a tu móvil: pantalla completa y acceso directo.',
+  install_boton: 'Instalar',
+  install_cerrar: 'Cerrar'
+});
+Object.assign(I18N.en, {
+  install_titulo: 'Install MotoSportPro',
+  install_ios_toca: 'Tap',
+  install_ios_luego: 'then choose “Add to Home Screen”',
+  install_android_sub: 'Add it to your phone: full screen and quick access.',
+  install_boton: 'Install',
+  install_cerrar: 'Close'
+});
+Object.assign(I18N.de, {
+  install_titulo: 'MotoSportPro installieren',
+  install_ios_toca: 'Tippe auf',
+  install_ios_luego: 'und dann „Zum Home-Bildschirm“',
+  install_android_sub: 'Aufs Handy laden: Vollbild und schneller Zugriff.',
+  install_boton: 'Installieren',
+  install_cerrar: 'Schließen'
+});
+Object.assign(I18N.fr, {
+  install_titulo: 'Installer MotoSportPro',
+  install_ios_toca: 'Touchez',
+  install_ios_luego: 'puis « Sur l’écran d’accueil »',
+  install_android_sub: 'Ajoutez-la à votre téléphone : plein écran et accès rapide.',
+  install_boton: 'Installer',
+  install_cerrar: 'Fermer'
+});
+Object.assign(I18N.it, {
+  install_titulo: 'Installa MotoSportPro',
+  install_ios_toca: 'Tocca',
+  install_ios_luego: 'e scegli “Aggiungi a Home”',
+  install_android_sub: 'Aggiungila al telefono: schermo intero e accesso rapido.',
+  install_boton: 'Installa',
+  install_cerrar: 'Chiudi'
+});
+
 const NOMBRES_IDIOMA = { es: 'Español', en: 'English', de: 'Deutsch', fr: 'Français', it: 'Italiano' };
 
 const i18n = {
