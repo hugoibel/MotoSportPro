@@ -39,7 +39,10 @@ const Nav = {
 
     // v0.24 — buscador estilo Maps: sugerencias en vivo + recientes + categorías
     input.addEventListener('input', () => this._onTyping(input.value));
-    input.addEventListener('focus', () => { if (!input.value.trim()) this._mostrarHome(); });
+    input.addEventListener('focus', () => {
+      this._posCache();                        // calentar el GPS ya, antes de que escriba
+      if (!input.value.trim()) this._mostrarHome();
+    });
     // Tocar fuera del buscador cierra la lista (como en Google Maps)
     document.addEventListener('click', e => {
       const r = $('nav-results');
@@ -127,11 +130,17 @@ const Nav = {
     if (!q) { this._mostrarHome(); return; }
     if (q.length < 3) return;
     this._acT = setTimeout(() => this._sugerir(q), 350);
-    // Cachear mi posición una sola vez por sesión de escritura (no en cada tecla)
-    if (!this._pos && !this._posPedida) {
-      this._posPedida = true;
-      this._miPos().then(p => { this._pos = p; });
-    }
+  },
+
+  // Mi posición para el sesgo de las sugerencias, cacheada 2 min y con reintento.
+  // (v0.24.1: antes se pedía UNA vez en paralelo → la 1ª búsqueda salía SIN posición
+  // y Photon devolvía resultados de cualquier parte del mundo, p. ej. Nueva York.)
+  async _posCache() {
+    const ahora = Date.now();
+    if (this._pos && ahora - (this._posT || 0) < 120000) return this._pos;
+    const p = await this._miPos();
+    if (p) { this._pos = p; this._posT = ahora; }
+    return p || ultimaPos || null;
   },
 
   async _sugerir(q) {
@@ -139,10 +148,11 @@ const Nav = {
     try {
       if (this._acAbort) this._acAbort.abort();
       this._acAbort = new AbortController();
-      const pos = this._pos || ultimaPos || null;
+      const pos = await this._posCache();      // ESPERAR la posición: sin ella salen sitios de cualquier parte
+      if (req !== this._acN) return;           // se siguió escribiendo mientras llegaba el GPS
       const lang = ({ en: 'en', de: 'de', fr: 'fr' })[i18n.lang] || 'default';
       let url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=6&lang=${lang}`;
-      if (pos) url += `&lat=${pos[0].toFixed(4)}&lon=${pos[1].toFixed(4)}`;
+      if (pos) url += `&lat=${pos[0].toFixed(4)}&lon=${pos[1].toFixed(4)}&location_bias_scale=0.6&zoom=14`;
       const r = await fetch(url, { signal: this._acAbort.signal });
       const d = await r.json();
       if (req !== this._acN) return;                     // ya se escribió otra cosa
