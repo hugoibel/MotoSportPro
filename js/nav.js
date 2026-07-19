@@ -43,6 +43,14 @@ const Nav = {
       this._posCache();                        // calentar el GPS ya, antes de que escriba
       if (!input.value.trim()) this._mostrarHome();
     });
+    // Botón ✕: borrar lo escrito y volver a chips + recientes
+    const bl = $('nav-clear');
+    if (bl) bl.addEventListener('click', () => {
+      input.value = '';
+      bl.style.display = 'none';
+      input.focus();
+      this._mostrarHome();
+    });
     // Tocar fuera del buscador cierra la lista (como en Google Maps)
     document.addEventListener('click', e => {
       const r = $('nav-results');
@@ -77,19 +85,19 @@ const Nav = {
     res.style.display = 'block';
     res.innerHTML = `<div class="nav-msg">${i18n.t('nav_buscando')}</div>`;
     try {
-      const pos = await this._miPos();
-      let data = await this._nominatim(q, pos, true);            // solo cerca
+      const pos = await this._posCache();
+      // Nominatim cerca + sitios por nombre (Overpass) a la vez; se fusiona todo
+      const [nomR, poiR] = await Promise.allSettled([
+        this._nominatim(q, pos, !!pos),
+        pos ? this._poisNombre(q, pos) : Promise.resolve([])
+      ]);
+      let data = nomR.status === 'fulfilled' ? nomR.value : [];
       if (pos && !data.length) data = await this._nominatim(q, pos, false);   // lejos: como antes
-      if (!data.length) { res.innerHTML = `<div class="nav-msg">${i18n.t('nav_sin_resultados')}</div>`; return; }
-
-      const items = data.map(d => {
-        const partes = d.display_name.split(',');
-        return {
-          lat: parseFloat(d.lat), lng: parseFloat(d.lon),
-          nombre: partes.shift().trim(), dir: partes.join(',').trim(),
-          completo: d.display_name
-        };
-      });
+      const items = this._dedupe([
+        ...this._mapNominatim(data),
+        ...(poiR.status === 'fulfilled' ? poiR.value : [])
+      ]);
+      if (!items.length) { res.innerHTML = `<div class="nav-msg">${i18n.t('nav_sin_resultados')}</div>`; return; }
       this._pintarResultados(items, pos);
     } catch (e) {
       res.innerHTML = `<div class="nav-msg">${i18n.t('nav_error')}</div>`;
@@ -105,6 +113,8 @@ const Nav = {
       items.forEach(it => { it.dist = distanciaMetros(pos, [it.lat, it.lng]); });
       items.sort((a, b) => a.dist - b.dist);
     }
+    items = items.slice(0, 12);
+    this._items = items;                    // la búsqueda profunda fusiona sobre esto
     res.innerHTML = '';
     items.forEach(it => {
       const b = document.createElement('button');
@@ -122,14 +132,20 @@ const Nav = {
 
   // ---------- v0.24: sugerencias en vivo (Photon), recientes y categorías ----------
 
-  // Cada tecla: espera 350 ms sin escribir y pide sugerencias (como Google Maps).
-  // Photon (komoot) está pensado para esto; Nominatim NO permite autocompletado.
+  // Cada tecla: a los 350 ms sin escribir pide sugerencias rápidas (Photon, pensado
+  // para autocompletar; Nominatim NO lo permite por tecla) y, si el usuario PARA de
+  // escribir ~1 s, añade una búsqueda profunda cerca (Nominatim acotado + Overpass)
+  // que garantiza los sitios de la zona. Todo se fusiona en la misma lista.
   _onTyping(q) {
     clearTimeout(this._acT);
+    clearTimeout(this._deepT);
     q = (q || '').trim();
+    const bl = $('nav-clear');
+    if (bl) bl.style.display = q ? 'flex' : 'none';
     if (!q) { this._mostrarHome(); return; }
     if (q.length < 3) return;
     this._acT = setTimeout(() => this._sugerir(q), 350);
+    this._deepT = setTimeout(() => this._profunda(q), 1100);
   },
 
   // Mi posición para el sesgo de las sugerencias, cacheada 2 min y con reintento.
@@ -151,7 +167,7 @@ const Nav = {
       const pos = await this._posCache();      // ESPERAR la posición: sin ella salen sitios de cualquier parte
       if (req !== this._acN) return;           // se siguió escribiendo mientras llegaba el GPS
       const lang = ({ en: 'en', de: 'de', fr: 'fr' })[i18n.lang] || 'default';
-      let url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=6&lang=${lang}`;
+      let url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=12&lang=${lang}`;
       if (pos) url += `&lat=${pos[0].toFixed(4)}&lon=${pos[1].toFixed(4)}&location_bias_scale=0.6&zoom=14`;
       const r = await fetch(url, { signal: this._acAbort.signal });
       const d = await r.json();
@@ -165,10 +181,82 @@ const Nav = {
           .filter(Boolean).join(', ');
         return { lat: c[1], lng: c[0], nombre, dir, completo: nombre + (dir ? ', ' + dir : '') };
       }).filter(it => it.nombre);
-      if (!items.length) return;                         // sin sugerencias: no molestar
+      this._itemsQ = q;                                  // para que la profunda fusione sobre esto
+      if (!items.length) { this._items = []; return; }   // sin sugerencias: no molestar
       $('nav-info').style.display = 'none';
       this._pintarResultados(items, pos);
-    } catch (e) { /* autocompletado caído: Enter sigue buscando con Nominatim */ }
+    } catch (e) { /* autocompletado caído: la búsqueda profunda y Enter siguen */ }
+  },
+
+  // Búsqueda PROFUNDA cercana (cuando paras de escribir ~1 s): Nominatim acotado a
+  // ~50 mi + Overpass por nombre a 30 km. Garantiza los sitios de TU zona aunque el
+  // autocompletado no los traiga (p. ej. "planet fitness" → el de a pocas millas).
+  async _profunda(q) {
+    // Token propio (NO el de _sugerir: ambas corren a la vez y no deben anularse;
+    // si el usuario elige o teclea, el check del texto del campo ya las descarta)
+    const req = this._dpN = (this._dpN || 0) + 1;
+    try {
+      const pos = await this._posCache();
+      const input = $('nav-input');
+      if (req !== this._dpN || !input || input.value.trim() !== q) return;
+      const [nom, poi] = await Promise.allSettled([
+        this._nominatim(q, pos, !!pos),
+        pos ? this._poisNombre(q, pos) : Promise.resolve([])
+      ]);
+      if (req !== this._dpN || input.value.trim() !== q) return;
+      const nomItems = this._mapNominatim(nom.status === 'fulfilled' ? nom.value : []);
+      const poiItems = poi.status === 'fulfilled' ? poi.value : [];
+      const base = (this._itemsQ === q && this._items) ? this._items : [];
+      const items = this._dedupe([...nomItems, ...poiItems, ...base]);
+      if (!items.length) return;
+      $('nav-info').style.display = 'none';
+      this._pintarResultados(items, pos);
+    } catch (e) { /* sin datos extra: la lista rápida se queda como está */ }
+  },
+
+  // Resultados de Nominatim → formato común de la lista
+  _mapNominatim(data) {
+    return (data || []).map(d => {
+      const partes = d.display_name.split(',');
+      return {
+        lat: parseFloat(d.lat), lng: parseFloat(d.lon),
+        nombre: partes.shift().trim(), dir: partes.join(',').trim(),
+        completo: d.display_name
+      };
+    });
+  },
+
+  // Sitios REALES con ese nombre a 30 km (Overpass, misma base que las gasolineras).
+  // Si el servicio no responde en 5 s se descarta sin romper nada.
+  async _poisNombre(q, pos) {
+    const rx = q.replace(/"/g, '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const ov = `[out:json][timeout:8];(node["name"~"${rx}",i](around:30000,${pos[0]},${pos[1]});way["name"~"${rx}",i](around:30000,${pos[0]},${pos[1]}););out center 15;`;
+    const ctl = new AbortController();
+    const t = setTimeout(() => ctl.abort(), 5000);
+    try {
+      const r = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: ov, signal: ctl.signal });
+      const d = await r.json();
+      return (d.elements || []).map(e => {
+        const lat = e.lat != null ? e.lat : (e.center && e.center.lat);
+        const lng = e.lon != null ? e.lon : (e.center && e.center.lon);
+        if (lat == null || !e.tags || !e.tags.name) return null;
+        const dir = [e.tags['addr:street'], e.tags['addr:city']].filter(Boolean).join(', ');
+        return { lat, lng, nombre: e.tags.name, dir, completo: e.tags.name + (dir ? ', ' + dir : '') };
+      }).filter(Boolean);
+    } finally { clearTimeout(t); }
+  },
+
+  // Quita duplicados entre fuentes: mismo nombre a menos de ~250 m = el mismo sitio
+  _dedupe(items) {
+    const vist = new Set(), out = [];
+    items.forEach(it => {
+      const k = it.nombre.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+        + '|' + Math.round(it.lat * 400) + '|' + Math.round(it.lng * 400);
+      if (vist.has(k)) return;
+      vist.add(k);
+      out.push(it);
+    });
+    return out;
   },
 
   // Campo vacío y enfocado → categorías rápidas + búsquedas recientes
@@ -290,8 +378,11 @@ const Nav = {
     this.ruta = null;
     this.pasos = null;
     clearTimeout(this._acT);                  // sin sugerencias pendientes tras elegir
+    clearTimeout(this._deepT);
     this._acN = (this._acN || 0) + 1;
     this._guardarRec(nombre, lat, lng);
+    const bl = $('nav-clear');
+    if (bl) bl.style.display = 'flex';
     $('nav-results').style.display = 'none';
     $('nav-input').value = nombre.split(',')[0];
     Mapa.setDestino(lat, lng);
@@ -601,6 +692,8 @@ const Nav = {
     document.body.classList.remove('navigating');
     if (typeof Mapa !== 'undefined') Mapa.limpiarNav();
     const info = $('nav-info'), res = $('nav-results'), input = $('nav-input'), g = $('nav-guide'), ep = $('eta-pill'), rain = $('nav-rain');
+    const bl = $('nav-clear');
+    if (bl) bl.style.display = 'none';
     if (info) info.style.display = 'none';
     if (res) res.style.display = 'none';
     if (input) input.value = '';

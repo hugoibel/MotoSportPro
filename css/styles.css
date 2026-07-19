@@ -556,6 +556,15 @@ body.driving .nav-guide {
 }
 .nav-msg { padding: 14px; color: var(--muted); font-size: 0.86rem; text-align: center; }
 
+/* v0.25: botón limpiar el campo de búsqueda */
+.nav-clear {
+  flex: none; width: 28px; height: 28px; border: none; cursor: pointer;
+  border-radius: 50%; color: var(--muted); font-size: 0.85rem;
+  background: rgba(255, 255, 255, 0.08);
+  display: flex; align-items: center; justify-content: center;
+}
+.nav-clear:active { background: rgba(255, 255, 255, 0.16); }
+
 /* v0.24: buscador estilo Maps — chips de categorías + recientes */
 .nav-chips {
   display: flex; gap: 8px; overflow-x: auto; padding: 10px 12px;
