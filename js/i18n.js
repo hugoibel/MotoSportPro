@@ -23,6 +23,9 @@ const I18N = {
     guardada: 'Ruta guardada', corta: 'Ruta demasiado corta para guardar.', grabando: 'Grabando',
     nav_buscar: '¿A dónde quieres ir?', nav_comenzar: 'Comenzar navegación', nav_buscando: 'Buscando…',
     nav_sin_resultados: 'Sin resultados', nav_error: 'No se pudo calcular la ruta', nav_min: 'min',
+    nav_recientes: 'Recientes', nav_hist_borrar: 'Borrar historial',
+    nav_chip_gas: 'Gasolinera', nav_chip_food: 'Comida', nav_chip_cafe: 'Café',
+    nav_chip_parking: 'Parking', nav_chip_moto: 'Taller moto',
     sin_gps: 'Este dispositivo no tiene GPS disponible.',
     permiso_gps: 'Permiso de ubicación denegado. Actívalo para grabar.',
     borrar_ruta: '¿Borrar esta ruta?'
@@ -47,6 +50,9 @@ const I18N = {
     guardada: 'Route saved', corta: 'Route too short to save.', grabando: 'Recording',
     nav_buscar: 'Where do you want to go?', nav_comenzar: 'Start navigation', nav_buscando: 'Searching…',
     nav_sin_resultados: 'No results', nav_error: 'Could not get the route', nav_min: 'min',
+    nav_recientes: 'Recent', nav_hist_borrar: 'Clear history',
+    nav_chip_gas: 'Gas station', nav_chip_food: 'Food', nav_chip_cafe: 'Coffee',
+    nav_chip_parking: 'Parking', nav_chip_moto: 'Bike shop',
     sin_gps: 'This device has no GPS available.',
     permiso_gps: 'Location permission denied. Enable it to record.',
     borrar_ruta: 'Delete this route?'
@@ -71,6 +77,9 @@ const I18N = {
     guardada: 'Route gespeichert', corta: 'Route zu kurz zum Speichern.', grabando: 'Aufnahme',
     nav_buscar: 'Wohin möchtest du?', nav_comenzar: 'Navigation starten', nav_buscando: 'Suche…',
     nav_sin_resultados: 'Keine Ergebnisse', nav_error: 'Route konnte nicht berechnet werden', nav_min: 'Min',
+    nav_recientes: 'Zuletzt gesucht', nav_hist_borrar: 'Verlauf löschen',
+    nav_chip_gas: 'Tankstelle', nav_chip_food: 'Essen', nav_chip_cafe: 'Café',
+    nav_chip_parking: 'Parkplatz', nav_chip_moto: 'Motorradwerkstatt',
     sin_gps: 'Dieses Gerät hat kein GPS.',
     permiso_gps: 'Standortzugriff verweigert. Bitte aktivieren.',
     borrar_ruta: 'Diese Route löschen?'
@@ -95,6 +104,9 @@ const I18N = {
     guardada: 'Trajet enregistré', corta: 'Trajet trop court pour être enregistré.', grabando: 'Enregistrement',
     nav_buscar: 'Où veux-tu aller ?', nav_comenzar: 'Démarrer la navigation', nav_buscando: 'Recherche…',
     nav_sin_resultados: 'Aucun résultat', nav_error: 'Impossible de calculer l\'itinéraire', nav_min: 'min',
+    nav_recientes: 'Récents', nav_hist_borrar: 'Effacer l\'historique',
+    nav_chip_gas: 'Station-service', nav_chip_food: 'Restauration', nav_chip_cafe: 'Café',
+    nav_chip_parking: 'Parking', nav_chip_moto: 'Atelier moto',
     sin_gps: 'Cet appareil n\'a pas de GPS.',
     permiso_gps: 'Autorisation de localisation refusée. Activez-la.',
     borrar_ruta: 'Supprimer ce trajet ?'
@@ -119,6 +131,9 @@ const I18N = {
     guardada: 'Percorso salvato', corta: 'Percorso troppo corto per salvarlo.', grabando: 'Registrazione',
     nav_buscar: 'Dove vuoi andare?', nav_comenzar: 'Avvia navigazione', nav_buscando: 'Ricerca…',
     nav_sin_resultados: 'Nessun risultato', nav_error: 'Impossibile calcolare il percorso', nav_min: 'min',
+    nav_recientes: 'Recenti', nav_hist_borrar: 'Cancella cronologia',
+    nav_chip_gas: 'Benzinaio', nav_chip_food: 'Cibo', nav_chip_cafe: 'Caffè',
+    nav_chip_parking: 'Parcheggio', nav_chip_moto: 'Officina moto',
     sin_gps: 'Questo dispositivo non ha il GPS.',
     permiso_gps: 'Permesso di posizione negato. Attivalo.',
     borrar_ruta: 'Eliminare questo percorso?'

@@ -36,6 +36,19 @@ const Nav = {
       });
     }
     input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); this.buscar(input.value); } });
+
+    // v0.24 — buscador estilo Maps: sugerencias en vivo + recientes + categorías
+    input.addEventListener('input', () => this._onTyping(input.value));
+    input.addEventListener('focus', () => { if (!input.value.trim()) this._mostrarHome(); });
+    // Tocar fuera del buscador cierra la lista (como en Google Maps)
+    document.addEventListener('click', e => {
+      const r = $('nav-results');
+      if (r && r.style.display !== 'none'
+          && !e.target.closest('.nav-search') && !e.target.closest('#nav-results')) {
+        r.style.display = 'none';
+      }
+    });
+
     $('nav-cancel').addEventListener('click', () => this.cancelar());
     this.vozOn = localStorage.getItem('msp_voz') !== '0';
     const v = $('ng-voice');
@@ -66,29 +79,172 @@ const Nav = {
       if (pos && !data.length) data = await this._nominatim(q, pos, false);   // lejos: como antes
       if (!data.length) { res.innerHTML = `<div class="nav-msg">${i18n.t('nav_sin_resultados')}</div>`; return; }
 
-      // Ordenar por cercanía y enseñar a cuánto queda cada resultado
-      if (pos) {
-        data.forEach(d => { d._dist = distanciaMetros(pos, [parseFloat(d.lat), parseFloat(d.lon)]); });
-        data.sort((a, b) => a._dist - b._dist);
-      }
-      res.innerHTML = '';
-      data.forEach(d => {
-        const b = document.createElement('button');
-        b.className = 'nav-result';
+      const items = data.map(d => {
         const partes = d.display_name.split(',');
-        const nombre = partes.shift().trim();
-        const dir = partes.join(',').trim();
-        let distTxt = '';
-        if (d._dist != null) {
-          const du = Units.distToUser(d._dist / 1000);
-          distTxt = `<em>${du < 10 ? du.toFixed(1) : Math.round(du)} ${Units.distLabel()}</em>`;
-        }
-        b.innerHTML = `<span>📍</span><span class="nr-txt"><b>${nombre}</b>${dir ? `<small>${dir}</small>` : ''}</span>${distTxt}`;
-        b.addEventListener('click', () => this.elegir(parseFloat(d.lat), parseFloat(d.lon), d.display_name));
-        res.appendChild(b);
+        return {
+          lat: parseFloat(d.lat), lng: parseFloat(d.lon),
+          nombre: partes.shift().trim(), dir: partes.join(',').trim(),
+          completo: d.display_name
+        };
       });
+      this._pintarResultados(items, pos);
     } catch (e) {
       res.innerHTML = `<div class="nav-msg">${i18n.t('nav_error')}</div>`;
+    }
+  },
+
+  // Pinta una lista de sitios ({lat,lng,nombre,dir,completo}) ordenada por cercanía
+  _pintarResultados(items, pos, icono) {
+    const res = $('nav-results');
+    res.style.display = 'block';
+    if (!items.length) { res.innerHTML = `<div class="nav-msg">${i18n.t('nav_sin_resultados')}</div>`; return; }
+    if (pos) {
+      items.forEach(it => { it.dist = distanciaMetros(pos, [it.lat, it.lng]); });
+      items.sort((a, b) => a.dist - b.dist);
+    }
+    res.innerHTML = '';
+    items.forEach(it => {
+      const b = document.createElement('button');
+      b.className = 'nav-result';
+      let distTxt = '';
+      if (it.dist != null) {
+        const du = Units.distToUser(it.dist / 1000);
+        distTxt = `<em>${du < 10 ? du.toFixed(1) : Math.round(du)} ${Units.distLabel()}</em>`;
+      }
+      b.innerHTML = `<span>${icono || '📍'}</span><span class="nr-txt"><b>${it.nombre}</b>${it.dir ? `<small>${it.dir}</small>` : ''}</span>${distTxt}`;
+      b.addEventListener('click', () => this.elegir(it.lat, it.lng, it.completo || it.nombre));
+      res.appendChild(b);
+    });
+  },
+
+  // ---------- v0.24: sugerencias en vivo (Photon), recientes y categorías ----------
+
+  // Cada tecla: espera 350 ms sin escribir y pide sugerencias (como Google Maps).
+  // Photon (komoot) está pensado para esto; Nominatim NO permite autocompletado.
+  _onTyping(q) {
+    clearTimeout(this._acT);
+    q = (q || '').trim();
+    if (!q) { this._mostrarHome(); return; }
+    if (q.length < 3) return;
+    this._acT = setTimeout(() => this._sugerir(q), 350);
+    // Cachear mi posición una sola vez por sesión de escritura (no en cada tecla)
+    if (!this._pos && !this._posPedida) {
+      this._posPedida = true;
+      this._miPos().then(p => { this._pos = p; });
+    }
+  },
+
+  async _sugerir(q) {
+    const req = this._acN = (this._acN || 0) + 1;
+    try {
+      if (this._acAbort) this._acAbort.abort();
+      this._acAbort = new AbortController();
+      const pos = this._pos || ultimaPos || null;
+      const lang = ({ en: 'en', de: 'de', fr: 'fr' })[i18n.lang] || 'default';
+      let url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=6&lang=${lang}`;
+      if (pos) url += `&lat=${pos[0].toFixed(4)}&lon=${pos[1].toFixed(4)}`;
+      const r = await fetch(url, { signal: this._acAbort.signal });
+      const d = await r.json();
+      if (req !== this._acN) return;                     // ya se escribió otra cosa
+      const input = $('nav-input');
+      if (!input || input.value.trim() !== q) return;    // el texto cambió mientras llegaba
+      const items = (d.features || []).map(f => {
+        const p = f.properties || {}, c = f.geometry.coordinates;
+        const nombre = p.name || p.street || '';
+        const dir = [p.street && p.name !== p.street ? p.street : '', p.city, p.state]
+          .filter(Boolean).join(', ');
+        return { lat: c[1], lng: c[0], nombre, dir, completo: nombre + (dir ? ', ' + dir : '') };
+      }).filter(it => it.nombre);
+      if (!items.length) return;                         // sin sugerencias: no molestar
+      $('nav-info').style.display = 'none';
+      this._pintarResultados(items, pos);
+    } catch (e) { /* autocompletado caído: Enter sigue buscando con Nominatim */ }
+  },
+
+  // Campo vacío y enfocado → categorías rápidas + búsquedas recientes
+  _mostrarHome() {
+    const res = $('nav-results');
+    if (!res) return;
+    const cats = [
+      { k: 'gas', e: '⛽', q: '["amenity"="fuel"]' },
+      { k: 'food', e: '🍔', q: '["amenity"~"restaurant|fast_food"]' },
+      { k: 'cafe', e: '☕', q: '["amenity"="cafe"]' },
+      { k: 'parking', e: '🅿️', q: '["amenity"="parking"]' },
+      { k: 'moto', e: '🔧', q: '["shop"~"^motorcycle"]' }
+    ];
+    res.innerHTML = '';
+    res.style.display = 'block';
+    const chips = document.createElement('div');
+    chips.className = 'nav-chips';
+    cats.forEach(c => {
+      const b = document.createElement('button');
+      b.className = 'nav-chip';
+      b.textContent = `${c.e} ${i18n.t('nav_chip_' + c.k)}`;
+      b.addEventListener('click', () => this._buscarCat(c));
+      chips.appendChild(b);
+    });
+    res.appendChild(chips);
+    const recs = this._recs();
+    if (recs.length) {
+      const h = document.createElement('div');
+      h.className = 'nav-rec-head';
+      h.innerHTML = `<span>${i18n.t('nav_recientes')}</span><button id="nav-rec-clear">${i18n.t('nav_hist_borrar')}</button>`;
+      res.appendChild(h);
+      h.querySelector('#nav-rec-clear').addEventListener('click', e => {
+        e.stopPropagation();
+        localStorage.removeItem('msp_nav_rec');
+        this._mostrarHome();
+      });
+      recs.slice(0, 6).forEach(rc => {
+        const b = document.createElement('button');
+        b.className = 'nav-result';
+        const partes = rc.n.split(',');
+        const nombre = partes.shift().trim();
+        const dir = partes.join(',').trim();
+        b.innerHTML = `<span>🕘</span><span class="nr-txt"><b>${nombre}</b>${dir ? `<small>${dir}</small>` : ''}</span>`;
+        b.addEventListener('click', () => this.elegir(rc.lat, rc.lng, rc.n));
+        res.appendChild(b);
+      });
+    }
+  },
+
+  _recs() {
+    try { return JSON.parse(localStorage.getItem('msp_nav_rec')) || []; }
+    catch (e) { return []; }
+  },
+
+  _guardarRec(nombre, lat, lng) {
+    const recs = this._recs().filter(r => r.n !== nombre);
+    recs.unshift({ n: nombre, lat, lng });
+    localStorage.setItem('msp_nav_rec', JSON.stringify(recs.slice(0, 8)));
+  },
+
+  // Chip de categoría → sitios REALES cercanos vía Overpass (igual que las
+  // gasolineras de fuel.js). Si Overpass falla, cae a la búsqueda por nombre.
+  async _buscarCat(cat) {
+    const res = $('nav-results');
+    $('nav-info').style.display = 'none';
+    res.style.display = 'block';
+    res.innerHTML = `<div class="nav-msg">${i18n.t('nav_buscando')}</div>`;
+    const pos = await this._miPos();
+    if (!pos) { res.innerHTML = `<div class="nav-msg">${i18n.t('permiso_gps')}</div>`; return; }
+    try {
+      const q = `[out:json][timeout:12];(node${cat.q}(around:10000,${pos[0]},${pos[1]});way${cat.q}(around:10000,${pos[0]},${pos[1]}););out center 20;`;
+      const r = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: q });
+      const d = await r.json();
+      const items = (d.elements || []).map(e => {
+        const lat = e.lat != null ? e.lat : (e.center && e.center.lat);
+        const lng = e.lon != null ? e.lon : (e.center && e.center.lon);
+        if (lat == null) return null;
+        const t = e.tags || {};
+        const nombre = t.name || i18n.t('nav_chip_' + cat.k);
+        const dir = [t['addr:street'], t['addr:city']].filter(Boolean).join(', ');
+        return { lat, lng, nombre, dir, completo: nombre + (dir ? ', ' + dir : '') };
+      }).filter(Boolean).slice(0, 12);
+      this._pintarResultados(items, pos, cat.e);
+    } catch (e) {
+      // Overpass caído: al menos buscar la categoría por nombre cerca de mí
+      this.buscar(i18n.t('nav_chip_' + cat.k));
     }
   },
 
@@ -123,6 +279,9 @@ const Nav = {
     this.destino = { lat, lng, nombre };
     this.ruta = null;
     this.pasos = null;
+    clearTimeout(this._acT);                  // sin sugerencias pendientes tras elegir
+    this._acN = (this._acN || 0) + 1;
+    this._guardarRec(nombre, lat, lng);
     $('nav-results').style.display = 'none';
     $('nav-input').value = nombre.split(',')[0];
     Mapa.setDestino(lat, lng);
