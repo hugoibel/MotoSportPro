@@ -32,7 +32,9 @@ const UI = {
   },
 
   // Diálogo de confirmación con el diseño de la app → Promise<boolean>
-  confirmar(msg) {
+  // tipoSi: estilo del botón afirmativo ('danger' por defecto = borrar algo;
+  // 'primary' para acciones que NO destruyen nada, como recuperar una salida).
+  confirmar(msg, tipoSi = 'danger') {
     return new Promise(res => {
       const o = document.createElement('div');
       o.className = 'confirm-overlay';
@@ -41,7 +43,7 @@ const UI = {
           <p></p>
           <div class="confirm-btns">
             <button class="btn c-no"></button>
-            <button class="btn danger c-si"></button>
+            <button class="btn ${tipoSi} c-si"></button>
           </div>
         </div>`;
       o.querySelector('p').textContent = msg;

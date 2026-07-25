@@ -668,6 +668,33 @@ Object.assign(I18N.it, {
   pista_mejor: 'migliore'
 });
 
+// --- v0.26: recuperar salida interrumpida + perfil de velocidad ---
+Object.assign(I18N.es, {
+  rec_pregunta: 'Se cerró la app durante una salida. ¿Quieres guardarla?',
+  rec_ok: 'Salida recuperada y guardada',
+  rm_perfil: 'Velocidad'
+});
+Object.assign(I18N.en, {
+  rec_pregunta: 'The app closed during a ride. Do you want to save it?',
+  rec_ok: 'Ride recovered and saved',
+  rm_perfil: 'Speed'
+});
+Object.assign(I18N.de, {
+  rec_pregunta: 'Die App wurde während einer Fahrt geschlossen. Möchtest du sie speichern?',
+  rec_ok: 'Fahrt wiederhergestellt und gespeichert',
+  rm_perfil: 'Geschwindigkeit'
+});
+Object.assign(I18N.fr, {
+  rec_pregunta: "L'application s'est fermée pendant une sortie. Voulez-vous l'enregistrer ?",
+  rec_ok: 'Sortie récupérée et enregistrée',
+  rm_perfil: 'Vitesse'
+});
+Object.assign(I18N.it, {
+  rec_pregunta: "L'app si è chiusa durante un'uscita. Vuoi salvarla?",
+  rec_ok: 'Uscita recuperata e salvata',
+  rm_perfil: 'Velocità'
+});
+
 const NOMBRES_IDIOMA = { es: 'Español', en: 'English', de: 'Deutsch', fr: 'Français', it: 'Italiano' };
 
 const i18n = {

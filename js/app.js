@@ -164,6 +164,11 @@ function iniciarGrabacion() {
   watchId = navigator.geolocation.watchPosition(onPosicion, onErrorGps, {
     enableHighAccuracy: true, maximumAge: 1000, timeout: 10000
   });
+
+  // Respaldo periódico por si el móvil cierra la app a mitad de la salida
+  limpiarSesion();
+  clearInterval(_sesionT);
+  _sesionT = setInterval(guardarSesion, 12000);
 }
 
 function onPosicion(pos) {
@@ -177,7 +182,10 @@ function onPosicion(pos) {
   let velMs = (speed != null && speed >= 0) ? speed : 0;
   if (velMs > velMax) velMax = velMs;
   _ultVelKmh = velMs * 3.6; _ultFixT = Date.now();
-  puntosSesion.push([latitude, longitude, +(velMs * 3.6).toFixed(1)]);
+  // 4º valor = segundos desde el inicio: permite exportar un GPX con marcas de
+  // tiempo reales (Strava/Calimoto/Garmin calculan la velocidad con ellas).
+  puntosSesion.push([latitude, longitude, +(velMs * 3.6).toFixed(1),
+    Math.round((Date.now() - tiempoInicio) / 1000)]);
 
   // Inclinación en vivo (suavizada para que no baile)
   const lean = calcularLean(velMs, heading, pos.timestamp || Date.now());
@@ -239,6 +247,69 @@ function onErrorGps(err) {
   if (err.code === 1) UI.toast(i18n.t('permiso_gps'), 'err');
 }
 
+// --- Autoguardado de la salida en curso (v0.26) ---
+// Hasta ahora la salida vivía SOLO en memoria: si el móvil cerraba la app a
+// mitad (batería, llamada, iOS matando la pestaña en segundo plano) se perdía
+// entera. Ahora se vuelca a localStorage cada pocos segundos y al abrir la app
+// se ofrece recuperarla.
+const SESION_KEY = 'msp_sesion_activa';
+let _sesionT = null;
+
+function guardarSesion() {
+  if (!grabando || puntosSesion.length < 2) return;
+  try {
+    localStorage.setItem(SESION_KEY, JSON.stringify({
+      ini: tiempoInicio,
+      ts: Date.now(),
+      dist: +distancia.toFixed(1),
+      velMax: +velMax.toFixed(2),
+      movSeg: Math.round(segMov),
+      leanMax: Math.round(leanMax),
+      // 5 decimales ≈ 1 m de precisión: ocupa la mitad y no se nota en el mapa
+      pts: puntosSesion.map(p => [+p[0].toFixed(5), +p[1].toFixed(5), p[2], p[3]])
+    }));
+  } catch (e) {
+    // Almacenamiento lleno: no rompemos la grabación por no poder respaldarla
+  }
+}
+
+function limpiarSesion() {
+  try { localStorage.removeItem(SESION_KEY); } catch (e) {}
+}
+
+// Al abrir la app: si quedó una salida a medias, ofrecer guardarla
+function revisarSesionPrevia() {
+  let s = null;
+  try { s = JSON.parse(localStorage.getItem(SESION_KEY)); } catch (e) {}
+  if (!s || !Array.isArray(s.pts) || s.pts.length < 2) { limpiarSesion(); return; }
+  // Más de 24 h: ya no tiene sentido preguntar, se descarta en silencio
+  if (Date.now() - (s.ts || 0) > 24 * 3600 * 1000) { limpiarSesion(); return; }
+
+  const km = (s.dist || 0) / 1000;
+  const dur = Math.max(1, Math.round(((s.ts || 0) - (s.ini || 0)) / 1000));
+  const resumen = `${Units.distToUser(km).toFixed(2)} ${Units.distLabel()} · ${fmtTiempo(dur)}`;
+  UI.confirmar(`${i18n.t('rec_pregunta')}\n${resumen}`, 'primary').then(ok => {
+    limpiarSesion();
+    if (!ok) return;
+    const mov = (s.movSeg > 0 && s.movSeg <= dur) ? s.movSeg : dur;
+    const ruta = {
+      id: String(s.ini || Date.now()),
+      fecha: new Date(s.ini || Date.now()).toISOString(),
+      distanciaKm: +km.toFixed(2),
+      duracionSeg: dur,
+      movSeg: Math.round(mov),
+      velMax: Math.round((s.velMax || 0) * 3.6),
+      velMedia: Math.round(mov > 0 ? km / (mov / 3600) : 0),
+      leanMax: Math.round(s.leanMax || 0),
+      puntos: s.pts
+    };
+    Storage.guardarRuta(ruta);
+    renderRutas();
+    UI.toast(i18n.t('rec_ok'), 'ok');
+    setTimeout(() => abrirRutaDetalle(ruta), 400);
+  });
+}
+
 function pararGrabacion() {
   UI.vibrar([30, 50, 30]);
   grabando = false;
@@ -252,6 +323,7 @@ function pararGrabacion() {
   Mapa.invalidate();
   if (watchId != null) navigator.geolocation.clearWatch(watchId);
   clearInterval(cronometro);
+  clearInterval(_sesionT); _sesionT = null;
   liberarWakeLock();
   if (typeof SOS !== 'undefined') SOS.desarmar();
   setGps('·', '');
@@ -264,7 +336,7 @@ function pararGrabacion() {
   const media = segMov > 0 ? km / (segMov / 3600)
     : (duracionSeg > 0 ? km / (duracionSeg / 3600) : 0);
 
-  if (nPuntos < 2) { UI.toast(i18n.t('corta'), 'err'); resetTelemetria(); return; }
+  if (nPuntos < 2) { limpiarSesion(); UI.toast(i18n.t('corta'), 'err'); resetTelemetria(); return; }
 
   const ruta = {
     id: Date.now().toString(),
@@ -278,6 +350,7 @@ function pararGrabacion() {
     puntos: puntosSesion
   };
   Storage.guardarRuta(ruta);
+  limpiarSesion();   // guardada de verdad: ya no hay nada que recuperar
   UI.toast(`✅ ${i18n.t('guardada')}: ${Units.distToUser(km).toFixed(2)} ${Units.distLabel()} · ${fmtTiempo(duracionSeg)}`, 'ok');
   resetTelemetria();
   // Resumen de la salida: se abre solo el detalle de la ruta recién guardada
@@ -403,12 +476,67 @@ function abrirRutaDetalle(r) {
     rmIni = L.circleMarker([pts[0][0], pts[0][1]], { radius: 7, color: '#fff', weight: 2, fillColor: '#2ad17a', fillOpacity: 1 }).addTo(rmMap);
     rmFin = L.circleMarker([pts[pts.length - 1][0], pts[pts.length - 1][1]], { radius: 7, color: '#fff', weight: 2, fillColor: '#ff3b5c', fillOpacity: 1 }).addTo(rmMap);
   }
+  dibujarPerfilVel(r);
+
   setTimeout(() => {
     rmMap.invalidateSize();
     if (pts.length) {
       try { rmMap.fitBounds(L.latLngBounds(pts.map(p => [p[0], p[1]])), { padding: [30, 30] }); } catch (e) {}
     }
   }, 150);
+}
+
+// Perfil de velocidad de la salida: gráfica SVG propia, sin librerías ni red.
+// Solo se dibuja en rutas que guardaron velocidad por punto (v0.17 en adelante).
+function dibujarPerfilVel(r) {
+  const el = $('rm-chart');
+  if (!el) return;
+  const vs = (r.puntos || []).filter(p => p && p.length >= 3 && p[2] != null).map(p => +p[2] || 0);
+  if (vs.length < 8) { el.style.display = 'none'; el.innerHTML = ''; return; }
+
+  // Remuestreo a ~110 columnas: el SVG queda ligero aunque la salida sea larga
+  const N = Math.min(110, vs.length);
+  const paso = vs.length / N;
+  const vals = [];
+  for (let i = 0; i < N; i++) {
+    const a = Math.floor(i * paso);
+    const b = Math.max(a + 1, Math.floor((i + 1) * paso));
+    let s = 0, n = 0;
+    for (let j = a; j < b && j < vs.length; j++) { s += vs[j]; n++; }
+    vals.push(n ? s / n : 0);
+  }
+
+  const W = 320, H = 92, P = 4;
+  const vmax = Math.max(...vals, 1);
+  const media = vals.reduce((s, v) => s + v, 0) / vals.length;
+  const px = i => P + (i * (W - 2 * P)) / (N - 1);
+  const py = v => H - P - (v / vmax) * (H - 2 * P);
+  const linea = vals.map((v, i) => `${i ? 'L' : 'M'}${px(i).toFixed(1)},${py(v).toFixed(1)}`).join('');
+  const area = `${linea}L${px(N - 1).toFixed(1)},${H - P}L${px(0).toFixed(1)},${H - P}Z`;
+  const u = Units.speedLabel();
+
+  el.style.display = 'block';
+  el.innerHTML = `
+    <div class="rm-chart-head">
+      <span>${i18n.t('rm_perfil')}</span>
+      <span class="rm-chart-vals">
+        <b>${Math.round(Units.speedToUser(vmax))}</b> ${i18n.t('max')} ·
+        <b>${Math.round(Units.speedToUser(media))}</b> ${i18n.t('media')} ${u}
+      </span>
+    </div>
+    <svg class="rm-chart-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="rm-grad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ff5c2a" stop-opacity=".5"/>
+          <stop offset="100%" stop-color="#ff5c2a" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <path d="${area}" fill="url(#rm-grad)"/>
+      <line x1="${P}" y1="${py(media).toFixed(1)}" x2="${W - P}" y2="${py(media).toFixed(1)}"
+            stroke="rgba(255,255,255,.28)" stroke-width="1" stroke-dasharray="4 4"/>
+      <path d="${linea}" fill="none" stroke="#ff7a45" stroke-width="2"
+            stroke-linejoin="round" stroke-linecap="round"/>
+    </svg>`;
 }
 
 function cerrarRutaDetalle() {
@@ -422,7 +550,14 @@ function cerrarRutaDetalle() {
 function exportarGPX(r) {
   if (!r || !(r.puntos || []).length) { UI.toast(i18n.t('gpx_vacio'), 'err'); return; }
   const fecha = new Date(r.fecha).toISOString().slice(0, 16).replace('T', ' ');
-  const pts = r.puntos.map(p => `      <trkpt lat="${p[0]}" lon="${p[1]}"></trkpt>`).join('\n');
+  // Con marca de tiempo por punto (v0.26) Strava/Calimoto/Garmin reconstruyen
+  // la velocidad real; las rutas viejas (sin el 4º valor) salen como antes.
+  const t0 = new Date(r.fecha).getTime();
+  const pts = r.puntos.map(p => {
+    const t = (p.length >= 4 && p[3] != null)
+      ? `<time>${new Date(t0 + p[3] * 1000).toISOString()}</time>` : '';
+    return `      <trkpt lat="${p[0]}" lon="${p[1]}">${t}</trkpt>`;
+  }).join('\n');
   const gpx = `<?xml version="1.0" encoding="UTF-8"?>
 <gpx version="1.1" creator="MotoSportPro" xmlns="http://www.topografix.com/GPX/1/1">
   <trk>
@@ -562,6 +697,15 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   // Modo Pista (tacómetro digital + vueltas)
   if (typeof Pista !== 'undefined') Pista.init();
+
+  // Si el móvil cerró la app a mitad de una salida, ofrecer recuperarla.
+  // Y respaldar en los momentos críticos: al pasar a segundo plano es justo
+  // cuando iOS/Android suelen matar la pestaña.
+  revisarSesionPrevia();
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') guardarSesion();
+  });
+  window.addEventListener('pagehide', guardarSesion);
 
   // Botón "Re-centrar" (aparece al arrastrar el mapa mientras conduces)
   $('btn-recentrar').addEventListener('click', () => Mapa.recentrar());
