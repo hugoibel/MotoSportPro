@@ -83,6 +83,9 @@ const Nav = {
     const res = $('nav-results');
     $('nav-info').style.display = 'none';
     res.style.display = 'block';
+    // Enter sobre una categoría genérica ("gasolinera") = buscarlas de verdad
+    const cat = Rank.categoria(q);
+    if (cat) { this._buscarCat(cat); return; }
     res.innerHTML = `<div class="nav-msg">${i18n.t('nav_buscando')}</div>`;
     try {
       const pos = await this._posCache();
@@ -98,20 +101,28 @@ const Nav = {
         ...(poiR.status === 'fulfilled' ? poiR.value : [])
       ]);
       if (!items.length) { res.innerHTML = `<div class="nav-msg">${i18n.t('nav_sin_resultados')}</div>`; return; }
-      this._pintarResultados(items, pos);
+      this._pintarResultados(items, pos, null, q);
     } catch (e) {
       res.innerHTML = `<div class="nav-msg">${i18n.t('nav_error')}</div>`;
     }
   },
 
-  // Pinta una lista de sitios ({lat,lng,nombre,dir,completo}) ordenada por cercanía
-  _pintarResultados(items, pos, icono) {
+  // Pinta la lista de sitios ORDENADA POR RELEVANCIA (v0.27).
+  // Antes se ordenaba solo por distancia y el sitio que de verdad buscabas
+  // quedaba enterrado bajo cualquier cosa cercana. Ahora manda `Rank`:
+  // nombre 50% · tipo 22% · cercanía 22% · fama 6%.
+  // `consulta` = lo que escribió el usuario (sin ella no se puede puntuar el
+  // nombre, p. ej. en los chips de categoría, y se cae a ordenar por cercanía).
+  _pintarResultados(items, pos, icono, consulta) {
     const res = $('nav-results');
     res.style.display = 'block';
     if (!items.length) { res.innerHTML = `<div class="nav-msg">${i18n.t('nav_sin_resultados')}</div>`; return; }
-    if (pos) {
-      items.forEach(it => { it.dist = distanciaMetros(pos, [it.lat, it.lng]); });
-      items.sort((a, b) => a.dist - b.dist);
+
+    if (consulta) {
+      items = Rank.puntuar(items, consulta, pos);
+    } else {
+      if (pos) items.forEach(it => { it.dist = distanciaMetros(pos, [it.lat, it.lng]); });
+      items = items.slice().sort((a, b) => (a.dist || 0) - (b.dist || 0));
     }
     items = items.slice(0, 12);
     this._items = items;                    // la búsqueda profunda fusiona sobre esto
@@ -124,7 +135,16 @@ const Nav = {
         const du = Units.distToUser(it.dist / 1000);
         distTxt = `<em>${du < 10 ? du.toFixed(1) : Math.round(du)} ${Units.distLabel()}</em>`;
       }
-      b.innerHTML = `<span>${icono || '📍'}</span><span class="nr-txt"><b>${it.nombre}</b>${it.dir ? `<small>${it.dir}</small>` : ''}</span>${distTxt}`;
+      // Etiqueta de qué es el sitio (Gasolinera, Hotel, Ciudad…) delante de la
+      // dirección: de un vistazo se distingue un negocio de una región.
+      const tipoTxt = it.tipoClave ? i18n.t(it.tipoClave) : '';
+      const sub = [tipoTxt, it.dir].filter(Boolean).join(' · ');
+      const ic = icono || it.icono || '📍';
+      b.innerHTML = `<span>${ic}</span><span class="nr-txt"><b></b>${sub ? '<small></small>' : ''}</span>${distTxt}`;
+      // textContent (no innerHTML) con los datos de la API: un nombre con < o &
+      // no puede romper la lista ni inyectar nada
+      b.querySelector('b').textContent = it.nombre;
+      if (sub) b.querySelector('small').textContent = sub;
       b.addEventListener('click', () => this.elegir(it.lat, it.lng, it.completo || it.nombre));
       res.appendChild(b);
     });
@@ -142,10 +162,24 @@ const Nav = {
     q = (q || '').trim();
     const bl = $('nav-clear');
     if (bl) bl.style.display = q ? 'flex' : 'none';
-    if (!q) { this._mostrarHome(); return; }
+    if (!q) { this._mostrarHome(); this._cargando(false); return; }
     if (q.length < 3) return;
     this._acT = setTimeout(() => this._sugerir(q), 350);
-    this._deepT = setTimeout(() => this._profunda(q), 1100);
+    this._deepT = setTimeout(() => {
+      // "gasolinera", "gas", "hotel"… = quiere UNA CERCA, no un sitio que se
+      // llame así. Se busca por categoría real en el mapa (v0.27).
+      const cat = Rank.categoria(q);
+      if (cat) { this._cargando(false); this._buscarCat(cat); return; }
+      this._cargando(true);
+      this._profunda(q);
+    }, 1100);
+  },
+
+  // Punto discreto de "sigo buscando" mientras corre la búsqueda profunda:
+  // sin él la lista parece congelada y da sensación de app lenta.
+  _cargando(on) {
+    const el = $('nav-loading');
+    if (el) el.style.display = on ? 'block' : 'none';
   },
 
   // Mi posición para el sesgo de las sugerencias, cacheada 2 min y con reintento.
@@ -177,14 +211,20 @@ const Nav = {
       const items = (d.features || []).map(f => {
         const p = f.properties || {}, c = f.geometry.coordinates;
         const nombre = p.name || p.street || '';
-        const dir = [p.street && p.name !== p.street ? p.street : '', p.city, p.state]
+        // El número de portal delante hace la dirección mucho más reconocible
+        const calle = [p.housenumber, p.street].filter(Boolean).join(' ');
+        const dir = [calle && p.name !== p.street ? calle : '', p.city, p.state]
           .filter(Boolean).join(', ');
-        return { lat: c[1], lng: c[0], nombre, dir, completo: nombre + (dir ? ', ' + dir : '') };
+        return {
+          lat: c[1], lng: c[0], nombre, dir,
+          completo: nombre + (dir ? ', ' + dir : ''),
+          osmKey: p.osm_key || '', osmValue: p.osm_value || ''
+        };
       }).filter(it => it.nombre);
       this._itemsQ = q;                                  // para que la profunda fusione sobre esto
       if (!items.length) { this._items = []; return; }   // sin sugerencias: no molestar
       $('nav-info').style.display = 'none';
-      this._pintarResultados(items, pos);
+      this._pintarResultados(items, pos, null, q);
     } catch (e) { /* autocompletado caído: la búsqueda profunda y Enter siguen */ }
   },
 
@@ -210,18 +250,26 @@ const Nav = {
       const items = this._dedupe([...nomItems, ...poiItems, ...base]);
       if (!items.length) return;
       $('nav-info').style.display = 'none';
-      this._pintarResultados(items, pos);
+      this._pintarResultados(items, pos, null, q);
     } catch (e) { /* sin datos extra: la lista rápida se queda como está */ }
+    finally { this._cargando(false); }
   },
 
-  // Resultados de Nominatim → formato común de la lista
+  // Resultados de Nominatim → formato común de la lista.
+  // Se conservan class/type e importance: el motor de relevancia los usa para
+  // saber si es un negocio o una región, y cuánta fama tiene el sitio.
   _mapNominatim(data) {
     return (data || []).map(d => {
       const partes = d.display_name.split(',');
+      const primera = (partes.shift() || '').trim();   // siempre se consume
       return {
         lat: parseFloat(d.lat), lng: parseFloat(d.lon),
-        nombre: partes.shift().trim(), dir: partes.join(',').trim(),
-        completo: d.display_name
+        nombre: (d.name && d.name.trim()) || primera,
+        dir: partes.join(',').trim(),
+        completo: d.display_name,
+        osmKey: d.category || d.class || '',
+        osmValue: d.type || '',
+        importancia: d.importance
       };
     });
   },
@@ -230,20 +278,42 @@ const Nav = {
   // Si el servicio no responde en 5 s se descarta sin romper nada.
   async _poisNombre(q, pos) {
     const rx = q.replace(/"/g, '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const ov = `[out:json][timeout:8];(node["name"~"${rx}",i](around:30000,${pos[0]},${pos[1]});way["name"~"${rx}",i](around:30000,${pos[0]},${pos[1]}););out center 15;`;
+    const a = `(around:30000,${pos[0]},${pos[1]})`;
+    // También por MARCA: muchas cadenas (Shell, Wendy's…) tienen el nombre de
+    // la sucursal en "name" y la cadena solo en "brand".
+    const ov = `[out:json][timeout:8];(` +
+      `node["name"~"${rx}",i]${a};way["name"~"${rx}",i]${a};` +
+      `node["brand"~"${rx}",i]${a};way["brand"~"${rx}",i]${a};` +
+      `);out center 25;`;
     const ctl = new AbortController();
     const t = setTimeout(() => ctl.abort(), 5000);
     try {
       const r = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: ov, signal: ctl.signal });
       const d = await r.json();
-      return (d.elements || []).map(e => {
-        const lat = e.lat != null ? e.lat : (e.center && e.center.lat);
-        const lng = e.lon != null ? e.lon : (e.center && e.center.lon);
-        if (lat == null || !e.tags || !e.tags.name) return null;
-        const dir = [e.tags['addr:street'], e.tags['addr:city']].filter(Boolean).join(', ');
-        return { lat, lng, nombre: e.tags.name, dir, completo: e.tags.name + (dir ? ', ' + dir : '') };
-      }).filter(Boolean);
+      return (d.elements || []).map(e => this._deOverpass(e)).filter(Boolean);
     } finally { clearTimeout(t); }
+  },
+
+  // Elemento de Overpass → formato común, conservando su categoría OSM
+  _deOverpass(e, nombrePorDefecto) {
+    const lat = e.lat != null ? e.lat : (e.center && e.center.lat);
+    const lng = e.lon != null ? e.lon : (e.center && e.center.lon);
+    if (lat == null) return null;
+    const t = e.tags || {};
+    const nombre = t.name || t.brand || nombrePorDefecto;
+    if (!nombre) return null;
+    // La primera etiqueta de categoría que traiga define el tipo
+    let osmKey = '', osmValue = '';
+    for (const k of ['amenity', 'shop', 'tourism', 'leisure', 'healthcare', 'aeroway', 'office', 'craft', 'place', 'highway']) {
+      if (t[k]) { osmKey = k; osmValue = t[k]; break; }
+    }
+    const dir = [[t['addr:housenumber'], t['addr:street']].filter(Boolean).join(' '), t['addr:city']]
+      .filter(Boolean).join(', ');
+    return {
+      lat, lng, nombre, dir, marca: t.brand || '',
+      completo: nombre + (dir ? ', ' + dir : ''),
+      osmKey, osmValue
+    };
   },
 
   // Quita duplicados entre fuentes: mismo nombre a menos de ~250 m = el mismo sitio
@@ -263,13 +333,10 @@ const Nav = {
   _mostrarHome() {
     const res = $('nav-results');
     if (!res) return;
-    const cats = [
-      { k: 'gas', e: '⛽', q: '["amenity"="fuel"]' },
-      { k: 'food', e: '🍔', q: '["amenity"~"restaurant|fast_food"]' },
-      { k: 'cafe', e: '☕', q: '["amenity"="cafe"]' },
-      { k: 'parking', e: '🅿️', q: '["amenity"="parking"]' },
-      { k: 'moto', e: '🔧', q: '["shop"~"^motorcycle"]' }
-    ];
+    // Los chips salen de la MISMA tabla que usa la detección por texto
+    // (Rank.CATEGORIAS), así no hay dos listas que mantener sincronizadas.
+    const cats = Rank.CATEGORIAS.filter(c =>
+      ['gas', 'food', 'cafe', 'parking', 'moto', 'hotel'].includes(c.k));
     res.innerHTML = '';
     res.style.display = 'block';
     const chips = document.createElement('div');
@@ -327,18 +394,13 @@ const Nav = {
     const pos = await this._miPos();
     if (!pos) { res.innerHTML = `<div class="nav-msg">${i18n.t('permiso_gps')}</div>`; return; }
     try {
-      const q = `[out:json][timeout:12];(node${cat.q}(around:10000,${pos[0]},${pos[1]});way${cat.q}(around:10000,${pos[0]},${pos[1]}););out center 20;`;
+      const q = `[out:json][timeout:12];(node${cat.q}(around:10000,${pos[0]},${pos[1]});way${cat.q}(around:10000,${pos[0]},${pos[1]}););out center 25;`;
       const r = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: q });
       const d = await r.json();
-      const items = (d.elements || []).map(e => {
-        const lat = e.lat != null ? e.lat : (e.center && e.center.lat);
-        const lng = e.lon != null ? e.lon : (e.center && e.center.lon);
-        if (lat == null) return null;
-        const t = e.tags || {};
-        const nombre = t.name || i18n.t('nav_chip_' + cat.k);
-        const dir = [t['addr:street'], t['addr:city']].filter(Boolean).join(', ');
-        return { lat, lng, nombre, dir, completo: nombre + (dir ? ', ' + dir : '') };
-      }).filter(Boolean).slice(0, 12);
+      const items = (d.elements || [])
+        .map(e => this._deOverpass(e, i18n.t('nav_chip_' + cat.k)))
+        .filter(Boolean);
+      // Por categoría manda la CERCANÍA (todos valen lo mismo): sin `consulta`
       this._pintarResultados(items, pos, cat.e);
     } catch (e) {
       // Overpass caído: al menos buscar la categoría por nombre cerca de mí

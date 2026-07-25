@@ -695,6 +695,73 @@ Object.assign(I18N.it, {
   rm_perfil: 'Velocità'
 });
 
+// --- v0.27: buscador con relevancia — tipos de lugar y categorías nuevas ---
+Object.assign(I18N.es, {
+  tipo_gym: 'Gimnasio', tipo_tienda: 'Centro comercial', tipo_lavado: 'Lavadero', tipo_playa: 'Playa', tipo_parque: 'Parque', tipo_camping: 'Camping', tipo_policia: 'Policía',
+  tipo_gas: 'Gasolinera', tipo_food: 'Restaurante', tipo_cafe: 'Cafetería',
+  tipo_bar: 'Bar', tipo_hotel: 'Hotel', tipo_parking: 'Aparcamiento',
+  tipo_moto: 'Tienda de motos', tipo_taller: 'Taller', tipo_super: 'Supermercado',
+  tipo_farm: 'Farmacia', tipo_hosp: 'Hospital', tipo_banco: 'Banco',
+  tipo_aseo: 'Aseos', tipo_mirador: 'Mirador', tipo_ver: 'Lugar de interés',
+  tipo_aero: 'Aeropuerto', tipo_ciudad: 'Ciudad', tipo_pueblo: 'Pueblo',
+  tipo_barrio: 'Barrio', tipo_dir: 'Dirección', tipo_calle: 'Calle',
+  tipo_region: 'Región', tipo_pais: 'País', tipo_sitio: 'Sitio',
+  nav_chip_hotel: 'Hoteles', nav_chip_taller: 'Talleres',
+  nav_chip_super: 'Supermercados', nav_chip_farm: 'Farmacias', nav_chip_banco: 'Cajeros'
+});
+Object.assign(I18N.en, {
+  tipo_gym: 'Gym', tipo_tienda: 'Shopping mall', tipo_lavado: 'Car wash', tipo_playa: 'Beach', tipo_parque: 'Park', tipo_camping: 'Campsite', tipo_policia: 'Police',
+  tipo_gas: 'Gas station', tipo_food: 'Restaurant', tipo_cafe: 'Café',
+  tipo_bar: 'Bar', tipo_hotel: 'Hotel', tipo_parking: 'Parking',
+  tipo_moto: 'Motorcycle shop', tipo_taller: 'Repair shop', tipo_super: 'Supermarket',
+  tipo_farm: 'Pharmacy', tipo_hosp: 'Hospital', tipo_banco: 'Bank',
+  tipo_aseo: 'Restrooms', tipo_mirador: 'Viewpoint', tipo_ver: 'Attraction',
+  tipo_aero: 'Airport', tipo_ciudad: 'City', tipo_pueblo: 'Town',
+  tipo_barrio: 'Neighborhood', tipo_dir: 'Address', tipo_calle: 'Street',
+  tipo_region: 'Region', tipo_pais: 'Country', tipo_sitio: 'Place',
+  nav_chip_hotel: 'Hotels', nav_chip_taller: 'Repair shops',
+  nav_chip_super: 'Supermarkets', nav_chip_farm: 'Pharmacies', nav_chip_banco: 'ATMs'
+});
+Object.assign(I18N.de, {
+  tipo_gym: 'Fitnessstudio', tipo_tienda: 'Einkaufszentrum', tipo_lavado: 'Autowäsche', tipo_playa: 'Strand', tipo_parque: 'Park', tipo_camping: 'Campingplatz', tipo_policia: 'Polizei',
+  tipo_gas: 'Tankstelle', tipo_food: 'Restaurant', tipo_cafe: 'Café',
+  tipo_bar: 'Bar', tipo_hotel: 'Hotel', tipo_parking: 'Parkplatz',
+  tipo_moto: 'Motorradladen', tipo_taller: 'Werkstatt', tipo_super: 'Supermarkt',
+  tipo_farm: 'Apotheke', tipo_hosp: 'Krankenhaus', tipo_banco: 'Bank',
+  tipo_aseo: 'Toiletten', tipo_mirador: 'Aussichtspunkt', tipo_ver: 'Sehenswürdigkeit',
+  tipo_aero: 'Flughafen', tipo_ciudad: 'Stadt', tipo_pueblo: 'Ortschaft',
+  tipo_barrio: 'Stadtteil', tipo_dir: 'Adresse', tipo_calle: 'Straße',
+  tipo_region: 'Region', tipo_pais: 'Land', tipo_sitio: 'Ort',
+  nav_chip_hotel: 'Hotels', nav_chip_taller: 'Werkstätten',
+  nav_chip_super: 'Supermärkte', nav_chip_farm: 'Apotheken', nav_chip_banco: 'Geldautomaten'
+});
+Object.assign(I18N.fr, {
+  tipo_gym: 'Salle de sport', tipo_tienda: 'Centre commercial', tipo_lavado: 'Lavage auto', tipo_playa: 'Plage', tipo_parque: 'Parc', tipo_camping: 'Camping', tipo_policia: 'Police',
+  tipo_gas: 'Station-service', tipo_food: 'Restaurant', tipo_cafe: 'Café',
+  tipo_bar: 'Bar', tipo_hotel: 'Hôtel', tipo_parking: 'Parking',
+  tipo_moto: 'Magasin de motos', tipo_taller: 'Garage', tipo_super: 'Supermarché',
+  tipo_farm: 'Pharmacie', tipo_hosp: 'Hôpital', tipo_banco: 'Banque',
+  tipo_aseo: 'Toilettes', tipo_mirador: 'Point de vue', tipo_ver: 'Site touristique',
+  tipo_aero: 'Aéroport', tipo_ciudad: 'Ville', tipo_pueblo: 'Village',
+  tipo_barrio: 'Quartier', tipo_dir: 'Adresse', tipo_calle: 'Rue',
+  tipo_region: 'Région', tipo_pais: 'Pays', tipo_sitio: 'Lieu',
+  nav_chip_hotel: 'Hôtels', nav_chip_taller: 'Garages',
+  nav_chip_super: 'Supermarchés', nav_chip_farm: 'Pharmacies', nav_chip_banco: 'Distributeurs'
+});
+Object.assign(I18N.it, {
+  tipo_gym: 'Palestra', tipo_tienda: 'Centro commerciale', tipo_lavado: 'Autolavaggio', tipo_playa: 'Spiaggia', tipo_parque: 'Parco', tipo_camping: 'Campeggio', tipo_policia: 'Polizia',
+  tipo_gas: 'Distributore', tipo_food: 'Ristorante', tipo_cafe: 'Caffetteria',
+  tipo_bar: 'Bar', tipo_hotel: 'Hotel', tipo_parking: 'Parcheggio',
+  tipo_moto: 'Negozio di moto', tipo_taller: 'Officina', tipo_super: 'Supermercato',
+  tipo_farm: 'Farmacia', tipo_hosp: 'Ospedale', tipo_banco: 'Banca',
+  tipo_aseo: 'Servizi igienici', tipo_mirador: 'Punto panoramico', tipo_ver: 'Attrazione',
+  tipo_aero: 'Aeroporto', tipo_ciudad: 'Città', tipo_pueblo: 'Paese',
+  tipo_barrio: 'Quartiere', tipo_dir: 'Indirizzo', tipo_calle: 'Via',
+  tipo_region: 'Regione', tipo_pais: 'Paese', tipo_sitio: 'Luogo',
+  nav_chip_hotel: 'Hotel', nav_chip_taller: 'Officine',
+  nav_chip_super: 'Supermercati', nav_chip_farm: 'Farmacie', nav_chip_banco: 'Bancomat'
+});
+
 const NOMBRES_IDIOMA = { es: 'Español', en: 'English', de: 'Deutsch', fr: 'Français', it: 'Italiano' };
 
 const i18n = {

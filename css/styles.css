@@ -556,6 +556,32 @@ body.driving .nav-guide {
 }
 .nav-msg { padding: 14px; color: var(--muted); font-size: 0.86rem; text-align: center; }
 
+/* v0.27: el icono de cada resultado cambia según lo que sea (⛽🍔🏨…) */
+.nav-result > span:first-child {
+  flex: none; width: 22px; text-align: center; font-size: 1.05rem; line-height: 1.25;
+}
+
+/* v0.27: "sigo buscando" mientras llega la búsqueda profunda. Sin esto la
+   lista parece congelada durante ~1 s y da sensación de app lenta. */
+.nav-loading {
+  display: flex; gap: 5px; justify-content: center; align-items: center;
+  padding: 8px 0 2px;
+}
+.nav-loading i {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--accent-light); opacity: 0.35;
+  animation: navdot 1.05s infinite ease-in-out;
+}
+.nav-loading i:nth-child(2) { animation-delay: 0.16s; }
+.nav-loading i:nth-child(3) { animation-delay: 0.32s; }
+@keyframes navdot {
+  0%, 80%, 100% { opacity: 0.25; transform: scale(0.85); }
+  40%           { opacity: 1;    transform: scale(1.15); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-loading i { animation: none; opacity: 0.6; }
+}
+
 /* v0.25: botón limpiar el campo de búsqueda */
 .nav-clear {
   flex: none; width: 28px; height: 28px; border: none; cursor: pointer;
