@@ -189,8 +189,8 @@ const Nav = {
     const ahora = Date.now();
     if (this._pos && ahora - (this._posT || 0) < 120000) return this._pos;
     const p = await this._miPos();
-    if (p) { this._pos = p; this._posT = ahora; }
-    return p || ultimaPos || null;
+    if (p) { this._pos = p; this._posT = ahora; this._guardarPos(p); }
+    return p || ultimaPos || this._posGuardada() || null;
   },
 
   async _sugerir(q) {
@@ -202,7 +202,9 @@ const Nav = {
       if (req !== this._acN) return;           // se siguió escribiendo mientras llegaba el GPS
       const lang = ({ en: 'en', de: 'de', fr: 'fr' })[i18n.lang] || 'default';
       let url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=12&lang=${lang}`;
-      if (pos) url += `&lat=${pos[0].toFixed(4)}&lon=${pos[1].toFixed(4)}&location_bias_scale=0.6&zoom=14`;
+      // location_bias_scale 0..1: 0.6 solo 'prefiere' lo cercano y dejaba colarse
+      // sitios famosos de otro estado. 0.9 lo acerca a un filtro sin serlo del todo.
+      if (pos) url += `&lat=${pos[0].toFixed(4)}&lon=${pos[1].toFixed(4)}&location_bias_scale=0.9&zoom=14`;
       const r = await fetch(url, { signal: this._acAbort.signal });
       const d = await r.json();
       if (req !== this._acN) return;                     // ya se escribió otra cosa
@@ -410,13 +412,33 @@ const Nav = {
 
   // Mi posición para la búsqueda: GPS rápido (vale uno de hace ≤2 min)
   // y, si no responde, la última posición conocida de la app.
+  // Guarda la ultima posicion conocida entre sesiones. SIN ESTO, al abrir la app
+  // con el GPS frio no habia posicion: Photon buscaba en todo el mundo y rank.js
+  // daba 0.45 de cercania a TODO -> buscabas "walmart" desde Miami y salia Texas.
+  _guardarPos(p) {
+    try { localStorage.setItem('msp_pos', JSON.stringify({ p: p, t: Date.now() })); } catch (e) {}
+  },
+
+  _posGuardada() {
+    try {
+      const d = JSON.parse(localStorage.getItem('msp_pos') || 'null');
+      // Vale 24 h: buscar cerca de donde estabas ayer es MUCHO mejor que en el mundo entero.
+      if (d && Array.isArray(d.p) && Date.now() - d.t < 86400000) return d.p;
+    } catch (e) {}
+    return null;
+  },
+
   _miPos() {
     return new Promise(resolve => {
-      if (!('geolocation' in navigator)) { resolve(ultimaPos || null); return; }
+      const respaldo = ultimaPos || this._posGuardada() || null;
+      if (!('geolocation' in navigator)) { resolve(respaldo); return; }
+      // Con respaldo se espera poco (4 s) porque hay red de seguridad; sin el, se
+      // espera hasta 10 s, porque tener posicion importa mas que ir rapido: el GPS
+      // frio de un movil tarda de sobra mas de 4 s dentro de casa o en un garaje.
       navigator.geolocation.getCurrentPosition(
         p => resolve([p.coords.latitude, p.coords.longitude]),
-        () => resolve(ultimaPos || null),
-        { maximumAge: 120000, timeout: 4000 }
+        () => resolve(respaldo),
+        { maximumAge: 120000, timeout: respaldo ? 4000 : 10000 }
       );
     });
   },

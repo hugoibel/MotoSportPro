@@ -790,6 +790,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     navigator.geolocation.getCurrentPosition(
       pos => {
         ultimaPos = [pos.coords.latitude, pos.coords.longitude];   // para la búsqueda "cerca de mí" y el SOS
+        Nav._guardarPos(ultimaPos);   // persistir: la proxima apertura ya tiene donde buscar
         Mapa.center(pos.coords.latitude, pos.coords.longitude, 15);
         Weather.cargar(pos.coords.latitude, pos.coords.longitude);
       },

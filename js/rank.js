@@ -235,13 +235,30 @@ const Rank = {
       // Orlando, "miami" tiene que dar Miami — no un "Miami Subs" de la esquina.
       // Se limita a sitios geográficos a propósito: para un negocio la cercanía
       // debe seguir mandando (un Starbucks a 300 km jamás gana al de al lado).
-      if (nom >= 1 && this._esLocalidad(tp)) {
-        cer = Math.max(cer, 0.85);
+      if (nom >= 0.9 && this._esLocalidad(tp)) {
+        // Antes se aplanaba a 0.85 FIJO, y al no distinguir distancias un nombre
+        // exacto lejano ganaba a uno casi exacto mas cerca: "daytona" daba primero
+        // un barrio de Jamaica (932 km) antes que Daytona Beach, Florida (392 km).
+        // Ahora la ciudad tiene su propia curva, mucho mas suave que la de un
+        // negocio (300 km de vida media frente a 12), pero que SIGUE decayendo.
+        // El umbral baja de 1 a 0.9 para que "Daytona Beach" tambien cuente como
+        // coincidencia de ciudad y no pierda el empujon de tipo.
+        cer = Math.max(cer, 1 / (1 + (dist == null ? 300 : dist / 1000) / 300));
         peso = Math.max(peso, 0.95);
       }
 
       const fama = Math.max(0, Math.min(1, +it.importancia || 0));
-      const score = nom * 0.50 + peso * 0.22 + cer * 0.22 + fama * 0.06;
+      let score = nom * 0.50 + peso * 0.22 + cer * 0.22 + fama * 0.06;
+
+      // FRENO A LO LEJANO. La curva de cercania sola no bastaba: como pesa el 22%,
+      // un nombre EXACTO a 2.000 km (0.50 de nombre) le ganaba a uno casi exacto a
+      // 5 km (0.475), y buscando desde Miami salia el Walmart de Texas. Un negocio
+      // a mas de 150 km no es lo que busca un motorista.
+      // Las CIUDADES se libran: desde Orlando, "miami" tiene que dar Miami.
+      // Multiplicar a todos los lejanos por lo mismo NO altera su orden entre si,
+      // asi que si TODO lo encontrado esta lejos (viaje planificado) sigue saliendo
+      // lo mejor primero; solo pierde cuando compite contra algo cercano.
+      if (dist != null && dist > 150000 && !this._esLocalidad(tp)) score *= 0.25;
       return Object.assign({}, it, {
         dist, score, icono: it.icono || tp.i, tipoClave: tp.t, _nom: nom
       });
@@ -251,7 +268,16 @@ const Rank = {
     const buenos = out.filter(x => x._nom >= 0.35);
     const lista = buenos.length ? buenos : out;
     lista.sort((a, b) => b.score - a.score || (a.dist || 0) - (b.dist || 0));
-    return lista;
+
+    // Hundir lo lejano no basta: seguia SALIENDO en la lista. Ver "Walmart,
+    // Pennsylvania" buscando desde Miami hace que la busqueda PAREZCA rota aunque
+    // el orden sea correcto. Basta UN resultado cercano para que los de otro estado
+    // sean ruido (Photon suele traer solo 1-2 de tu zona, por eso no vale pedir 3).
+    // Si no hay NINGUNO cerca (buscas algo que solo existe lejos, o planificas un
+    // viaje), se devuelve todo: nunca se deja al usuario sin resultados.
+    const cerca = lista.filter(x =>
+      x.dist == null || x.dist <= 150000 || this._esLocalidad({ t: x.tipoClave }));
+    return cerca.length ? cerca : lista;
   },
 
   _dist(a, b) {
